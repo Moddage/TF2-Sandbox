@@ -557,7 +557,7 @@ public Action:Command_LightDynamic(Client, args) {
 		return Plugin_Handled;
 	}
 	
-	new Obj_LightDMelon = CreateEntityByName("prop_physics_multiplayer");
+	new Obj_LightDMelon = CreateEntityByName("prop_dynamic");
 	if (Build_RegisterEntityOwner(Obj_LightDMelon, Client)) {
 		new String:szRange[33], String:szBrightness[33], String:szColorR[33], String:szColorG[33], String:szColorB[33], String:szColor[33];
 		new String:szNameMelon[64];
@@ -571,8 +571,8 @@ public Action:Command_LightDynamic(Client, args) {
 		Build_ClientAimOrigin(Client, fOriginAim);
 		fOriginAim[2] += 50;
 		
-		if(!IsModelPrecached("models/props_wasteland/prison_lamp001c.mdl"))
-			PrecacheModel("models/props_wasteland/prison_lamp001c.mdl");
+		if(!IsModelPrecached("models/props_2fort/lightbulb001.mdl"))
+			PrecacheModel("models/props_2fort/lightbulb001.mdl");
 		
 		if (StrEqual(szBrightness, ""))
 			szBrightness = "3";
@@ -584,18 +584,18 @@ public Action:Command_LightDynamic(Client, args) {
 			szColorB = "100";
 		Format(szColor, sizeof(szColor), "%s %s %s", szColorR, szColorG, szColorB);
 		
-		DispatchKeyValue(Obj_LightDMelon, "model", "models/props_wasteland/prison_lamp001c.mdl");
+		DispatchKeyValue(Obj_LightDMelon, "model", "models/props_2fort/lightbulb001.mdl");
 		//DispatchKeyValue(Obj_LightDMelon, "rendermode", "5");
 		//DispatchKeyValue(Obj_LightDMelon, "renderamt", "150");
 		//DispatchKeyValue(Obj_LightDMelon, "renderfx", "15");
 		DispatchKeyValue(Obj_LightDMelon, "rendercolor", szColor);
 		
 		new Obj_LightDynamic = CreateEntityByName("light_dynamic");
-		if (StringToInt(szRange) > 1500) {
+		if (StringToInt(szRange) > 500) {
 			if (g_bClientLang[Client])
-				Build_PrintToChat(Client, "範圍上限是 1500!");
+				Build_PrintToChat(Client, "範圍上限是 500!");
 			else
-				Build_PrintToChat(Client, "Max range is 1500!");
+				Build_PrintToChat(Client, "Max range is 500!");
 			return Plugin_Handled;
 		}
 		if (StringToInt(szBrightness) > 7) {
@@ -613,6 +613,7 @@ public Action:Command_LightDynamic(Client, args) {
 		AcceptEntityInput(Obj_LightDynamic, "style", -1);
 		SetVariantString(szColor);
 		AcceptEntityInput(Obj_LightDynamic, "color", -1);
+		SetEntProp(Obj_LightDMelon, Prop_Send, "m_nSolidType", 6);
 		
 		DispatchSpawn(Obj_LightDMelon);
 		TeleportEntity(Obj_LightDMelon, fOriginAim, NULL_VECTOR, NULL_VECTOR);
