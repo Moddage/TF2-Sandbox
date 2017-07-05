@@ -1,4 +1,12 @@
 # TF2: Sandbox, the gamemode that releashes player's creative head.
+
+On January 26th 2017 at TitanTF Discord:
+![alt text](https://puu.sh/wcZgy/8df86e3038.png)
+
+This is why I made TF2 Sandbox.
+
+
+
 This is a fork mod of the original BuildMod for HL2DM (https://sourceforge.net/projects/smbuildmod)
 
 TF2: Sandbox is a open-source gamemode for Team Fortress 2 that introduces PhysGun, ability to build.
@@ -18,7 +26,8 @@ General Sandbox Features:
 
 To Do:
 - Assign a WeaponID to the Physics Gun.
-- Making a spawnlist that looks for props.ini and make list of things existed in the file.
+- Tool Gun
+- MSTR Sandbox Messages
 
 Main server:
-dtf2server.ddns .net:27015 - DanctTF2 - 24/7 Sandbox
+http://steamcommunity.com/groups/TF2Sandbox
