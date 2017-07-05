@@ -64,7 +64,7 @@ creategravityguncvar(){
 	cvar_redteam_enable = CreateConVar("gravitygunmod_redteam_enable", "1", "1 for enable 0 for disable");
 	cvar_unassignedteam_enable = CreateConVar("gravitygunmod_unassignedteam_enable", "1", "1 for enable 0 for disable");
 	
-	g_cvarWeaponEnableGrab = CreateConVar("gravitygunmod_WeaponEnableGrab", "weapon_knife;weapon_stunstick;weapon_crowbar", "list of weapon that allow grab, empty means all weapon can grab");
+	g_cvarWeaponEnableGrab = CreateConVar("gravitygunmod_WeaponEnableGrab", "tf_weapon_builder", "list of weapon that allow grab, empty means all weapon can grab");
 	
 	g_cvarWeaponSwitchRule = CreateConVar("gravitygunmod_WeaponSwitchRule", "2", "0 = doesnt allow weapon switch when u holding some prop, \n1 = u can change weapon but held prop will auto released, \n2 = u can change weapon and u can keep hold yo prop if changed weapon also has gravitygun function.");
 	
