@@ -1,3 +1,20 @@
+/*
+	This file is part of TF2 Sandbox.
+	
+	TF2 Sandbox is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    TF2 Sandbox is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with TF2 Sandbox.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #pragma semicolon 1
 
 #include <clientprefs>
@@ -44,14 +61,17 @@ public Plugin:myinfo = {
 	url = "http://dtf2server.ddns.net"
 };
 
-static const String:tips[7][] = { 
-		"You can type !g to obtain the Physics Gun easily.",
+static const String:tips[10][] = { 
+		"Type /g to get the Physics Gun and move props around.",
 		"You can rotate a prop by holding down the Reload button.", 		
 		"If you want to delete everything you own, type !delall", 
-		"To delete the prop you're looking at, type !del", 
+		"Type /del to delete the prop you are looking at.", 
 		"This server is running \x04TF2:Sandbox\x01 by \x05Danct12\x01 and \x05DaRkWoRlD\x01",
-		"Keep in mind, this mod is a work in progress. More things coming soon!",
-		"Where the hell did they go? Type !goto <playername>" 
+		"This mod is a work in progress.",
+		"Type /goto <player> to teleport to a player.",
+		"Type /build to begin building.",
+		"TF2SB official group: http://steamcommunity.com/groups/TF2Sandbox",
+		"Tired to be in Godmode? Why not turn it off? Say !god"
 	}; 
 
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) {
@@ -80,11 +100,12 @@ public OnPluginStart() {
 	g_hCvarSwitch = CreateConVar("bm_buildmod", "2", "Turn on, off TF2SB, or admins only.", 0, true, 0.0, true, 2.0);
 	g_hCvarNonOwner = CreateConVar("bm_nonowner", "0", "Switch non-admin player can control non-owner props or not", 0, true, 0.0, true, 1.0);
 	g_hCvarFly = CreateConVar("bm_fly", "1", "Switch non-admin player can use !fly to noclip or not", 0, true, 0.0, true, 1.0);
-	g_hCvarClPropLimit = CreateConVar("bm_prop", "700", "Player prop spawn limit.", 0, true, 0.0);
+	g_hCvarClPropLimit = CreateConVar("bm_prop", "62", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("bm_doll", "10", "Player doll spawn limit.", 0, true, 0.0);
 	g_hCvarServerLimit = CreateConVar("bm_maxprops", "2000", "Limit server-side prop.", 0, true, 0.0, true, 3000.0);
 	RegAdminCmd("sm_version", Command_Version, 0, "Show TF2SB Core version");
 	RegAdminCmd("sm_my", Command_SpawnCount, 0, "Show how many entities are you spawned.");
+	ServerCommand("tf_allow_player_use 1");
 	
 	g_iCvarEnabled = GetConVarInt(g_hCvarSwitch);
 	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
@@ -133,7 +154,7 @@ public Action:DisplayHud(Handle:timer)
 	{
 		if (IsValidEntity(i))
 		{
-			ShowHudText(i, -1, "Type !build to build. This is a WORK IN PROGRESS gamemode!");
+			ShowHudText(i, -1, "Type !build. This is a WORK IN PROGRESS gamemode!");
 		}
 		i++;
 	}
@@ -395,7 +416,7 @@ public Native_IsAdmin(Handle:hPlugin, iNumParams) {
 	
 	if (IsClientConnected(Client)) {
 		new AdminId:Aid = GetUserAdmin(Client);
-		if (GetAdminFlag(Aid, (bLevel2) ? Admin_Custom1 : Admin_Ban))
+		if (GetAdminFlag(Aid, (bLevel2) ? Admin_Custom1 : Admin_Slay))
 			return true;
 		else
 			return false;

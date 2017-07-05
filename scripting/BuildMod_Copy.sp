@@ -1,3 +1,20 @@
+/*
+	This file is part of TF2 Sandbox.
+	
+	TF2 Sandbox is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    TF2 Sandbox is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with TF2 Sandbox.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #pragma semicolon 1
 
 #include <clientprefs>
@@ -16,6 +33,8 @@ new bool:g_bCopyIsRunning[MAXPLAYERS] = false;
 new g_Beam;
 new g_Halo;
 new g_PBeam;
+
+new bool:g_bBuffer[MAXPLAYERS + 1];
 
 new String:CopyableProps[][] = {
 	"prop_dynamic",
@@ -63,8 +82,21 @@ public Action:OnClientCommand(Client, args) {
 }
 
 public Action:Command_Copy(Client, args) {
+	
+	if (g_bBuffer[Client])
+	{
+		Build_PrintToChat(Client, "Anti Spam Protection, please wait.");
+
+		return Plugin_Handled;
+	}
+
+	g_bBuffer[Client] = true;
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));
+	
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	
 	
 	new iEntity = Build_ClientAimEntity(Client, true, true);
 	if (iEntity == -1)
@@ -186,6 +218,7 @@ public Action:Command_Copy(Client, args) {
 }
 
 public Action:Command_Paste(Client, args) {
+	
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client))
 		return Plugin_Handled;
 		
@@ -272,4 +305,11 @@ public Action:Timer_CopyMain(Handle:Timer, any:Client) {
 			DispatchKeyValue(g_iCopyTarget[Client], "rendercolor", "255 255 255");
 		}
 	}
+}
+
+public Action:Timer_CoolDown(Handle:hTimer, any:iBuffer)
+{
+	new iClient = GetClientFromSerial(iBuffer);
+
+	if (g_bBuffer[iClient]) g_bBuffer[iClient] = false;
 }

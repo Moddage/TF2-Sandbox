@@ -42,7 +42,8 @@ enum PropTypeCheck{
 	PROP_WEAPON = 3,
 	PROP_TF2OBJ = 4,//tf2 buildings
 	PROP_RAGDOLL = 5,
-	PROP_TF2PROJ = 6 //tf2 projectiles
+	PROP_TF2PROJ = 6, //tf2 projectiles
+	PROP_PLAYER = 7		
 
 };
 
@@ -255,6 +256,7 @@ public Action:WeaponSwitchHook(client, entity){
 		{
 			new ent = GetEntPropEnt(client,Prop_Send,"m_hViewModel");
 			SetEntProp(ent,Prop_Send,"m_nModelIndex",g_PhysGunModel,2);
+			SetEntProp(ent, Prop_Send, "m_nSequence", 2);
 		}
 		else
 		{
@@ -348,7 +350,11 @@ public PreThinkHook(client){
 						return;
 					
 					}
+	 
+																		
 				}
+	
+	
 			}
 			
 		if((buttons & IN_RELOAD)  && clientisgrabbingvalidobject(client)){
@@ -604,6 +610,7 @@ emptyshoot(client){
 			if(entityType == PROP_RIGID){
 			
 				//SetEntProp(targetentity, Prop_Data, "m_bThrownByPlayer", true);
+																   
 			
 			}
 			
@@ -690,6 +697,24 @@ hold(client){
 	resultangle2[1] = resultangle[client][1] + playeranglerotate[client][1];
 	resultangle2[2] = resultangle[client][2] + playeranglerotate[client][2];
 
+													  
+   new PlayerSpawnCheck;
+			
+			
+	while((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+	{
+		if(Entity_InRange(grabbedentref[client],PlayerSpawnCheck,400.0))
+		{
+			if(grabentitytype[client] != PROP_PLAYER)
+			{
+				Build_PrintToChat(client, "You're too near the spawn!");
+				Build_SetLimit(client, -1);
+				AcceptEntityInput(grabbedentref[client], "kill");
+				//Build_RegisterEntityOwner(grabbedentref[client], -1);
+			}		
+		}
+	}
+											
 	if(grabentitytype[client] != PROP_RAGDOLL)
 	{
 		TeleportEntity(grabbedentref[client], NULL_VECTOR, playeranglerotate[client], NULL_VECTOR);
@@ -704,7 +729,7 @@ hold(client){
 		SetEntPropFloat(grabbedentref[client], Prop_Data, "m_flLastPhysicsInfluenceTime", GetGameTime());
 		
 	}
-	if(grabentitytype[client]== PROP_RIGID){
+	if(grabentitytype[client]== PROP_RIGID || grabentitytype[client] == PROP_PLAYER){
 	
 				decl Float:eyeposfornow[3];
 				GetClientEyePosition(client, eyeposfornow);
@@ -748,7 +773,17 @@ PropTypeCheck:entityTypeCheck(entity){
 	
 		return PROP_TF2OBJ;
 	
-	}else{
+  
+														
+  
+					 
+  
+	}
+	else if(StrContains(classname, "player", false)  != -1)
+	{
+		return PROP_PLAYER;
+	}
+	else{
 	
 		return PROP_NONE;
 	

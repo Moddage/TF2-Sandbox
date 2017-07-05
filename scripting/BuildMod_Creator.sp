@@ -1,3 +1,21 @@
+/*
+	This file is part of TF2 Sandbox.
+	
+	TF2 Sandbox is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    TF2 Sandbox is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with TF2 Sandbox.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
 #pragma semicolon 1
 
 #include <clientprefs>
@@ -6,6 +24,7 @@
 #include <build>
 #include <build_stocks>
 #include <vphysics>
+#include <smlib>
 
 new bool:g_bClientLang[MAXPLAYERS];
 new Handle:g_hCookieClientLang;
@@ -28,6 +47,8 @@ new ColorBlue[4]	= {
 new g_Halo;
 new g_PBeam;
 
+new bool:g_bBuffer[MAXPLAYERS + 1];
+
 public Plugin:myinfo = {
 	name = "TF2 Sandbox - Creator",
 	author = "Danct12, DaRkWoRlD",
@@ -39,6 +60,7 @@ public Plugin:myinfo = {
 public OnPluginStart() {
 	// For better compatibility
 	RegConsoleCmd("kill", Command_kill, "");
+	RegConsoleCmd("noclip", Command_Fly, "");
 
 	// Basic Spawn Commands
 	RegAdminCmd("sm_spawnprop", Command_SpawnProp, 0, "Spawn a prop in command list!");
@@ -60,8 +82,7 @@ public OnPluginStart() {
 	
 	// Misc stuffs
 	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Doors creator.");
-	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light.");
-	RegAdminCmd("sm_lightd", Command_LightDynamic, 0, "Dynamic Light.");
+	RegAdminCmd("sm_lightforbesure", Command_LightDynamic, 0, "Dynamic Light.");
 	RegAdminCmd("sm_fly", Command_Fly, 0, "I BELIEVE I CAN FLYYYYYYY, I BELIEVE THAT I CAN TOUCH DE SKY");
 	RegAdminCmd("sm_setname", Command_SetName, 0, "SetPropname");
 	RegAdminCmd("sm_simplelight", Command_SimpleLight, 0, "Spawn a Light, in a very simple way.");
@@ -102,6 +123,16 @@ public Action:OnClientCommand(Client, args) {
 public Action:Command_OpenableDoorProp(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+	
+	if (g_bBuffer[Client])
+	{
+		Build_PrintToChat(Client, "Anti Spam Protection, please wait.");
+
+		return Plugin_Handled;
+	}
+
+	g_bBuffer[Client] = true;
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));
 	
 	new iDoor = CreateEntityByName("prop_door_rotating");
 	if (Build_RegisterEntityOwner(iDoor, Client)) {
@@ -481,8 +512,18 @@ public Action:Command_SimpleLight(Client, args) {
 
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	if (g_bBuffer[Client])
+	{
+		Build_PrintToChat(Client, "Anti Spam Protection, please wait.");
 
-	FakeClientCommand(Client, "sm_ld 500 5 255 255 255");
+		return Plugin_Handled;
+	}
+
+	g_bBuffer[Client] = true;
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));
+
+	FakeClientCommand(Client, "sm_lightforbesure 500 5 255 255 255");
 
 	return Plugin_Handled;
 }
@@ -633,13 +674,23 @@ public Action:Command_LightDynamic(Client, args) {
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
-	Build_Logging(Client, "sm_ld", szArgs);
+	Build_Logging(Client, "sm_lightforbesure", szArgs);
 	return Plugin_Handled;
 }
 
 public Action:Command_SpawnDoor(Client, args) {
 	if(!Build_AllowToUse(Client) || Build_IsBlacklisted(Client))
 		return Plugin_Handled;
+		
+	if (g_bBuffer[Client])
+	{
+		Build_PrintToChat(Client, "Anti Spam Protection, please wait.");
+
+		return Plugin_Handled;
+	}
+
+	g_bBuffer[Client] = true;
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));
 	
 	decl String:szDoorTarget[16], String:szType[4], String:szFormatStr[64], String:szNameStr[8];
 	decl Float:iAim[3];
@@ -652,13 +703,13 @@ public Action:Command_SpawnDoor(Client, args) {
 		new Obj_Door = CreateEntityByName("prop_dynamic");
 		
 		switch(szType[0]) {
-			case '1': szModel = "models/props_c17/door01_left.mdl";
-			case '2': szModel = "models/combine_gate_citizen.mdl";
-			case '3': szModel = "models/combine_gate_Vehicle.mdl";
-			case '4': szModel = "models/props_doors/doorKLab01.mdl";
+			case '1': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '2': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '3': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '4': szModel = "models/props_lab/blastdoor001c.mdl";
 			case '5': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '6': szModel = "models/props_lab/elevatordoor.mdl";
-			case '7': szModel = "models/props_lab/RavenDoor.mdl";
+			case '6': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '7': szModel = "models/props_lab/blastdoor001c.mdl";
 		}
 		
 		DispatchKeyValue(Obj_Door, "model", szModel);
@@ -880,6 +931,16 @@ public Action:Command_SpawnProp(Client, args) {
 		return Plugin_Handled;
 	}
 	
+	if (g_bBuffer[Client])
+	{
+		Build_PrintToChat(Client, "Anti Spam Protection, please wait.");
+
+		return Plugin_Handled;
+	}
+
+	g_bBuffer[Client] = true;
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));
+	
 	if (IndexInArray != -1) {
 		new bool:bIsDoll = false;
 		new String:szEntType[33];
@@ -901,6 +962,9 @@ public Action:Command_SpawnProp(Client, args) {
 
 		if (Build_RegisterEntityOwner(iEntity, Client, bIsDoll)) {
 			new Float:fOriginWatching[3], Float:fOriginFront[3], Float:fAngles[3], Float:fRadiansX, Float:fRadiansY;
+			
+			decl Float:iAim[3];
+			new Float:vOriginPlayer[3];
 			
 			GetClientEyePosition(Client, fOriginWatching);
 			GetClientEyeAngles(Client, fAngles);
@@ -928,12 +992,52 @@ public Action:Command_SpawnProp(Client, args) {
 			if (StrEqual(szEntType, "prop_dynamic"))
 				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
 			
+			if (StrEqual(szEntType, "prop_dynamic_override"))
+				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
+			
+			Build_ClientAimOrigin(Client, iAim);
+			iAim[2] = iAim[2] + 10;
+			
+			GetClientAbsOrigin(Client, vOriginPlayer);
+			vOriginPlayer[2] = vOriginPlayer[2] + 50;
+			
+			
 			DispatchSpawn(iEntity);
-			TeleportEntity(iEntity, fOriginFront, NULL_VECTOR, NULL_VECTOR);
+			TeleportEntity(iEntity, iAim, NULL_VECTOR, NULL_VECTOR);
+			
+			
+			
+			TE_SetupBeamPoints(iAim, vOriginPlayer, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
+			TE_SendToAll();
+			
+			new random = GetRandomInt(0,1);
+			if (random == 1) {
+				EmitAmbientSound("buttons/button3.wav", iAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+				EmitAmbientSound("buttons/button3.wav", vOriginPlayer, Client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			} else {
+				EmitAmbientSound("buttons/button3.wav", iAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+				EmitAmbientSound("buttons/button3.wav", vOriginPlayer, Client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			}
+			
 			SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
 			
 			// Debugging issues
 			//PrintToChatAll(szPropString);
+			
+			new PlayerSpawnCheck;
+			
+			
+			while((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+			{
+				if(Entity_InRange(iEntity,PlayerSpawnCheck,400.0))
+				{
+					Build_PrintToChat(Client, "You're too near the spawn!");
+					Build_SetLimit(Client, -1);
+					AcceptEntityInput(iEntity, "kill");
+					
+				}
+			}
+			
 			
 			if (!StrEqual(szPropFrozen, "")) {
 				if (Phys_IsPhysicsObject(iEntity))
@@ -1020,3 +1124,9 @@ ReadPropsLine(const String:szLine[], iCountProps) {
 
 
 
+public Action:Timer_CoolDown(Handle:hTimer, any:iBuffer)
+{
+	new iClient = GetClientFromSerial(iBuffer);
+
+	if (g_bBuffer[iClient]) g_bBuffer[iClient] = false;
+}

@@ -1,3 +1,20 @@
+/*
+	This file is part of TF2 Sandbox.
+	
+	TF2 Sandbox is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    TF2 Sandbox is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with TF2 Sandbox.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #pragma semicolon 1
 
 #include <clientprefs>
@@ -61,9 +78,9 @@ public EntityInfo(Client, iTarget) {
 			GetClientAuthString(iTarget, szSteamId, sizeof(szSteamId));
 			GetClientIP(iTarget, szIP, sizeof(szIP));
 			if (g_bClientLang[Client])
-				ShowHudText(Client, -1, "玩家: %N\n血量: %i\n玩家編號: %i\nSteamID:%s\nIP: %s", iTarget, iHealth, GetClientUserId(iTarget), szSteamId, szIP);
+				ShowHudText(Client, -1, "玩家: %N\n血量: %i\n玩家編號: %i\nSteamID:%s", iTarget, iHealth, GetClientUserId(iTarget), szSteamId);
 			else
-				ShowHudText(Client, -1, "Player: %N\nHealth: %i\nUserID: %i\nSteamID:%s\nIP: %s", iTarget, iHealth, GetClientUserId(iTarget), szSteamId, szIP);
+				ShowHudText(Client, -1, "Player: %N\nHealth: %i\nUserID: %i\nSteamID:%s", iTarget, iHealth, GetClientUserId(iTarget), szSteamId);
 		} else {
 			if (g_bClientLang[Client])
 				ShowHudText(Client, -1, "玩家: %N\n血量: %i", iTarget, iHealth);
@@ -106,10 +123,10 @@ public EntityInfo(Client, iTarget) {
 	if (Phys_IsPhysicsObject(iTarget)) {
 		SetHudTextParams(-1.0, 0.6, 0.1, 255, 0, 0, 255);
 		if (StrContains(szClass, "prop_door_", false) == 0){
-			ShowHudText(Client, -1, "%s built by %s\nPress [TAB] to use", szPropString , szOwner);
+			ShowHudText(Client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString , szOwner);
 		}
 		else {
-			ShowHudText(Client, -1, "%s built by %s", szPropString , szOwner);
+			ShowHudText(Client, -1, "%s \nbuilt by %s", szPropString , szOwner);
 		}
 		//if (g_bClientLang[Client])
 			
@@ -118,7 +135,7 @@ public EntityInfo(Client, iTarget) {
 			//ShowHudText(Client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s\nMass:%f", szClass, iTarget, szModel, szOwner, Phys_GetMass(iTarget));
 	} else {
 		if (g_bClientLang[Client])
-			ShowHudText(Client, -1, "%s built by %s", szPropString , szOwner);
+			ShowHudText(Client, -1, "%s \nbuilt by %s", szPropString , szOwner);
 			//ShowHudText(Client, -1, "類型: %s\n編號: %i\n模組: %s\n擁有者: %s", szClass, iTarget, szModel, szOwner);
 		//else
 			//ShowHudText(Client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s", szClass, iTarget, szModel, szOwner);

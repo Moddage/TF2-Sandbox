@@ -17,12 +17,13 @@ new Handle:g_hPropMenuComic = INVALID_HANDLE;
 new Handle:g_hPropMenuConstructions = INVALID_HANDLE;
 new Handle:g_hPropMenuWeapons = INVALID_HANDLE;
 new Handle:g_hPropMenuPickup = INVALID_HANDLE;
+new Handle:g_hPropMenuHL2 = INVALID_HANDLE;
 
-/*new String:g_szFile[128];
+new String:g_szFile[128];
 new Handle:g_hPropNameArray;
 new Handle:g_hPropModelPathArray;
 new Handle:g_hPropTypeArray;
-new Handle:g_hPropStringArray;*/
+new Handle:g_hPropStringArray;
 
 public Plugin:myinfo = {
 	name = "TF2 Sandbox - Menu",
@@ -55,6 +56,7 @@ public OnPluginStart()
 	
 	// Init thing for commands!
 	RegAdminCmd("sm_build", Command_BuildMenu, 0);
+	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
 	RegAdminCmd("sm_t", Command_ToolGun, 0);
 	RegAdminCmd("sm_g", Command_PhysGun, 0);
     
@@ -68,8 +70,9 @@ public OnPluginStart()
 	AddMenuItem(g_hBuildHelperMenu, "skin", "Skin (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "rotate", "Rotate (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "accuraterotate", "Accurate Rotate (see chat)");
-	AddMenuItem(g_hBuildHelperMenu, "doors", "Doors (see chat)");
-	AddMenuItem(g_hBuildHelperMenu, "lights", "Lights (see chat)");
+	AddMenuItem(g_hBuildHelperMenu, "sdoors", "Doors (see chat)");
+	AddMenuItem(g_hBuildHelperMenu, "pdoors", "Prop Doors");
+	AddMenuItem(g_hBuildHelperMenu, "lights", "Lights");
 	SetMenuExitBackButton(g_hBuildHelperMenu, true);
 	
 	// Remove Command
@@ -86,13 +89,13 @@ public OnPluginStart()
 	AddMenuItem(g_hCondMenu, "godmode", "Godmode");
 	AddMenuItem(g_hCondMenu, "crits", "Crits");
 	AddMenuItem(g_hCondMenu, "noclip", "Noclip");
-	AddMenuItem(g_hCondMenu, "infammo", "Inf. Ammo");
+//	AddMenuItem(g_hCondMenu, "infammo", "Inf. Ammo");
 	AddMenuItem(g_hCondMenu, "speedboost", "Speed Boost");
 	AddMenuItem(g_hCondMenu, "resupply", "Resupply");
-	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
+//	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
 	AddMenuItem(g_hCondMenu, "minicrits", "Mini-Crits");
 	AddMenuItem(g_hCondMenu, "fly", "Fly");
-	AddMenuItem(g_hCondMenu, "infclip", "Inf. Clip");
+//	AddMenuItem(g_hCondMenu, "infclip", "Inf. Clip");
 	AddMenuItem(g_hCondMenu, "damagereduce", "Damage Reduction");
 	AddMenuItem(g_hCondMenu, "removeweps", "Remove Weapons");
 	SetMenuExitBackButton(g_hCondMenu, true);
@@ -103,7 +106,7 @@ public OnPluginStart()
 	
 	AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun");
 	AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
-	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
+//	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
 	
     SetMenuExitBackButton(g_hEquipMenu, true);
     
@@ -130,6 +133,7 @@ public OnPluginStart()
 	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
 	AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
 	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
+	AddMenuItem(g_hPropMenu, "hl2props", "HL2 Props and Miscs");
 	
 	// Prop Menu Pickup
 	g_hPropMenuPickup = CreateMenu(PropMenuPickup);
@@ -386,8 +390,15 @@ public OnPluginStart()
 	AddMenuItem(g_hPropMenuConstructions, "woodpile_indoor", "Wood Pile Indoor");
 	AddMenuItem(g_hPropMenuConstructions, "work_table001", "Work Table");
 	
+	// HL2 Props
+	g_hPropMenuHL2 = CreateMenu(PropMenuHL2);
+	SetMenuTitle(g_hPropMenuHL2, "TF2SB - HL2 Props and Miscs\nSay /g in chat to move Entities!");
+    SetMenuExitBackButton(g_hPropMenuHL2, true);
+	AddMenuItem(g_hPropMenuHL2, "removeprops", "|Remove");
 	
-/*	g_hPropNameArray = CreateArray(33, 2048);		// Max Prop List is 1024-->2048
+	
+	
+	g_hPropNameArray = CreateArray(33, 2048);		// Max Prop List is 1024-->2048
 	g_hPropModelPathArray = CreateArray(128, 2048);	// Max Prop List is 1024-->2048
 	g_hPropTypeArray = CreateArray(33, 2048);		// Max Prop List is 1024-->2048
 	g_hPropStringArray = CreateArray(256, 2048);
@@ -397,7 +408,8 @@ public OnPluginStart()
 	new String:szPropName[32], String:szPropFrozen[32], String:szPropString[256], String:szModelPath[128];
 	
 	new PropName = FindStringInArray(g_hPropNameArray, szPropName);
-	new PropString = FindStringInArray(g_hPropNameArray, szPropString);*/
+	new PropString = FindStringInArray(g_hPropNameArray, szPropString);
+	
 }
 
 public void OnConfigExecuted(){
@@ -490,6 +502,10 @@ public PropMenu(Handle:menu, MenuAction:action, param1, param2)
 		{
 			DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
 		}
+		else if(StrEqual(info, "hl2props"))
+		{
+			DisplayMenu(g_hPropMenuHL2, param1, MENU_TIME_FOREVER);
+		}
 		else
 		{
 			FakeClientCommand(param1, "sm_prop %s", info);
@@ -523,7 +539,7 @@ public CondMenu(Handle:menu, MenuAction:action, param1, param2)
 			}
 		}
 		
-		if (StrEqual(item, "infammo"))
+		/*if (StrEqual(item, "infammo"))
 		{
 			Build_PrintToChat(param1, "Learn more at !aiamenu");
 		}
@@ -531,7 +547,7 @@ public CondMenu(Handle:menu, MenuAction:action, param1, param2)
 		if (StrEqual(item, "infclip"))
 		{
 			Build_PrintToChat(param1, "Learn more at !aiamenu");
-		}
+		}*/
 		
 		if (StrEqual(item, "resupply"))
 		{
@@ -555,7 +571,7 @@ public CondMenu(Handle:menu, MenuAction:action, param1, param2)
 			}
 		}
 		
-		if (StrEqual(item, "godmode"))
+/*		if (StrEqual(item, "godmode"))
 		{
 			FakeClientCommand(param1, "sm_god");				
 		}
@@ -563,7 +579,7 @@ public CondMenu(Handle:menu, MenuAction:action, param1, param2)
 		if (StrEqual(item, "buddha"))
 		{
 			FakeClientCommand(param1, "sm_buddha");				
-		}
+		}*/
 		
 		if (StrEqual(item, "fly"))
 		{
@@ -709,10 +725,10 @@ public EquipMenu(Handle:menu, MenuAction:action, param1, param2)
 		{
 				FakeClientCommand(param1, "sm_t");
 		}
-		if (StrEqual(item, "portalgun"))
+		/*if (StrEqual(item, "portalgun"))
 		{
 				FakeClientCommand(param1, "sm_portalgun");
-		}
+		}*/
     }
 	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsClientInGame(param1))
 	{
@@ -773,11 +789,15 @@ public BuildHelperMenu(Handle:menu, MenuAction:action, param1, param2)
 		}
 		else if (StrEqual(item, "lights"))
 		{
-			FakeClientCommand(param1, "sm_ld");
+			FakeClientCommand(param1, "sm_simplelight");
 		}
-		else if (StrEqual(item, "doors"))
+		else if (StrEqual(item, "sdoors"))
 		{
 			FakeClientCommand(param1, "sm_sdoor");
+		}
+		else if (StrEqual(item, "pdoors"))
+		{
+			FakeClientCommand(param1, "sm_propdoor");
 		}
     }
 	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsClientInGame(param1))
@@ -954,4 +974,94 @@ public PropMenuPickup(Handle:menu, MenuAction:action, param1, param2)
     {
         DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
     }
+}
+
+public PropMenuHL2(Handle:menu, MenuAction:action, param1, param2)
+{
+    if (action == MenuAction_Select && IsClientInGame(param1))
+    {
+		DisplayMenuAtItem(g_hPropMenuHL2, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
+        //DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
+		decl String:info[255];
+		
+		GetMenuItem(menu, param2, info, sizeof(info));
+		
+		if(StrEqual(info, "removeprops"))
+		{
+			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+		}
+		else
+		{
+			FakeClientCommand(param1, "sm_prop %s", info);
+		}
+    }
+    else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsClientInGame(param1))
+    {
+        DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
+    }
+}
+
+ReadProps() {
+	BuildPath(Path_SM, g_szFile, sizeof(g_szFile), "configs/buildmod/props.ini");
+	
+	new Handle:iFile = OpenFile(g_szFile, "rt");
+	if (iFile == INVALID_HANDLE)
+		return;
+	
+	new iCountProps = 0;
+	while (!IsEndOfFile(iFile))
+	{
+		decl String:szLine[255];
+		if (!ReadFileLine(iFile, szLine, sizeof(szLine)))
+			break;
+		
+		/* 略過註解 */
+		new iLen = strlen(szLine);
+		new bool:bIgnore = false;
+		
+		for (new i = 0; i < iLen; i++) {
+			if (bIgnore) {
+				if (szLine[i] == '"')
+					bIgnore = false;
+			} else {
+				if (szLine[i] == '"')
+					bIgnore = true;
+				else if (szLine[i] == ';') {
+					szLine[i] = '\0';
+					break;
+				} else if (szLine[i] == '/' && i != iLen - 1 && szLine[i+1] == '/') {
+					szLine[i] = '\0';
+					break;
+				}
+			}
+		}
+		
+		TrimString(szLine);
+		
+		if ((szLine[0] == '/' && szLine[1] == '/') || (szLine[0] == ';' || szLine[0] == '\0'))
+			continue;
+	
+		ReadPropsLine(szLine, iCountProps++);
+		
+	}
+	CloseHandle(iFile);
+}
+
+ReadPropsLine(const String:szLine[], iCountProps) {
+	decl String:szPropInfo[4][128];
+	ExplodeString(szLine, ", ", szPropInfo, sizeof(szPropInfo), sizeof(szPropInfo[]));
+	
+	StripQuotes(szPropInfo[0]);
+	SetArrayString(g_hPropNameArray, iCountProps, szPropInfo[0]);
+	
+	StripQuotes(szPropInfo[1]);
+	SetArrayString(g_hPropModelPathArray, iCountProps, szPropInfo[1]);
+	
+	StripQuotes(szPropInfo[2]);
+	SetArrayString(g_hPropTypeArray, iCountProps, szPropInfo[2]);
+	
+	StripQuotes(szPropInfo[3]);
+	SetArrayString(g_hPropStringArray, iCountProps, szPropInfo[3]);
+	
+	AddMenuItem(g_hPropMenuHL2, szPropInfo[0], szPropInfo[3]);
 }
