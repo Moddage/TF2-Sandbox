@@ -100,7 +100,7 @@ public OnPluginStart() {
 	g_hCvarSwitch = CreateConVar("bm_buildmod", "2", "Turn on, off TF2SB, or admins only.", 0, true, 0.0, true, 2.0);
 	g_hCvarNonOwner = CreateConVar("bm_nonowner", "0", "Switch non-admin player can control non-owner props or not", 0, true, 0.0, true, 1.0);
 	g_hCvarFly = CreateConVar("bm_fly", "1", "Switch non-admin player can use !fly to noclip or not", 0, true, 0.0, true, 1.0);
-	g_hCvarClPropLimit = CreateConVar("bm_prop", "62", "Player prop spawn limit.", 0, true, 0.0);
+	g_hCvarClPropLimit = CreateConVar("bm_prop", "120", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("bm_doll", "10", "Player doll spawn limit.", 0, true, 0.0);
 	g_hCvarServerLimit = CreateConVar("bm_maxprops", "2000", "Limit server-side prop.", 0, true, 0.0, true, 3000.0);
 	RegAdminCmd("sm_version", Command_Version, 0, "Show TF2SB Core version");

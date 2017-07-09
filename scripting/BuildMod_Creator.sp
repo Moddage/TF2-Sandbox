@@ -123,6 +123,13 @@ public Action:OnClientCommand(Client, args) {
 public Action:Command_OpenableDoorProp(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 	
 	if (g_bBuffer[Client])
 	{
@@ -195,6 +202,13 @@ public Action:Command_kill(Client, Args) {
 public Action:Command_Render(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 	
 	if (args < 5) {
 		if (g_bClientLang[Client]) {
@@ -259,6 +273,13 @@ public Action:Command_Color(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
 	
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
+	
 	if (args < 3) {
 		if (g_bClientLang[Client]) {
 			Build_PrintToChat(Client, "用法: !color <紅> <綠> <藍>");
@@ -318,7 +339,12 @@ public Action:Command_PropScale(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
 	
-	
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 	
 	if (args < 1) {
 		if (g_bClientLang[Client]) {
@@ -431,6 +457,13 @@ public Action:Command_Skin(Client, args) {
 public Action:Command_Rotate(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 	
 	if (args < 1) {
 		if (g_bClientLang[Client]) {
@@ -512,6 +545,13 @@ public Action:Command_SimpleLight(Client, args) {
 
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+	
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 		
 	if (g_bBuffer[Client])
 	{
@@ -531,6 +571,13 @@ public Action:Command_SimpleLight(Client, args) {
 public Action:Command_AccurateRotate(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 	
 	if (args < 1) {
 		if (g_bClientLang[Client])
@@ -682,6 +729,13 @@ public Action:Command_SpawnDoor(Client, args) {
 	if(!Build_AllowToUse(Client) || Build_IsBlacklisted(Client))
 		return Plugin_Handled;
 		
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
+		
 	if (g_bBuffer[Client])
 	{
 		Build_PrintToChat(Client, "Anti Spam Protection, please wait.");
@@ -714,10 +768,10 @@ public Action:Command_SpawnDoor(Client, args) {
 		
 		DispatchKeyValue(Obj_Door, "model", szModel);
 		SetEntProp(Obj_Door, Prop_Send, "m_nSolidType", 6);
-		Build_RegisterEntityOwner(Obj_Door, Client);
-		
-		TeleportEntity(Obj_Door, iAim, NULL_VECTOR, NULL_VECTOR);
-		DispatchSpawn(Obj_Door);
+		if(Build_RegisterEntityOwner(Obj_Door, Client)){
+			TeleportEntity(Obj_Door, iAim, NULL_VECTOR, NULL_VECTOR);
+			DispatchSpawn(Obj_Door);
+		}
 	} else if (StrEqual(szType[0], "a") || StrEqual(szType[0], "b") || StrEqual(szType[0], "c")) {
 	
 		iEntity = Build_ClientAimEntity(Client);
@@ -811,6 +865,13 @@ public Action:Command_SpawnDoor(Client, args) {
 public Action:Command_Move(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 	
 	if (args < 1) {
 		if (g_bClientLang[Client]) {
@@ -903,6 +964,13 @@ public Action:Command_SetName(Client, args) {
 public Action:Command_SpawnProp(Client, args) {
 	if (!Build_AllowToUse(Client) || Build_IsBlacklisted(Client) || !Build_IsClientValid(Client, Client, true))
 		return Plugin_Handled;
+		
+	if (!IsPlayerAlive(Client))
+	{
+		Build_PrintToChat(Client, "You must be alive to use this command!");
+
+		return Plugin_Handled;
+	}
 	
 	if (args < 1) {
 		if (g_bClientLang[Client]) {
