@@ -1,5 +1,5 @@
 #define BUILDMODAPI_VER 3
-#define BUILDMOD_VER "0.68"
+#define BUILDMOD_VER "0.70"
 #define MAX_HOOK_ENTITIES 4096
 
 /**

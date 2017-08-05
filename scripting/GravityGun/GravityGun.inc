@@ -1,7 +1,7 @@
-#if defined _gravitygun_included
+/* #if defined _gravitygun_included
  #endinput
 #endif
-#define _gravitygun_included
+#define _gravitygun_included */
 
 //u can stop client`s grab try by this forward. return continue to allow grab of current entity or any other value to stop
 forward Action:OnClientGrabEntity(client, entity);
