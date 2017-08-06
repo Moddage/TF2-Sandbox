@@ -111,6 +111,7 @@ new Handle:g_hPropMenuComic = INVALID_HANDLE;
 new Handle:g_hPropMenuConstructions = INVALID_HANDLE;
 new Handle:g_hPropMenuWeapons = INVALID_HANDLE;
 new Handle:g_hPropMenuPickup = INVALID_HANDLE;
+new Handle:g_hPropMenuHL2 = INVALID_HANDLE;
 
 /*new String:g_szFile[128];
 new Handle:g_hPropNameArray;
@@ -296,6 +297,12 @@ public OnPluginStart() {
 	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, 0, "Making a door, in prop_door way.");
 	RegAdminCmd("sm_propscale", Command_PropScale, ADMFLAG_SLAY, "Resizing a prop");
 	
+	// HL2 Props
+	g_hPropMenuHL2 = CreateMenu(PropMenuHL2);
+	SetMenuTitle(g_hPropMenuHL2, "TF2SB - HL2 Props and Miscs\nSay /g in chat to move Entities!");
+	SetMenuExitBackButton(g_hPropMenuHL2, true);
+	AddMenuItem(g_hPropMenuHL2, "removeprops", "|Remove");
+	
 	g_hCookieSDoorTarget = RegClientCookie("cookie_SDoorTarget", "For SDoor.", CookieAccess_Private);
 	g_hCookieSDoorModel = RegClientCookie("cookie_SDoorModel", "For SDoor.", CookieAccess_Private);
 	g_hCookieClientLang = RegClientCookie("cookie_BuildModClientLang", "TF2SB Client Language.", CookieAccess_Private);
@@ -429,6 +436,7 @@ public OnPluginStart() {
 	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
 	AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
 	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
+	AddMenuItem(g_hPropMenu, "hl2props", "HL2 Props and Miscs");
 	
 	// Prop Menu Pickup
 	g_hPropMenuPickup = CreateMenu(PropMenuPickup);
@@ -1995,6 +2003,7 @@ public Action:Command_SpawnProp(Client, args) {
 			if (IsClientInGame(i) && IsPlayerAlive(i))
 				if (IsStuckInEnt(i, iEntity))
 			{
+				Build_SetLimit(Client, -1);
 				AcceptEntityInput(iEntity, "Kill");
 				PrintCenterText(Client, "Prop removed due to stucking players");
 				break;
@@ -2007,10 +2016,6 @@ public Action:Command_SpawnProp(Client, args) {
 				{
 					PrintCenterText(Client, "Prop is too near the spawn!");
 					Build_SetLimit(Client, -1);
-					new Float:vOriginAim[3];
-					Build_ClientAimOrigin(Client, vOriginAim);
-					TE_SetupBeamRingPoint(vOriginAim, 10.0, 150.0, g_PBeam, g_Halo, 0, 10, 0.6, 3.0, 0.5, ColorBlue, 20, 0);
-					TE_SendToAll();
 					AcceptEntityInput(iEntity, "kill");
 					
 				}
@@ -2095,6 +2100,8 @@ ReadPropsLine(const String:szLine[], iCountProps) {
 	
 	StripQuotes(szPropInfo[3]);
 	SetArrayString(g_hPropStringArray, iCountProps, szPropInfo[3]);
+	
+	AddMenuItem(g_hPropMenuHL2, szPropInfo[0], szPropInfo[3]);
 }
 
 stock bool:IsStuckInEnt(client, ent) {
@@ -3250,6 +3257,10 @@ public PropMenu(Handle:menu, MenuAction:action, param1, param2)
 		{
 			DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
 		}
+		else if (StrEqual(info, "hl2props"))
+		{
+			DisplayMenu(g_hPropMenuHL2, param1, MENU_TIME_FOREVER);
+		}
 		else
 		{
 			FakeClientCommand(param1, "sm_prop %s", info);
@@ -3601,6 +3612,31 @@ public TF2SBPoseMenu(Handle:menu, MenuAction:action, param1, param2)
 	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
+	}
+}
+
+public PropMenuHL2(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action == MenuAction_Select && IsClientInGame(param1))
+	{
+		DisplayMenuAtItem(g_hPropMenuHL2, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
+		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
+		decl String:info[255];
+		
+		GetMenuItem(menu, param2, info, sizeof(info));
+		
+		if (StrEqual(info, "removeprops"))
+		{
+			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+		}
+		else
+		{
+			FakeClientCommand(param1, "sm_prop %s", info);
+		}
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
 }
 
@@ -4233,17 +4269,6 @@ hold(client) {
 	
 	
 	new PlayerSpawnCheck;
-	
-	for (new i = 1; i <= MaxClients; i++)
-	if (IsClientInGame(i) && IsPlayerAlive(i))
-		if (IsStuckInEnt(i, grabbedentref[client]))
-	{
-		AcceptEntityInput(grabbedentref[client], "Kill");
-		PrintCenterText(client, "Prop removed due to stucking players");
-		break;
-	}
-	
-	SetEntPropEnt(grabbedentref[client], Prop_Send, "m_PredictableID", client);
 	
 	
 	while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
