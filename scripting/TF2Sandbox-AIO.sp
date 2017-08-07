@@ -1998,18 +1998,6 @@ public Action:Command_SpawnProp(Client, args) {
 			
 			new PlayerSpawnCheck;
 			
-			
-			for (new i = 1; i <= MaxClients; i++)
-			if (IsClientInGame(i) && IsPlayerAlive(i))
-				if (IsStuckInEnt(i, iEntity))
-			{
-				Build_SetLimit(Client, -1);
-				AcceptEntityInput(iEntity, "Kill");
-				PrintCenterText(Client, "Prop removed due to stucking players");
-				break;
-			}
-			SetEntPropEnt(iEntity, Prop_Send, "m_PredictableID", Client);
-			
 			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
 			{
 				if (Entity_InRange(iEntity, PlayerSpawnCheck, 400.0))
@@ -2102,22 +2090,6 @@ ReadPropsLine(const String:szLine[], iCountProps) {
 	SetArrayString(g_hPropStringArray, iCountProps, szPropInfo[3]);
 	
 	AddMenuItem(g_hPropMenuHL2, szPropInfo[0], szPropInfo[3]);
-}
-
-stock bool:IsStuckInEnt(client, ent) {
-	decl Float:vecMin[3], Float:vecMax[3], Float:vecOrigin[3];
-	
-	GetClientMins(client, vecMin);
-	GetClientMaxs(client, vecMax);
-	
-	GetClientAbsOrigin(client, vecOrigin);
-	
-	TR_TraceHullFilter(vecOrigin, vecOrigin, vecMin, vecMax, MASK_ALL, TraceRayHitOnlyEnt, ent);
-	return TR_DidHit();
-}
-
-public bool:TraceRayHitOnlyEnt(entityhit, mask, any:data) {
-	return entityhit == data;
 }
 
 public Action:Event_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
