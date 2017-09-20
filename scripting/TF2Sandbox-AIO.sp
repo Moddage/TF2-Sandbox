@@ -29,8 +29,43 @@
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
+#include <entity_prop_stocks>
+#include <tf2items>
 #include <stocklib>
 #include <matrixmath>
+
+//#pragma newdecls required
+
+#define MDL_TOOLGUN			"models/weapons/v_crossbow.mdl"
+#define SND_TOOLGUN_SHOOT	"weapons/357/357_fire2.wav"
+#define SND_TOOLGUN_SHOOT2	"weapons/357/357_fire3.wav"
+#define SND_TOOLGUN_SELECT	"buttons/button15.wav"
+
+// Toolgun
+#define EF_BONEMERGE			(1 << 0)
+#define EF_BONEMERGE_FASTCULL	(1 << 7)
+
+new Handle:g_hSdkEquipWearable;
+new g_CollisionOffset;
+
+new int:g_hWearableOwner[2049];
+new int:g_iTiedEntity[2049];
+new bool:g_bIsToolgun[2049];
+new String:g_sCurrentColor[MAXPLAYERS + 1][32];
+new RenderFx:g_fxEffectTool[MAXPLAYERS + 1];
+new int:g_iCurrentColor[MAXPLAYERS + 1][3];
+new LastUsed[MAXPLAYERS + 1];
+
+new int:g_iTool[MAXPLAYERS + 1];
+new int:g_iColorTool[MAXPLAYERS + 1];
+new int:g_iEffectTool[MAXPLAYERS + 1];
+new bool:g_bPlayerPressedReload[MAXPLAYERS + 1];
+new bool:g_bAttackWasMouse2[MAXPLAYERS + 1];
+new bool:g_bAttackWasMouse3[MAXPLAYERS + 1];
+
+//Duplicator ToolGun
+new String:modelnamedupe[MAXPLAYERS + 1][256];
+new Float:propeyeangle[MAXPLAYERS + 1][3];
 
 new bool:g_bClientLang[MAXPLAYERS];
 new Handle:g_hCookieClientLang;
@@ -40,6 +75,9 @@ new g_iGrabTarget[MAXPLAYERS];
 new Float:g_vGrabPlayerOrigin[MAXPLAYERS][3];
 new bool:g_bGrabIsRunning[MAXPLAYERS];
 new bool:g_bGrabFreeze[MAXPLAYERS];
+
+new Handle:g_hMenuCredits;
+new Handle:g_hMenuCredits2;
 
 
 new Handle:g_hCookieSDoorTarget;
@@ -60,6 +98,8 @@ new Float:g_fDelRangePoint2[MAXPLAYERS][3];
 new Float:g_fDelRangePoint3[MAXPLAYERS][3];
 new String:g_szDelRangeStatus[MAXPLAYERS][8];
 new bool:g_szDelRangeCancel[MAXPLAYERS] =  { false, ... };
+
+new int:g_RememberGodmode[MAXPLAYERS];
 
 new ColorBlue[4] =  {
 	50, 
@@ -238,6 +278,8 @@ new entityownersave[MAXPLAYERS + 1] =  { INVALID_ENT_REFERENCE, ... };
 
 new PropTypeCheck:grabentitytype[MAXPLAYERS + 1];
 
+new Float:grabpos[MAXPLAYERS + 1][3];
+
 new Handle:forwardOnClientGrabEntity = INVALID_HANDLE;
 new Handle:forwardOnClientDragEntity = INVALID_HANDLE;
 new Handle:forwardOnClientEmptyShootEntity = INVALID_HANDLE;
@@ -259,6 +301,9 @@ public Plugin:myinfo =  {
 public OnPluginStart() {
 	// Client Language Base
 	g_hCookieClientLang = RegClientCookie("cookie_BuildModClientLang", "TF2SB Client Language.", CookieAccess_Private);
+	
+	RegAdminCmd("sm_bl", Command_AddBL, ADMFLAG_CONVARS, "Add clients to TF2SB Blacklist");
+	RegAdminCmd("sm_unbl", Command_RemoveBL, ADMFLAG_CONVARS, "Remove clients from TF2SB Blacklist");
 	
 	// Copy
 	RegAdminCmd("+copy", Command_Copy, 0, "Copy a prop.");
@@ -290,7 +335,7 @@ public OnPluginStart() {
 	
 	// Misc stuffs
 	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Doors creator.");
-	RegAdminCmd("sm_lightforbesure", Command_LightDynamic, 0, "Dynamic Light.");
+	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light.");
 	RegAdminCmd("sm_fly", Command_Fly, 0, "I BELIEVE I CAN FLYYYYYYY, I BELIEVE THAT I CAN TOUCH DE SKY");
 	RegAdminCmd("sm_setname", Command_SetName, 0, "SetPropname");
 	RegAdminCmd("sm_simplelight", Command_SimpleLight, 0, "Spawn a Light, in a very simple way.");
@@ -333,6 +378,9 @@ public OnPluginStart() {
 	RegAdminCmd("sm_del", Command_Delete, 0, "Delete an entity.");
 	
 	HookEntityOutput("prop_physics_respawnable", "OnBreak", OnPropBreak);
+	
+	g_CollisionOffset = FindSendPropInfo("CBaseEntity", "m_CollisionGroup");
+	RegAdminCmd("sm_toolgun", Command_ToolGun, 0);
 	
 	// Buildings Belong To Us
 	HookEvent("player_builtobject", Event_player_builtobject);
@@ -721,6 +769,73 @@ public OnPluginStart() {
 	
 	RegAdminCmd("sm_fda", ClientRemoveAll, ADMFLAG_SLAY);
 	
+	new String:buffer[512];
+	
+	g_hMenuCredits = CreateMenu(TF2SBCred1);
+	
+	Format(buffer, sizeof(buffer), "Credits\n \n");
+	StrCat(buffer, sizeof(buffer), "Coders: Danct12, DaRkWoRlD\n");
+	StrCat(buffer, sizeof(buffer), "\n \n");
+	StrCat(buffer, sizeof(buffer), "greenteaf0718, hjkwe654 -for the original BuildMod\n");
+	StrCat(buffer, sizeof(buffer), "FlaminSarge, javalia -for the GravityGun Mod\n");
+	StrCat(buffer, sizeof(buffer), "Pelipoika -for the ToolGun Source Code!\n");
+	StrCat(buffer, sizeof(buffer), "TESTBOT#7 -making official group profile\n");
+	StrCat(buffer, sizeof(buffer), "iKiroZz -inspired me to make this mod\n");
+	StrCat(buffer, sizeof(buffer), "SomePanns -help me fixing some problems at some parts.\n");
+	StrCat(buffer, sizeof(buffer), "Garry Newman -for creating Garry's Mod, without him, this wouldn't exist.\n");
+	StrCat(buffer, sizeof(buffer), "AlliedModders -without this, SourceMod wouldn't exist and this also won't.\n \n");
+	
+	SetMenuTitle(g_hMenuCredits, buffer);
+	AddMenuItem(g_hMenuCredits, "0", "Next");
+	
+	g_hMenuCredits2 = CreateMenu(TF2SBCred2);
+	
+	Format(buffer, sizeof(buffer), "Credits\n \n");
+	StrCat(buffer, sizeof(buffer), "Thanks to these people for tested this mod at the begin:\n \n");
+	StrCat(buffer, sizeof(buffer), "periodicJudgement\n");
+	StrCat(buffer, sizeof(buffer), "Lord Lecubon | ᵁᶳᴸ\n");
+	StrCat(buffer, sizeof(buffer), "iKiroZz | Titan.TF\n");
+	StrCat(buffer, sizeof(buffer), "Lazyneer\n");
+	StrCat(buffer, sizeof(buffer), "Cecil\n");
+	StrCat(buffer, sizeof(buffer), "TESTBOT#7\n");
+	StrCat(buffer, sizeof(buffer), "And every DanctTF2 players who have joined to test it out!\n \n \n");
+	StrCat(buffer, sizeof(buffer), "THANKS FOR PLAYING\n \n");
+	
+	SetMenuTitle(g_hMenuCredits2, buffer);
+	AddMenuItem(g_hMenuCredits2, "0", "Back");
+	RegAdminCmd("sm_tf2sb", Command_TF2SBCred, 0);
+	RegAdminCmd("hidehudtf2sb", Command_TF2SBHideHud, 0);
+	
+}
+
+public Action:Command_TF2SBCred(client, args)
+{
+	
+	DisplayMenu(g_hMenuCredits, client, MENU_TIME_FOREVER);
+	
+	return Plugin_Handled;
+}
+
+public TF2SBCred1(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action == MenuAction_Select)
+	{
+		switch (param2)
+		{
+			case 0:DisplayMenu(g_hMenuCredits2, param1, MENU_TIME_FOREVER);
+		}
+	}
+}
+
+public TF2SBCred2(Handle:menu, MenuAction:action, param1, param2)
+{
+	if (action == MenuAction_Select)
+	{
+		switch (param2)
+		{
+			case 0:DisplayMenu(g_hMenuCredits, param1, MENU_TIME_FOREVER);
+		}
+	}
 }
 
 stock Float:GetEntitiesDistance(ent1, ent2)
@@ -767,6 +882,11 @@ public OnMapStart() {
 	}
 	
 	prepatchsounds();
+	
+	PrecacheModel(MDL_TOOLGUN);
+	PrecacheSound(SND_TOOLGUN_SHOOT);
+	PrecacheSound(SND_TOOLGUN_SHOOT2);
+	PrecacheSound(SND_TOOLGUN_SELECT);
 	
 	g_iHalo = PrecacheModel("materials/sprites/halo01.vmt");
 	//g_iBeam = PrecacheModel("materials/sprites/laserbeam.vmt");
@@ -817,6 +937,10 @@ public OnClientDisconnect(Client) {
 	release(Client);
 }
 
+public OnClientConnected(Client) {
+	g_RememberGodmode[Client] = 1.0;
+}
+
 public Action:Timer_Disconnect(Handle:Timer, Handle:hPack) {
 	ResetPack(hPack);
 	new Client = ReadPackCell(hPack);
@@ -851,7 +975,7 @@ public Action:Command_Copy(Client, args) {
 	
 	if (g_bBuffer[Client])
 	{
-		Build_PrintToChat(Client, "You're doing it so fast! Slow it down!'");
+		Build_PrintToChat(Client, "You're doing it so fast! Slow it down!");
 		
 		return Plugin_Handled;
 	}
@@ -1117,6 +1241,19 @@ public Action:Command_OpenableDoorProp(Client, args) {
 		DispatchSpawn(iDoor);
 		
 		TeleportEntity(iDoor, fOriginAim, NULL_VECTOR, NULL_VECTOR);
+		
+		new PlayerSpawnCheck;
+		
+		while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+		{
+			if (Entity_InRange(iDoor, PlayerSpawnCheck, 400.0))
+			{
+				PrintCenterText(Client, "Prop is too near the spawn!");
+				Build_SetLimit(Client, -1);
+				AcceptEntityInput(iDoor, "kill");
+				
+			}
+		}
 		
 		Format(szNamePropDoor, sizeof(szNamePropDoor), "TF2SB_Door%i", GetRandomInt(1000, 5000));
 		DispatchKeyValue(iDoor, "targetname", szNamePropDoor);
@@ -1489,7 +1626,7 @@ public Action:Command_SimpleLight(Client, args) {
 		return Plugin_Handled;
 	}
 	
-	if (g_bBuffer[Client])
+	/*if (g_bBuffer[Client])
 	{
 		Build_PrintToChat(Client, "You're doing it too fast! Slow it down!");
 		
@@ -1497,10 +1634,8 @@ public Action:Command_SimpleLight(Client, args) {
 	}
 	
 	g_bBuffer[Client] = true;
-	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));
-	
-	// Spoiler: I'm Lazy
-	FakeClientCommand(Client, "sm_lightforbesure 500 5 255 255 255");
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));*/
+	FakeClientCommand(Client, "sm_ld 7 255 255 255");
 	
 	return Plugin_Handled;
 }
@@ -1572,20 +1707,30 @@ public Action:Command_LightDynamic(Client, args) {
 		return Plugin_Handled;
 	
 	if (args < 1) {
-		Build_PrintToChat(Client, "Usage: !ld <range> <brightness> <R> <G> <B>");
+		Build_PrintToChat(Client, "Usage: !ld <brightness> <R> <G> <B>");
 		return Plugin_Handled;
 	}
 	
+	if (g_bBuffer[Client])
+	{
+		Build_PrintToChat(Client, "You're doing it too fast! Slow it down!");
+		
+		return Plugin_Handled;
+	}
+	
+	g_bBuffer[Client] = true;
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(Client));
+	
 	new Obj_LightDMelon = CreateEntityByName("prop_dynamic");
 	if (Build_RegisterEntityOwner(Obj_LightDMelon, Client)) {
-		new String:szRange[33], String:szBrightness[33], String:szColorR[33], String:szColorG[33], String:szColorB[33], String:szColor[33];
+		new String:szBrightness[33], String:szColorR[33], String:szColorG[33], String:szColorB[33], String:szColor[33];
 		new String:szNameMelon[64];
 		new Float:fOriginAim[3];
-		GetCmdArg(1, szRange, sizeof(szRange));
-		GetCmdArg(2, szBrightness, sizeof(szBrightness));
-		GetCmdArg(3, szColorR, sizeof(szColorR));
-		GetCmdArg(4, szColorG, sizeof(szColorG));
-		GetCmdArg(5, szColorB, sizeof(szColorB));
+		//GetCmdArg(1, szRange, sizeof(szRange));
+		GetCmdArg(1, szBrightness, sizeof(szBrightness));
+		GetCmdArg(2, szColorR, sizeof(szColorR));
+		GetCmdArg(3, szColorG, sizeof(szColorG));
+		GetCmdArg(4, szColorB, sizeof(szColorB));
 		
 		Build_ClientAimOrigin(Client, fOriginAim);
 		fOriginAim[2] += 50;
@@ -1610,18 +1755,18 @@ public Action:Command_LightDynamic(Client, args) {
 		DispatchKeyValue(Obj_LightDMelon, "rendercolor", szColor);
 		
 		new Obj_LightDynamic = CreateEntityByName("light_dynamic");
-		if (StringToInt(szRange) > 500) {
-			Build_PrintToChat(Client, "Max range is 500!");
-			return Plugin_Handled;
-		}
+		
 		if (StringToInt(szBrightness) > 7) {
 			if (g_bClientLang[Client])
 				Build_PrintToChat(Client, "亮度上限是 7!");
 			else
 				Build_PrintToChat(Client, "Max brightness is 7!");
+			
+			Build_SetLimit(Client, -1);
 			return Plugin_Handled;
 		}
-		SetVariantString(szRange);
+		
+		SetVariantString("500");
 		AcceptEntityInput(Obj_LightDynamic, "distance", -1);
 		SetVariantString(szBrightness);
 		AcceptEntityInput(Obj_LightDynamic, "brightness", -1);
@@ -1631,16 +1776,32 @@ public Action:Command_LightDynamic(Client, args) {
 		AcceptEntityInput(Obj_LightDynamic, "color", -1);
 		SetEntProp(Obj_LightDMelon, Prop_Send, "m_nSolidType", 6);
 		
+		
+		
 		DispatchSpawn(Obj_LightDMelon);
 		TeleportEntity(Obj_LightDMelon, fOriginAim, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(Obj_LightDynamic);
 		TeleportEntity(Obj_LightDynamic, fOriginAim, NULL_VECTOR, NULL_VECTOR);
+		
+		new PlayerSpawnCheck;
+		
+		while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+		{
+			if (Entity_InRange(Obj_LightDMelon, PlayerSpawnCheck, 400.0))
+			{
+				PrintCenterText(Client, "Prop is too near the spawn!");
+				Build_SetLimit(Client, -1);
+				AcceptEntityInput(Obj_LightDynamic, "kill");
+				AcceptEntityInput(Obj_LightDMelon, "kill");
+			}
+		}
 		
 		Format(szNameMelon, sizeof(szNameMelon), "Obj_LightDMelon%i", GetRandomInt(1000, 5000));
 		DispatchKeyValue(Obj_LightDMelon, "targetname", szNameMelon);
 		SetVariantString(szNameMelon);
 		AcceptEntityInput(Obj_LightDynamic, "setparent", -1);
 		AcceptEntityInput(Obj_LightDynamic, "turnon", Client, Client);
+		
 	} else
 		RemoveEdict(Obj_LightDMelon);
 	
@@ -1649,7 +1810,7 @@ public Action:Command_LightDynamic(Client, args) {
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
-	Build_Logging(Client, "sm_lightforbesure", szArgs);
+	Build_Logging(Client, "sm_ld", szArgs);
 	return Plugin_Handled;
 }
 
@@ -1699,6 +1860,19 @@ public Action:Command_SpawnDoor(Client, args) {
 		if (Build_RegisterEntityOwner(Obj_Door, Client)) {
 			TeleportEntity(Obj_Door, iAim, NULL_VECTOR, NULL_VECTOR);
 			DispatchSpawn(Obj_Door);
+			
+			new PlayerSpawnCheck;
+			
+			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+			{
+				if (Entity_InRange(Obj_Door, PlayerSpawnCheck, 400.0))
+				{
+					PrintCenterText(Client, "Prop is too near the spawn!");
+					Build_SetLimit(Client, -1);
+					AcceptEntityInput(Obj_Door, "kill");
+					
+				}
+			}
 		}
 	} else if (StrEqual(szType[0], "a") || StrEqual(szType[0], "b") || StrEqual(szType[0], "c")) {
 		
@@ -2095,7 +2269,12 @@ ReadPropsLine(const String:szLine[], iCountProps) {
 public Action:Event_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
+	LastUsed[client] = 0;
+	
+	if (g_RememberGodmode[client] == 1.0)
+	{
+		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
+	}
 	
 	nextactivetime[client] = GetGameTime();
 }
@@ -2107,11 +2286,13 @@ public Action:Command_ChangeGodMode(Client, Args) {
 	if (GetEntProp(Client, Prop_Data, "m_takedamage") == 0)
 	{
 		Build_PrintToChat(Client, "God Mode OFF");
+		g_RememberGodmode[Client] = 0.0;
 		SetEntProp(Client, Prop_Data, "m_takedamage", 2, 1);
 	}
 	else
 	{
 		Build_PrintToChat(Client, "God Mode ON");
+		g_RememberGodmode[Client] = 1.0;
 		SetEntProp(Client, Prop_Data, "m_takedamage", 0, 1);
 	}
 	
@@ -3146,9 +3327,14 @@ public Action:Command_BuildMenu(client, args)
 
 public Action:Command_ToolGun(client, args)
 {
-	if (client > 0)
+	/*if (client > 0)
 	{
 		DisplayMenu(g_hBuildHelperMenu, client, MENU_TIME_FOREVER);
+	}*/
+	
+	if (client > 0 && client <= MaxClients && IsClientInGame(client) && IsPlayerAlive(client))
+	{
+		GiveToolgun(client);
 	}
 	
 	return Plugin_Handled;
@@ -3165,7 +3351,7 @@ public Action:Command_PhysGun(client, args)
 
 public Action:Command_Resupply(client, args)
 {
-	Build_PrintToChat(client, "You're now resupplied.'");
+	Build_PrintToChat(client, "You're now resupplied.");
 	TF2_RegeneratePlayer(client);
 }
 
@@ -3773,6 +3959,68 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 			
 		}
 	}
+	
+	if (IsPlayerAlive(client))
+	{
+		
+		new aw = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
+		if (IsValidEntity(aw) && g_bIsToolgun[aw])
+		{
+			new ent = GetEntPropEnt(client, Prop_Data, "m_hViewModel");
+			SetEntProp(ent, Prop_Data, "m_nModelIndex", PrecacheModel(MDL_TOOLGUN), 2);
+			SetEntProp(ent, Prop_Send, "m_nSequence", 1);
+			
+			SetHudTextParams(0.0, 0.25, 0.1, 150, 150, 0, 150, 0, 0.0, 0.0, 0.0);
+			
+			switch (g_iTool[client])
+			{
+				case 1:ShowHudText(client, -1, "TOOL:\nREMOVER\n\n\n\n[PRIMARY] Remove\n[SECONDARY] Remove\n[RELOAD] Switch Tools");
+				case 2:ShowHudText(client, -1, "TOOL:\nEXPLODE TARGET\n\n\n\n[PRIMARY] BOOM!\n[RELOAD] Switch Tools");
+				case 3:ShowHudText(client, -1, "TOOL:\nRESIZE TOOL\n\n\n\n[PRIMARY] Larger\n[SECONDARY] Smaller\n[RELOAD] Switch Tools");
+				case 4:ShowHudText(client, -1, "TOOL:\nNO COLLIDE\n\n\n\n[PRIMARY] No Collide\n[SECONDARY] Collide\n[RELOAD] Switch Tools");
+				case 5:ShowHudText(client, -1, "TOOL:\nDUPLICATOR\n\n\n\n[PRIMARY] Paste\n[SECONDARY] Copy\n[RELOAD] Switch Tools");
+				case 6:ShowHudText(client, -1, "TOOL:\nALPHA\n\n\n\n[PRIMARY] More Transparent\n[SECONDARY] More Visible\n[RELOAD] Switch Tools");
+				case 7:ShowHudText(client, -1, "TOOL:\nCOLORS\n%s\n\n\n[PRIMARY] Apply\n[SECONDARY] Restore\n[TERTIARY] Change Colors\n[RELOAD] Switch Tools", g_sCurrentColor[client]);
+				case 8:ShowHudText(client, -1, "TOOL:\nSKIN\n\n\n\n[PRIMARY] Next Skin\n[SECONDARY] Previous Skin\n[RELOAD] Switch Tools");
+				case 9:ShowHudText(client, -1, "TOOL:\nRENDER FX\n%i\n\n\n[PRIMARY] Apply\n[SECONDARY] Restore\n[TERTIARY] Change FX\n[RELOAD] Switch Tools", g_fxEffectTool[client]);
+				case 10:ShowHudText(client, -1, "TOOL:\nSDOOR\n\n\n\n[PRIMARY] Spawn Door\n[SECONDARY] Shoot to Open\n[RELOAD] Switch Tools");
+				case 11:ShowHudText(client, -1, "TOOL:\nLIGHTS\n\n\n\n[PRIMARY] Spawn Light\n[RELOAD] Switch Tools");
+				case 12:ShowHudText(client, -1, "TOOL:\nPROPDOOR\n\n\n\n[PRIMARY] Spawn Propdoor\n[RELOAD] Switch Tools");
+			}
+			
+			if (buttons & IN_ATTACK2)
+			{
+				g_bAttackWasMouse2[client] = true;
+				buttons &= ~IN_ATTACK2;
+				buttons |= IN_ATTACK;
+			}
+			else
+				g_bAttackWasMouse2[client] = false;
+			
+			if (buttons & IN_ATTACK3)
+			{
+				g_bAttackWasMouse3[client] = true;
+				buttons &= ~IN_ATTACK3;
+				buttons |= IN_ATTACK;
+			}
+			else
+				g_bAttackWasMouse3[client] = false;
+			
+			if (buttons & IN_RELOAD && !g_bPlayerPressedReload[client])
+			{
+				if (g_iTool[client] < 12)
+					g_iTool[client]++;
+				else
+					g_iTool[client] = 1;
+				
+				EmitSoundToClient(client, SND_TOOLGUN_SELECT);
+				
+				g_bPlayerPressedReload[client] = true;
+			}
+			else if (!(buttons & IN_RELOAD) && g_bPlayerPressedReload[client])
+				g_bPlayerPressedReload[client] = false;
+		}
+	}
 	return Plugin_Continue;
 	
 }
@@ -3936,7 +4184,6 @@ public PreThinkHook(client) {
 			{
 				//trying to grab something
 				if (teamcanusegravitygun(clientteam) && g_bIsWeaponGrabber[client]) {
-					
 					grab(client);
 					
 				}
@@ -4057,9 +4304,12 @@ grab(client) {
 			
 			entitygravitysave[client] = Phys_IsGravityEnabled(targetentity);
 			
-			Phys_EnableGravity(targetentity, false);
+			if (entityType != PROP_RIGID) {
+				Phys_EnableGravity(targetentity, false);
+			}
 			
-			decl Float:clienteyeangle[3], Float:entityangle[3]; //, Float:entityposition[3];
+			
+			decl Float:clienteyeangle[3], Float:entityangle[3], Float:entityposition[3];
 			GetEntPropVector(grabbedentref[client], Prop_Send, "m_angRotation", entityangle);
 			GetClientEyeAngles(client, clienteyeangle);
 			
@@ -4069,10 +4319,12 @@ grab(client) {
 			
 			
 			grabdistance[client] = GetEntitiesDistance(client, targetentity);
-			/* GetEntPropVector(grabbedentref[client], Prop_Send, "m_vecOrigin", entityposition);
-				grabpos[client][0] = entityposition[0] - resultpos[0];
-				grabpos[client][1] = entityposition[1] - resultpos[1];
-				grabpos[client][2] = entityposition[2] - resultpos[2]; */
+			GetEntPropVector(grabbedentref[client], Prop_Send, "m_vecOrigin", entityposition);
+			grabpos[client][0] = entityposition[0] - resultpos[0];
+			grabpos[client][1] = entityposition[1] - resultpos[1];
+			grabpos[client][2] = entityposition[2] - resultpos[2];
+			
+			
 			
 			new matrix[matrix3x4_t];
 			
@@ -4197,6 +4449,9 @@ hold(client) {
 	
 	decl Float:clienteyeangleafterchange[3];
 	
+	decl Float:aimorigin[3];
+	GetAimOrigin(client, aimorigin);
+	
 	new Float:fAngles[3];
 	new Float:fOrigin[3];
 	new Float:fEOrigin[3];
@@ -4257,13 +4512,39 @@ hold(client) {
 		}
 	}
 	
+	if (grabbedentref[client] != client)
+	{
+		if (Entity_InRange(grabbedentref[client], !client, 400.0))
+		{
+			if (grabentitytype[client] != PROP_PLAYER)
+			{
+				Build_PrintToChat(client, "You're too near the spawn!");
+				Build_SetLimit(client, -1);
+				AcceptEntityInput(grabbedentref[client], "kill");
+				//Build_RegisterEntityOwner(grabbedentref[client], -1);
+			}
+		}
+	}
+	
 	if (grabentitytype[client] != PROP_RAGDOLL)
 	{
 		TeleportEntity(grabbedentref[client], NULL_VECTOR, playeranglerotate[client], NULL_VECTOR);
 	}
 	
+	if (grabentitytype[client] != PROP_RIGID)
+	{
+		Phys_SetVelocity(EntRefToEntIndex(grabbedentref[client]), vector, ZERO_VECTOR, true);
+	}
 	
-	Phys_SetVelocity(EntRefToEntIndex(grabbedentref[client]), vector, ZERO_VECTOR, true);
+	
+	new Float:physgunaimfinal[3];
+	/*physgunaimfinal[0] = resultpos[0] - aimorigin[0];
+	physgunaimfinal[1] = resultpos[1] - aimorigin[1];
+	physgunaimfinal[2] = resultpos[2] - aimorigin[2];*/
+	
+	physgunaimfinal[0] = fOrigin[0] - aimorigin[0];
+	physgunaimfinal[1] = fOrigin[1] - aimorigin[1];
+	physgunaimfinal[2] = fOrigin[2] - aimorigin[2];
 	
 	if (grabentitytype[client] == PROP_PHYSBOX || grabentitytype[client] == PROP_RAGDOLL) {
 		
@@ -4278,7 +4559,11 @@ hold(client) {
 		
 		decl Float:eyeanglefornow[3];
 		GetClientEyeAngles(client, eyeanglefornow);
+		
+		
 		//SetEntProp(grabbedentref[client], Prop_Data, "m_bThrownByPlayer", true);
+		//TeleportEntity(grabbedentref[client], resultpos, playeranglerotate[client], NULL_VECTOR);
+		//TeleportEntity(grabbedentref[client], resultpos, playeranglerotate[client], NULL_VECTOR);
 		TeleportEntity(grabbedentref[client], resultpos, playeranglerotate[client], NULL_VECTOR);
 		
 	}
@@ -4528,3 +4813,721 @@ public Action:Event_player_builtobject(Handle:event, const String:name[], bool:d
 	}
 	return Plugin_Continue;
 }
+
+stock GetAimOrigin(client, Float:hOrigin[3])
+{
+	new Float:vAngles[3], Float:fOrigin[3];
+	GetClientAbsOrigin(client, fOrigin);
+	GetClientEyeAngles(client, vAngles);
+	
+	fOrigin[2] += 75.0;
+	
+	new Handle:trace = TR_TraceRayFilterEx(fOrigin, vAngles, MASK_SHOT, RayType_Infinite, TraceEntityFilterPlayer);
+	
+	if (TR_DidHit(trace))
+	{
+		TR_GetEndPosition(hOrigin, trace);
+		CloseHandle(trace);
+		return 1;
+	}
+	
+	CloseHandle(trace);
+	return 0;
+}
+
+// BlackList
+
+public Action:Command_AddBL(Client, args) {
+	if (args < 1) {
+		ReplyToCommand(Client, "[SM] Usage: sm_bl <#userid|name>");
+		return Plugin_Handled;
+	}
+	
+	new String:arg[33];
+	GetCmdArg(1, arg, sizeof(arg));
+	
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
+	
+	if ((target_count = ProcessTargetString(arg, Client, target_list, MAXPLAYERS, 0, target_name, sizeof(target_name), tn_is_ml)) <= 0) {
+		ReplyToTargetError(Client, target_count);
+		return Plugin_Handled;
+	}
+	
+	for (new i = 0; i < target_count; i++) {
+		new target = target_list[i];
+		
+		if (Build_IsBlacklisted(target)) {
+			Build_PrintToChat(Client, "%s is already blacklisted!", target_name);
+			return Plugin_Handled;
+		} else
+			Build_AddBlacklist(target);
+	}
+	
+	for (new i = 0; i < MaxClients; i++) {
+		if (Build_IsClientValid(i, i)) {
+			if (g_bClientLang[i])
+				Build_PrintToChat(i, "%N 將 %s 加入到黑名單 :(", Client, target_name);
+			else
+				Build_PrintToChat(i, "%N added %s to this server blacklist :(", Client, target_name);
+		}
+	}
+	return Plugin_Handled;
+}
+
+public Action:Command_RemoveBL(Client, args) {
+	if (args < 1) {
+		ReplyToCommand(Client, "[SM] Usage: sm_unbl <#userid|name>");
+		return Plugin_Handled;
+	}
+	
+	new String:arg[33];
+	GetCmdArg(1, arg, sizeof(arg));
+	
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
+	
+	if ((target_count = ProcessTargetString(arg, Client, target_list, MAXPLAYERS, 0, target_name, sizeof(target_name), tn_is_ml)) <= 0) {
+		ReplyToTargetError(Client, target_count);
+		return Plugin_Handled;
+	}
+	
+	for (new i = 0; i < target_count; i++) {
+		new target = target_list[i];
+		
+		if (!Build_RemoveBlacklist(target)) {
+			Build_PrintToChat(Client, "%s is not in blacklist!", target_name);
+			return Plugin_Handled;
+		}
+	}
+	
+	if (tn_is_ml) {
+		for (new i = 0; i < MaxClients; i++) {
+			if (Build_IsClientValid(i, i)) {
+				if (g_bClientLang[i])
+					Build_PrintToChat(i, "%N 將 %s 從黑名單移除 :)", Client, target_name);
+				else
+					Build_PrintToChat(i, "%N removed %s from this server blacklist :)", Client, target_name);
+			}
+		}
+	} else {
+		for (new i = 0; i < MaxClients; i++) {
+			if (Build_IsClientValid(i, i)) {
+				if (g_bClientLang[i])
+					Build_PrintToChat(i, "%N 將 %s 從黑名單移除 :)", Client, target_name);
+				else
+					Build_PrintToChat(i, "%N removed %s from this server blacklist :)", Client, target_name);
+			}
+		}
+	}
+	
+	return Plugin_Handled;
+}
+
+stock GiveToolgun(client)
+{
+	TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
+	// Idk why this was here
+	//TF2_RemoveWeaponSlot(client, TFWeaponSlot_Building);
+	
+	new Handle:hWeapon = TF2Items_CreateItem(OVERRIDE_ALL | FORCE_GENERATION);
+	if (hWeapon != INVALID_HANDLE)
+	{
+		TF2Items_SetClassname(hWeapon, "tf_weapon_pistol");
+		TF2Items_SetItemIndex(hWeapon, 5);
+		TF2Items_SetLevel(hWeapon, 100);
+		TF2Items_SetQuality(hWeapon, 5);
+		
+		TF2Items_SetAttribute(hWeapon, 0, 305, 1.0); //Fire tracer rounds
+		TF2Items_SetAttribute(hWeapon, 1, 731, 1.0); //Allow inspect
+		TF2Items_SetAttribute(hWeapon, 2, 106, 0.0); //Accuracy bonus
+		TF2Items_SetAttribute(hWeapon, 3, 1, 0.0); //Damage Penalty
+		TF2Items_SetNumAttributes(hWeapon, 4);
+		
+		new weapon = TF2Items_GiveNamedItem(client, hWeapon);
+		EquipPlayerWeapon(client, weapon);
+		
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+		
+		CloseHandle(hWeapon);
+		
+		EquipWearable(client, MDL_TOOLGUN, weapon);
+		
+		new String:arms[PLATFORM_MAX_PATH];
+		switch (TF2_GetPlayerClass(client))
+		{
+			case TFClass_Scout:Format(arms, sizeof(arms), "models/weapons/c_models/c_scout_arms.mdl");
+			case TFClass_Soldier:Format(arms, sizeof(arms), "models/weapons/c_models/c_soldier_arms.mdl");
+			case TFClass_Pyro:Format(arms, sizeof(arms), "models/weapons/c_models/c_pyro_arms.mdl");
+			case TFClass_DemoMan:Format(arms, sizeof(arms), "models/weapons/c_models/c_demo_arms.mdl");
+			case TFClass_Heavy:Format(arms, sizeof(arms), "models/weapons/c_models/c_heavy_arms.mdl");
+			case TFClass_Engineer:Format(arms, sizeof(arms), "models/weapons/c_models/c_engineer_arms.mdl");
+			case TFClass_Medic:Format(arms, sizeof(arms), "models/weapons/c_models/c_medic_arms.mdl");
+			case TFClass_Sniper:Format(arms, sizeof(arms), "models/weapons/c_models/c_sniper_arms.mdl");
+			case TFClass_Spy:Format(arms, sizeof(arms), "models/weapons/c_models/c_spy_arms.mdl");
+		}
+		if (strlen(arms) && FileExists(arms, true))
+		{
+			PrecacheModel(arms, true);
+			EquipWearable(client, arms, weapon);
+		}
+		
+		SetEntProp(weapon, Prop_Send, "m_iWorldModelIndex", PrecacheModel(MDL_TOOLGUN));
+		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel(MDL_TOOLGUN), _, 0);
+		SetEntProp(weapon, Prop_Send, "m_nSequence", 3);
+		
+		SetEntityRenderMode(weapon, RENDER_NONE);
+		SetEntityRenderColor(weapon, 0, 0, 0, 0);
+		
+		g_bIsToolgun[weapon] = true;
+		g_iTool[client] = 1;
+		
+		SDKUnhook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
+		SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
+	}
+}
+
+public Action:TF2_CalcIsAttackCritical(client, weapon, String:weaponname[], &bool:result)
+{
+	if (IsValidEntity(weapon) && g_bIsToolgun[weapon])
+	{
+		new Float:flStartPos[3], flEyeAng[3], flHitPos[3];
+		GetClientEyePosition(client, flStartPos);
+		GetClientEyeAngles(client, flEyeAng);
+		
+		new Handle:hTrace = TR_TraceRayFilterEx(flStartPos, flEyeAng, MASK_SHOT, RayType_Infinite, TraceRayDontHitEntity, client);
+		TR_GetEndPosition(flHitPos, hTrace);
+		new iHitEntity = TR_GetEntityIndex(hTrace);
+		CloseHandle(hTrace);
+		
+		// For Entity Check
+		new String:classname[64];
+		GetEdictClassname(iHitEntity, classname, 64);
+		
+		
+		
+		//	if(TF2_GetClientTeam(client) == TFTeam_Blue)
+		//		ShootLaser(weapon, "dxhr_sniper_rail_blue", flStartPos, flHitPos);
+		//	else
+		//		ShootLaser(weapon, "dxhr_sniper_rail_red", flStartPos, flHitPos);
+		
+		switch (g_iTool[client])
+		{
+			case 1:
+			{
+				if (iHitEntity > 0 && IsValidEntity(iHitEntity))
+				{
+					if (StrContains(classname, "player", false) != -1)
+					{
+						PrintCenterText(client, "You cannot remove a player!");
+					}
+					else
+					{
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							AcceptEntityInput(iHitEntity, "Kill");
+							Build_SetLimit(client, -1);
+						}
+					}
+				}
+			}
+			case 2:
+			{
+				if (iHitEntity > 0)
+				{
+					if (iHitEntity <= MaxClients && IsClientInGame(iHitEntity) && IsPlayerAlive(iHitEntity))
+						FakeClientCommandEx(iHitEntity, "explode");
+					else
+						AcceptEntityInput(iHitEntity, "explode");
+				}
+			}
+			case 3:
+			{
+				if (iHitEntity > 0)
+				{
+					if (Build_IsAdmin(client))
+					{
+						new Float:flModelScale = GetEntPropFloat(iHitEntity, Prop_Send, "m_flModelScale");
+						
+						if (g_bAttackWasMouse2[client])
+						{
+							new Float:flNewScale = flModelScale - 0.1;
+							
+							if (flNewScale > 0.0)
+							{
+								decl String:strScale[8];
+								FloatToString(flNewScale, strScale, sizeof(strScale));
+								
+								SetVariantString(strScale);
+								AcceptEntityInput(iHitEntity, "SetModelScale");
+							}
+						}
+						else
+						{
+							new Float:flNewScale = flModelScale + 0.1;
+							if (flNewScale > 0.0)
+							{
+								decl String:strScale[8];
+								FloatToString(flNewScale, strScale, sizeof(strScale));
+								
+								SetVariantString(strScale);
+								AcceptEntityInput(iHitEntity, "SetModelScale");
+							}
+						}
+					}
+					else
+					{
+						PrintCenterText(client, "This tool is only available for admins.");
+					}
+				}
+			}
+			case 4:
+			{
+				if (g_bAttackWasMouse2[client])
+				{
+					if (iHitEntity > 0)
+					{
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							SetEntData(iHitEntity, g_CollisionOffset, 5, 4, true);
+						}
+						
+					}
+				}
+				else
+				{
+					if (iHitEntity > 0)
+					{
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							SetEntData(iHitEntity, g_CollisionOffset, 2, 4, true);
+						}
+						
+					}
+				}
+				
+			}
+			case 5:
+			{
+				flEyeAng[0] = 0.0;
+				
+				new PropDuped = CreateEntityByName("prop_dynamic_override");
+				
+				if (g_bAttackWasMouse2[client])
+				{
+					if (iHitEntity > 0)
+					{
+						if (StrContains(classname, "player", false) != -1 || StrContains(classname, "obj_", false) != -1)
+						{
+							PrintCenterText(client, "You cannot duplicate this object!");
+						}
+						else
+						{
+							if (Build_IsEntityOwner(client, iHitEntity))
+							{
+								GetEntPropString(iHitEntity, Prop_Data, "m_ModelName", modelnamedupe[client], 256);
+								//GetEntPropString(iHitEntity, Prop_Data, "m_ModelName", modelnamedupe, 256);
+								GetEntPropVector(iHitEntity, Prop_Data, "m_angRotation", propeyeangle[client]);
+								//PrintToChatAll("Prop name copied %s", modelnamedupe);
+							}
+						}
+					}
+				}
+				else
+				{
+					if (StrContains(modelnamedupe[client], "models", false) == -1) {
+					}
+					else
+					{
+						
+						new currentTime = GetTime();
+						if (currentTime - LastUsed[client] < 1)
+							return Plugin_Handled;
+						
+						LastUsed[client] = currentTime;
+						
+						if (Build_RegisterEntityOwner(PropDuped, client))
+						{
+							DispatchKeyValueVector(PropDuped, "origin", flHitPos);
+							DispatchKeyValueVector(PropDuped, "angles", propeyeangle[client]);
+							
+							DispatchKeyValue(PropDuped, "model", modelnamedupe[client]);
+							SetEntProp(PropDuped, Prop_Data, "m_nSolidType", 6);
+							DispatchSpawn(PropDuped);
+							ActivateEntity(PropDuped);
+							
+							new PlayerSpawnCheck;
+							
+							while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+							{
+								if (Entity_InRange(PropDuped, PlayerSpawnCheck, 400.0))
+								{
+									PrintCenterText(client, "Prop is too near the spawn!");
+									Build_SetLimit(client, -1);
+									AcceptEntityInput(PropDuped, "kill");
+									
+								}
+							}
+							
+							//PrintToChatAll("Prop name pasted %s", modelnamedupe);
+						}
+						else
+						{
+							RemoveEdict(PropDuped);
+						}
+					}
+				}
+			}
+			case 6:
+			{
+				new alphatest[4];
+				flEyeAng[0] = 0.0;
+				
+				if (g_bAttackWasMouse2[client])
+				{
+					if (Build_IsEntityOwner(client, iHitEntity))
+					{
+						GetEntityRenderColor(iHitEntity, alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+						if (alphatest[3] < 255)
+						{
+							
+							alphatest[3] = alphatest[3] + 15;
+							SetEntityRenderMode(iHitEntity, RENDER_TRANSALPHA);
+							SetEntityRenderColor(iHitEntity, alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+							PrintToChatAll("%f, %f, %f, %f", alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+						}
+					}
+				}
+				else
+				{
+					if (Build_IsEntityOwner(client, iHitEntity))
+					{
+						GetEntityRenderColor(iHitEntity, alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+						if (alphatest[3] >= 1)
+						{
+							
+							alphatest[3] = alphatest[3] - 15;
+							SetEntityRenderMode(iHitEntity, RENDER_TRANSALPHA);
+							SetEntityRenderColor(iHitEntity, alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+							PrintToChatAll("%f, %f, %f, %f", alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+						}
+					}
+				}
+			}
+			case 7:
+			{
+				flEyeAng[0] = 0.0;
+				
+				if (g_bAttackWasMouse3[client])
+				{
+					if (g_iColorTool[client] < 6)
+						g_iColorTool[client]++;
+					else
+						g_iColorTool[client] = 1;
+					
+					switch (g_iColorTool[client])
+					{
+						case 1:
+						{
+							g_sCurrentColor[client] = "Red";
+							g_iCurrentColor[client][0] = 255;
+							g_iCurrentColor[client][1] = 0;
+							g_iCurrentColor[client][2] = 0;
+						}
+						case 2:
+						{
+							g_sCurrentColor[client] = "Orange";
+							g_iCurrentColor[client][0] = 255;
+							g_iCurrentColor[client][1] = 165;
+							g_iCurrentColor[client][2] = 0;
+						}
+						case 3:
+						{
+							g_sCurrentColor[client] = "Yellow";
+							g_iCurrentColor[client][0] = 255;
+							g_iCurrentColor[client][1] = 255;
+							g_iCurrentColor[client][2] = 0;
+						}
+						case 4:
+						{
+							g_sCurrentColor[client] = "Green";
+							g_iCurrentColor[client][0] = 0;
+							g_iCurrentColor[client][1] = 128;
+							g_iCurrentColor[client][2] = 0;
+						}
+						case 5:
+						{
+							g_sCurrentColor[client] = "Blue";
+							g_iCurrentColor[client][0] = 0;
+							g_iCurrentColor[client][1] = 0.0;
+							g_iCurrentColor[client][2] = 255;
+						}
+						case 6:
+						{
+							g_sCurrentColor[client] = "Violet";
+							g_iCurrentColor[client][0] = 238;
+							g_iCurrentColor[client][1] = 130;
+							g_iCurrentColor[client][2] = 238;
+						}
+					}
+					
+				}
+				else if (g_bAttackWasMouse2[client])
+				{
+					if (iHitEntity > 0) {
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							SetEntityRenderColor(iHitEntity, 255, 255, 255, _);
+						}
+					}
+				}
+				else
+				{
+					if (iHitEntity > 0) {
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							SetEntityRenderColor(iHitEntity, g_iCurrentColor[client][0], g_iCurrentColor[client][1], g_iCurrentColor[client][2], _);
+						}
+					}
+				}
+			}
+			case 8:
+			{
+				flEyeAng[0] = 0.0;
+				if (iHitEntity > 0) {
+					if (g_bAttackWasMouse2[client])
+					{
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							if (GetEntProp(iHitEntity, Prop_Send, "m_nSkin") > 0) {
+								SetEntProp(iHitEntity, Prop_Send, "m_nSkin", GetEntProp(iHitEntity, Prop_Send, "m_nSkin") - 1, 1);
+								Build_PrintToChat(client, "Skin %i has been applied to prop.", GetEntProp(iHitEntity, Prop_Send, "m_nSkin"));
+							}
+						}
+					}
+					else
+					{
+						
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							SetEntProp(iHitEntity, Prop_Send, "m_nSkin", GetEntProp(iHitEntity, Prop_Send, "m_nSkin") + 1, 1);
+							Build_PrintToChat(client, "Skin %i has been applied to prop.", GetEntProp(iHitEntity, Prop_Send, "m_nSkin"));
+						}
+					}
+				}
+			}
+			case 9:
+			{
+				flEyeAng[0] = 0.0;
+				if (g_bAttackWasMouse3[client])
+				{
+					if (g_iEffectTool[client] < 17)
+						g_iEffectTool[client]++;
+					else
+						g_iEffectTool[client] = 1;
+					
+					switch (g_iEffectTool[client])
+					{
+						case 1:g_fxEffectTool[client] = RENDERFX_NONE;
+						case 2:g_fxEffectTool[client] = RENDERFX_PULSE_SLOW;
+						case 3:g_fxEffectTool[client] = RENDERFX_PULSE_FAST;
+						case 4:g_fxEffectTool[client] = RENDERFX_PULSE_SLOW_WIDE;
+						case 5:g_fxEffectTool[client] = RENDERFX_PULSE_FAST_WIDE;
+						case 6:g_fxEffectTool[client] = RENDERFX_FADE_SLOW;
+						case 7:g_fxEffectTool[client] = RENDERFX_FADE_FAST;
+						case 8:g_fxEffectTool[client] = RENDERFX_SOLID_SLOW;
+						case 9:g_fxEffectTool[client] = RENDERFX_SOLID_FAST;
+						case 10:g_fxEffectTool[client] = RENDERFX_STROBE_SLOW;
+						case 11:g_fxEffectTool[client] = RENDERFX_STROBE_FAST;
+						case 12:g_fxEffectTool[client] = RENDERFX_STROBE_FASTER;
+						case 13:g_fxEffectTool[client] = RENDERFX_FLICKER_SLOW;
+						case 14:g_fxEffectTool[client] = RENDERFX_FLICKER_FAST;
+						case 15:g_fxEffectTool[client] = RENDERFX_NO_DISSIPATION;
+						case 16:g_fxEffectTool[client] = RENDERFX_DISTORT;
+						case 17:g_fxEffectTool[client] = RENDERFX_HOLOGRAM;
+						
+					}
+					
+				}
+				else if (g_bAttackWasMouse2[client])
+				{
+					if (iHitEntity > 0) {
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							SetEntityRenderFx(iHitEntity, RENDERFX_NONE);
+						}
+					}
+				}
+				else
+				{
+					if (iHitEntity > 0) {
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							SetEntityRenderFx(iHitEntity, g_fxEffectTool[client]);
+						}
+					}
+				}
+			}
+			case 10:
+			{
+				flEyeAng[0] = 0.0;
+				
+				if (g_bAttackWasMouse2[client])
+				{
+					if (iHitEntity > 0) {
+						if (Build_IsEntityOwner(client, iHitEntity))
+						{
+							FakeClientCommand(client, "sm_sdoor b");
+						}
+					}
+				}
+				else {
+					FakeClientCommand(client, "sm_sdoor 7");
+				}
+				//FakeClientCommand(client, "sm_sdoor 7");
+				
+			}
+			case 11:
+			{
+				flEyeAng[0] = 0.0;
+				
+				FakeClientCommand(client, "sm_simplelight");
+				
+			}
+			case 12:
+			{
+				flEyeAng[0] = 0.0;
+				
+				FakeClientCommand(client, "sm_propdoor");
+				
+			}
+		}
+		
+		new random = GetRandomInt(0, 1);
+		if (random == 1) {
+			EmitSoundToAll(SND_TOOLGUN_SHOOT2, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT2);
+		} else {
+			EmitSoundToAll(SND_TOOLGUN_SHOOT, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT);
+		}
+		
+		SetEntProp(weapon, Prop_Send, "m_iClip1", -1);
+	}
+}
+
+public bool:TraceRayDontHitEntity(entity, mask, any:data)
+{
+	if (entity == data)
+		return false;
+	
+	return true;
+}
+
+public OnWeaponSwitch(client, iWep)
+{
+	if (IsValidEntity(iWep))
+	{
+		new i = -1;
+		while ((i = FindEntityByClassname(i, "tf_wearable*")) != -1)
+		{
+			if (client == g_hWearableOwner[i])
+			{
+				new effects = GetEntProp(i, Prop_Send, "m_fEffects");
+				if (iWep == g_iTiedEntity[i])
+					SetEntProp(i, Prop_Send, "m_fEffects", effects & ~32);
+				else
+					SetEntProp(i, Prop_Send, "m_fEffects", effects |= 32);
+			}
+		}
+	}
+}
+
+public OnEntityDestroyed(ent)
+{
+	if (ent <= 0 || ent > 2048)
+		return;
+	
+	g_bIsToolgun[ent] = false;
+	g_iTiedEntity[ent] = 0;
+	g_hWearableOwner[ent] = 0;
+}
+
+stock EquipWearable(client, String:Mdl[], weapon = 0)
+{
+	new wearable = CreateWearable(client, Mdl);
+	if (wearable == -1)
+		return -1;
+	
+	g_hWearableOwner[wearable] = client;
+	
+	if (weapon > MaxClients)
+	{
+		g_iTiedEntity[wearable] = weapon;
+		
+		new effects = GetEntProp(wearable, Prop_Send, "m_fEffects");
+		if (weapon == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
+			SetEntProp(wearable, Prop_Send, "m_fEffects", effects & ~32);
+		else
+			SetEntProp(wearable, Prop_Send, "m_fEffects", effects |= 32);
+	}
+	return wearable;
+}
+
+stock CreateWearable(client, String:model[])
+{
+	new ent = CreateEntityByName("tf_wearable_vm");
+	SetEntProp(ent, Prop_Send, "m_nModelIndex", PrecacheModel(model));
+	SetEntProp(ent, Prop_Send, "m_fEffects", EF_BONEMERGE | EF_BONEMERGE_FASTCULL);
+	SetEntProp(ent, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+	SetEntProp(ent, Prop_Send, "m_usSolidFlags", 4);
+	SetEntProp(ent, Prop_Send, "m_CollisionGroup", 11);
+	DispatchSpawn(ent);
+	
+	SetVariantString("!activator");
+	ActivateEntity(ent);
+	
+	TF2_EquipWearable(client, ent);
+	return ent;
+}
+
+stock TF2_EquipWearable(client, entity)
+{
+	if (g_hSdkEquipWearable == INVALID_HANDLE)
+	{
+		new Handle:hGameConf = LoadGameConfigFile("tf2items.randomizer");
+		if (hGameConf == INVALID_HANDLE)
+		{
+			SetFailState("Couldn't load SDK functions. Could not locate tf2items.randomizer.txt in the gamedata folder.");
+			return;
+		}
+		StartPrepSDKCall(SDKCall_Player);
+		PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CTFPlayer::EquipWearable");
+		PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+		g_hSdkEquipWearable = EndPrepSDKCall();
+		if (g_hSdkEquipWearable == INVALID_HANDLE)
+		{
+			SetFailState("Could not initialize call for CTFPlayer::EquipWearable");
+			CloseHandle(hGameConf);
+			return;
+		}
+	}
+	if (g_hSdkEquipWearable != INVALID_HANDLE)SDKCall(g_hSdkEquipWearable, client, entity);
+}
+
+public Action:Command_TF2SBHideHud(client, args)
+{
+	new hidehudnumber = GetEntProp(client, Prop_Send, "m_iHideHUD");
+	
+	if (hidehudnumber == 2048)
+	{
+		Client_SetHideHud(client, HIDEHUD_ALL);
+		Client_SetDrawViewModel(client, false);
+	}
+	else
+	{
+		Client_SetHideHud(client, HIDEHUD_BONUS_PROGRESS);
+		Client_SetDrawViewModel(client, true);
+	}
+	return Plugin_Handled;
+} 
