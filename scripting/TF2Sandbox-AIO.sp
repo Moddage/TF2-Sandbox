@@ -408,7 +408,6 @@ public OnPluginStart() {
 	// Init thing for commands!
 	RegAdminCmd("sm_build", Command_BuildMenu, 0);
 	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
-	RegAdminCmd("sm_t", Command_ToolGun, 0);
 	RegAdminCmd("sm_g", Command_PhysGun, 0);
 	RegAdminCmd("sm_resupply", Command_Resupply, 0);
 	
@@ -3624,7 +3623,7 @@ public EquipMenu(Handle:menu, MenuAction:action, param1, param2)
 		}
 		if (StrEqual(item, "toolgun"))
 		{
-			FakeClientCommand(param1, "sm_t");
+			FakeClientCommand(param1, "sm_toolgun");
 		}
 		/*if (StrEqual(item, "portalgun"))
 		{
@@ -5194,7 +5193,7 @@ public Action:TF2_CalcIsAttackCritical(client, weapon, String:weaponname[], &boo
 							alphatest[3] = alphatest[3] + 15;
 							SetEntityRenderMode(iHitEntity, RENDER_TRANSALPHA);
 							SetEntityRenderColor(iHitEntity, alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
-							PrintToChatAll("%f, %f, %f, %f", alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+							//PrintToChatAll("%i, %i, %i, %i", alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
 						}
 					}
 				}
@@ -5209,7 +5208,7 @@ public Action:TF2_CalcIsAttackCritical(client, weapon, String:weaponname[], &boo
 							alphatest[3] = alphatest[3] - 15;
 							SetEntityRenderMode(iHitEntity, RENDER_TRANSALPHA);
 							SetEntityRenderColor(iHitEntity, alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
-							PrintToChatAll("%f, %f, %f, %f", alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
+							//PrintToChatAll("%i, %i, %i, %i", alphatest[0], alphatest[1], alphatest[2], alphatest[3]);
 						}
 					}
 				}
