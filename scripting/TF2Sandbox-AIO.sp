@@ -36,9 +36,9 @@
 
 //#pragma newdecls required
 
-#define MDL_TOOLGUN			"models/weapons/v_crossbow.mdl"
-#define SND_TOOLGUN_SHOOT	"weapons/357/357_fire2.wav"
-#define SND_TOOLGUN_SHOOT2	"weapons/357/357_fire3.wav"
+#define MDL_TOOLGUN			"models/weapons/v_357.mdl"
+#define SND_TOOLGUN_SHOOT	"weapons/airboat/airboat_gun_lastshot1.wav"
+#define SND_TOOLGUN_SHOOT2	"weapons/airboat/airboat_gun_lastshot2.wav"
 #define SND_TOOLGUN_SELECT	"buttons/button15.wav"
 
 // Toolgun
@@ -48,17 +48,17 @@
 new Handle:g_hSdkEquipWearable;
 new g_CollisionOffset;
 
-new int:g_hWearableOwner[2049];
-new int:g_iTiedEntity[2049];
+new g_hWearableOwner[2049];
+new g_iTiedEntity[2049];
 new bool:g_bIsToolgun[2049];
 new String:g_sCurrentColor[MAXPLAYERS + 1][32];
 new RenderFx:g_fxEffectTool[MAXPLAYERS + 1];
-new int:g_iCurrentColor[MAXPLAYERS + 1][3];
+new g_iCurrentColor[MAXPLAYERS + 1][3];
 new LastUsed[MAXPLAYERS + 1];
 
-new int:g_iTool[MAXPLAYERS + 1];
-new int:g_iColorTool[MAXPLAYERS + 1];
-new int:g_iEffectTool[MAXPLAYERS + 1];
+new g_iTool[MAXPLAYERS + 1];
+new g_iColorTool[MAXPLAYERS + 1];
+new g_iEffectTool[MAXPLAYERS + 1];
 new bool:g_bPlayerPressedReload[MAXPLAYERS + 1];
 new bool:g_bAttackWasMouse2[MAXPLAYERS + 1];
 new bool:g_bAttackWasMouse3[MAXPLAYERS + 1];
@@ -99,7 +99,7 @@ new Float:g_fDelRangePoint3[MAXPLAYERS][3];
 new String:g_szDelRangeStatus[MAXPLAYERS][8];
 new bool:g_szDelRangeCancel[MAXPLAYERS] =  { false, ... };
 
-new int:g_RememberGodmode[MAXPLAYERS];
+new g_RememberGodmode[MAXPLAYERS];
 
 new ColorBlue[4] =  {
 	50, 
@@ -937,7 +937,7 @@ public OnClientDisconnect(Client) {
 }
 
 public OnClientConnected(Client) {
-	g_RememberGodmode[Client] = 1.0;
+	g_RememberGodmode[Client] = 1;
 }
 
 public Action:Timer_Disconnect(Handle:Timer, Handle:hPack) {
@@ -2285,13 +2285,13 @@ public Action:Command_ChangeGodMode(Client, Args) {
 	if (GetEntProp(Client, Prop_Data, "m_takedamage") == 0)
 	{
 		Build_PrintToChat(Client, "God Mode OFF");
-		g_RememberGodmode[Client] = 0.0;
+		g_RememberGodmode[Client] = 0;
 		SetEntProp(Client, Prop_Data, "m_takedamage", 2, 1);
 	}
 	else
 	{
 		Build_PrintToChat(Client, "God Mode ON");
-		g_RememberGodmode[Client] = 1.0;
+		g_RememberGodmode[Client] = 1;
 		SetEntProp(Client, Prop_Data, "m_takedamage", 0, 1);
 	}
 	
@@ -2496,7 +2496,10 @@ public EntityInfo(Client, iTarget) {
 	}
 	
 	new String:szModel[128], String:szOwner[32], String:szPropString[256];
-	new String:szGetThoseString = GetEntPropString(iTarget, Prop_Data, "m_iName", szPropString, sizeof(szPropString));
+	
+	new String:szGetThoseString[512];
+	GetEntPropString(iTarget, Prop_Data, "m_iName", szPropString, sizeof(szPropString));
+	
 	new iOwner = Build_ReturnEntityOwner(iTarget);
 	GetEntPropString(iTarget, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
 	if (iOwner != -1)
@@ -3484,7 +3487,7 @@ public CondMenu(Handle:menu, MenuAction:action, param1, param2)
 		if (StrEqual(item, "fly"))
 		{
 			if (!Build_AllowToUse(param1) || Build_IsBlacklisted(param1) || !Build_IsClientValid(param1, param1, true) || !Build_AllowFly(param1))
-				return Plugin_Handled;
+				return 0;
 			
 			if (GetEntityMoveType(param1) != MOVETYPE_FLY)
 			{
@@ -3974,7 +3977,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 			switch (g_iTool[client])
 			{
 				case 1:ShowHudText(client, -1, "TOOL:\nREMOVER\n\n\n\n[PRIMARY] Remove\n[SECONDARY] Remove\n[RELOAD] Switch Tools");
-				case 2:ShowHudText(client, -1, "TOOL:\nEXPLODE TARGET\n\n\n\n[PRIMARY] BOOM!\n[RELOAD] Switch Tools");
+				case 2:ShowHudText(client, -1, "TOOL:\nALLAHU AKBAR!!\n\n\n\n[PRIMARY] BOOM!\n[RELOAD] Switch Tools");
 				case 3:ShowHudText(client, -1, "TOOL:\nRESIZE TOOL\n\n\n\n[PRIMARY] Larger\n[SECONDARY] Smaller\n[RELOAD] Switch Tools");
 				case 4:ShowHudText(client, -1, "TOOL:\nNO COLLIDE\n\n\n\n[PRIMARY] No Collide\n[SECONDARY] Collide\n[RELOAD] Switch Tools");
 				case 5:ShowHudText(client, -1, "TOOL:\nDUPLICATOR\n\n\n\n[PRIMARY] Paste\n[SECONDARY] Copy\n[RELOAD] Switch Tools");
@@ -4237,7 +4240,7 @@ grab(client) {
 	
 	targetentity = GetClientAimEntity3(client, distancetoentity, resultpos);
 	
-	if (targetentity != -1) {
+	if (targetentity != -1 && !IsValidClient(targetentity)) {
 		
 		new PropTypeCheck:entityType = entityTypeCheck(targetentity);
 		
@@ -4545,13 +4548,13 @@ hold(client) {
 	physgunaimfinal[1] = fOrigin[1] - aimorigin[1];
 	physgunaimfinal[2] = fOrigin[2] - aimorigin[2];
 	
-	if (grabentitytype[client] == PROP_PHYSBOX || grabentitytype[client] == PROP_RAGDOLL) {
+	if (grabentitytype[client] == PROP_PHYSBOX || grabentitytype[client] == PROP_RAGDOLL || grabentitytype[client] == PROP_PLAYER) {
 		
 		SetEntPropEnt(grabbedentref[client], Prop_Data, "m_hPhysicsAttacker", client);
 		SetEntPropFloat(grabbedentref[client], Prop_Data, "m_flLastPhysicsInfluenceTime", GetGameTime());
 		
 	}
-	if (grabentitytype[client] == PROP_RIGID || grabentitytype[client] == PROP_PLAYER) {
+	if (grabentitytype[client] == PROP_RIGID) {
 		
 		decl Float:eyeposfornow[3];
 		GetClientEyePosition(client, eyeposfornow);
@@ -4574,11 +4577,11 @@ PropTypeCheck:entityTypeCheck(entity) {
 	new String:classname[64];
 	GetEdictClassname(entity, classname, 64);
 	
-	if (StrContains(classname, "prop_dynamic", false) != -1 || StrContains(classname, "prop_physics", false) != -1 || StrContains(classname, "tf_dropped_weapon", false) != -1 || StrContains(classname, "prop_door_", false) != -1 || StrContains(classname, "tf_ammo_pack", false) != -1 || StrContains(classname, "prop_physics_multiplayer", false) != -1) {
+	if (StrContains(classname, "prop_dynamic", false) != -1 || StrContains(classname, "tf_dropped_weapon", false) != -1 || StrContains(classname, "prop_door_", false) != -1 || StrContains(classname, "tf_ammo_pack", false) != -1 || StrContains(classname, "prop_physics_multiplayer", false) != -1) {
 		
 		return PROP_RIGID;
 	}
-	else if (StrContains(classname, "func_physbox", false) != -1) {
+	else if (StrContains(classname, "func_physbox", false) != -1 || StrContains(classname, "prop_physics", false) != -1) {
 		
 		return PROP_PHYSBOX;
 		
@@ -4669,7 +4672,7 @@ bool:clientcangrab(client) {
 		
 		
 	}
-	
+	return false;
 }
 
 bool:clientisgrabbingvalidobject(client) {
@@ -4761,7 +4764,7 @@ public Action:ClientRemoveAll(client, args)
 		return Plugin_Handled;
 	}
 	
-	decl String:arg[65], String:cmd[192];
+	decl String:arg[65], cmd[192];
 	GetCmdArg(1, arg, sizeof(arg));
 	
 	decl String:target_name[MAX_TARGET_LENGTH];
@@ -4937,8 +4940,6 @@ stock GiveToolgun(client)
 		TF2Items_SetLevel(hWeapon, 100);
 		TF2Items_SetQuality(hWeapon, 5);
 		
-		TF2Items_SetAttribute(hWeapon, 0, 305, 1.0); //Fire tracer rounds
-		TF2Items_SetAttribute(hWeapon, 1, 731, 1.0); //Allow inspect
 		TF2Items_SetAttribute(hWeapon, 2, 106, 0.0); //Accuracy bonus
 		TF2Items_SetAttribute(hWeapon, 3, 1, 0.0); //Damage Penalty
 		TF2Items_SetNumAttributes(hWeapon, 4);
@@ -4973,7 +4974,7 @@ stock GiveToolgun(client)
 		
 		SetEntProp(weapon, Prop_Send, "m_iWorldModelIndex", PrecacheModel(MDL_TOOLGUN));
 		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel(MDL_TOOLGUN), _, 0);
-		SetEntProp(weapon, Prop_Send, "m_nSequence", 3);
+		SetEntProp(weapon, Prop_Send, "m_nSequence", 2);
 		
 		SetEntityRenderMode(weapon, RENDER_NONE);
 		SetEntityRenderColor(weapon, 0, 0, 0, 0);
@@ -4990,9 +4991,10 @@ public Action:TF2_CalcIsAttackCritical(client, weapon, String:weaponname[], &boo
 {
 	if (IsValidEntity(weapon) && g_bIsToolgun[weapon])
 	{
-		new Float:flStartPos[3], flEyeAng[3], flHitPos[3];
+		new Float:flStartPos[3], Float:flEyeAng[3], Float:flHitPos[3], Float:fOrigin[3];
 		GetClientEyePosition(client, flStartPos);
 		GetClientEyeAngles(client, flEyeAng);
+		GetClientAbsOrigin(client, fOrigin);
 		
 		new Handle:hTrace = TR_TraceRayFilterEx(flStartPos, flEyeAng, MASK_SHOT, RayType_Infinite, TraceRayDontHitEntity, client);
 		TR_GetEndPosition(flHitPos, hTrace);
@@ -5032,12 +5034,23 @@ public Action:TF2_CalcIsAttackCritical(client, weapon, String:weaponname[], &boo
 			}
 			case 2:
 			{
-				if (iHitEntity > 0)
+				if (Build_IsAdmin(client))
 				{
-					if (iHitEntity <= MaxClients && IsClientInGame(iHitEntity) && IsPlayerAlive(iHitEntity))
-						FakeClientCommandEx(iHitEntity, "explode");
-					else
-						AcceptEntityInput(iHitEntity, "explode");
+					new explosion = CreateEntityByName("env_explosion");
+					DispatchKeyValue(explosion, "magnitude", "10000");
+					DispatchKeyValue(explosion, "radius_override", "256");
+					DispatchKeyValue(explosion, "rendermode", "5");
+					DispatchKeyValue(explosion, "spawnflags", "0");
+					TeleportEntity(explosion, flHitPos, NULL_VECTOR, NULL_VECTOR);
+					DispatchSpawn(explosion);
+					ActivateEntity(explosion);
+					AcceptEntityInput(explosion, "Explode");
+					
+					AcceptEntityInput(explosion, "Kill");
+				}
+				else
+				{
+					PrintCenterText(client, "This tool now is only for admin due to abusive reasons.");
 				}
 			}
 			case 3:
@@ -5258,7 +5271,7 @@ public Action:TF2_CalcIsAttackCritical(client, weapon, String:weaponname[], &boo
 						{
 							g_sCurrentColor[client] = "Blue";
 							g_iCurrentColor[client][0] = 0;
-							g_iCurrentColor[client][1] = 0.0;
+							g_iCurrentColor[client][1] = 0;
 							g_iCurrentColor[client][2] = 255;
 						}
 						case 6:
@@ -5404,15 +5417,28 @@ public Action:TF2_CalcIsAttackCritical(client, weapon, String:weaponname[], &boo
 		
 		new random = GetRandomInt(0, 1);
 		if (random == 1) {
-			EmitSoundToAll(SND_TOOLGUN_SHOOT2, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
-			EmitSoundToClient(client, SND_TOOLGUN_SHOOT2);
+			EmitAmbientSound(SND_TOOLGUN_SHOOT2, flHitPos, iHitEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			EmitAmbientSound(SND_TOOLGUN_SHOOT2, fOrigin, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			/*EmitSoundToAll(SND_TOOLGUN_SHOOT2, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT2);*/
 		} else {
-			EmitSoundToAll(SND_TOOLGUN_SHOOT, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
-			EmitSoundToClient(client, SND_TOOLGUN_SHOOT);
+			/*EmitSoundToAll(SND_TOOLGUN_SHOOT, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT);*/
+			
+			EmitAmbientSound(SND_TOOLGUN_SHOOT, flHitPos, iHitEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			EmitAmbientSound(SND_TOOLGUN_SHOOT, fOrigin, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 		}
+		
+		TE_SetupBeamRingPoint(flHitPos, 10.0, 150.0, g_Beam, g_Halo, 0, 10, 0.6, 3.0, 0.5, ColorWhite, 20, 0);
+		TE_SendToAll();
+		TE_SetupBeamPoints(flHitPos, fOrigin, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
+		TE_SendToAll();
+		
+		
 		
 		SetEntProp(weapon, Prop_Send, "m_iClip1", -1);
 	}
+	return Plugin_Continue;
 }
 
 public bool:TraceRayDontHitEntity(entity, mask, any:data)
@@ -5529,4 +5555,12 @@ public Action:Command_TF2SBHideHud(client, args)
 		Client_SetDrawViewModel(client, true);
 	}
 	return Plugin_Handled;
+}
+
+stock bool:IsValidClient(client)
+{
+	if (client <= 0)return false;
+	if (client > MaxClients)return false;
+	if (!IsClientConnected(client))return false;
+	return IsClientInGame(client);
 } 

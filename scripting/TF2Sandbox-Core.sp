@@ -25,7 +25,6 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 
-#include <steamtools>
 #include <steamworks>
 
 #define DEBUG 
@@ -38,7 +37,6 @@
 
 #define MSGTAG "\x01[\x04TF2SB\x01]"
 
-new bool:steamtools = false;
 new bool:steamworks = false;
 
 new bool:g_bClientLang[MAXPLAYERS];
@@ -125,11 +123,6 @@ public OnLibraryAdded(const String:name[])
 		Updater_AddPlugin(UPDATE_URL);
 	}
 	
-	if (!strcmp(name, "SteamTools", false))
-	{
-		steamtools = true;
-	}
-	
 	if (!strcmp(name, "SteamWorks", false))
 	{
 		steamworks = true;
@@ -138,10 +131,6 @@ public OnLibraryAdded(const String:name[])
 
 public OnLibraryRemoved(const String:name[])
 {
-	if (!strcmp(name, "SteamTools", false))
-	{
-		steamtools = false;
-	}
 	
 	if (!strcmp(name, "SteamWorks", false))
 	{
@@ -161,14 +150,6 @@ public OnConfigsExecuted() {
 		if (steamworks)
 		{
 			SteamWorks_SetGameDescription(sBuffer);
-			steamtools = false;
-		}
-		#endif
-		#if defined _steamtools_included
-		if (steamtools)
-		{
-			Steam_SetGameDescription(sBuffer);
-			steamworks = false;
 		}
 		#endif
 	}
@@ -209,8 +190,6 @@ public OnPluginStart() {
 	HookConVarChange(g_hCvarServerLimit, Hook_CvarServerLimit);
 	
 	g_hCookieClientLang = RegClientCookie("cookie_BuildModClientLang", "TF2SB Client Language.", CookieAccess_Private);
-	
-	steamtools = LibraryExists("SteamTools");
 	
 	steamworks = LibraryExists("SteamWorks");
 	
