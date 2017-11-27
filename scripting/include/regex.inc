@@ -1,5 +1,5 @@
 /**
- * vim: set ts=4 :
+ * vim: set ts=4 sw=4 tw=99 noet :
  * =============================================================================
  * SourceMod (C)2004-2008 AlliedModders LLC.  All rights reserved.
  * =============================================================================
@@ -92,6 +92,43 @@ enum RegexError
 	REGEX_ERROR_BADLENGTH = -32,
 };
 
+// Regular expression objects are used to match or decompose strings based on
+// patterns.
+methodmap Regex < Handle
+{
+	// Compile a regular expression.
+	// 
+	// @param pattern		The regular expression pattern.
+	// @param flags			General flags for the regular expression.
+	// @param error			Error message encountered, if applicable.
+	// @param maxLen		Maximum string length of the error buffer.
+	// @param errcode		Regex type error code encountered, if applicable.
+	public native Regex(const char[] pattern, int flags = 0, char[] error="", int maxLen = 0, RegexError &errcode = REGEX_ERROR_NONE);
+
+	// Matches a string against a pre-compiled regular expression pattern.
+	// 
+	// @param str			The string to check.
+	// @param regex			Regex Handle from CompileRegex()
+	// @param ret			Error code, if applicable.
+	// @return				Number of substrings found or -1 on failure.
+	// 
+	// @note				Use the regex handle passed to this function to extract
+	// 						matches with GetRegexSubString().
+	public native int Match(const char[] str, RegexError &ret = REGEX_ERROR_NONE);
+
+	// Returns a matched substring from a regex handle.
+    //
+	// Substring ids start at 0 and end at substrings-1, where substrings is the
+	// number returned by Regex.Match.
+	//
+	// @param regex			The regex handle to extract data from.
+	// @param str_id		The index of the expression to get - starts at 0, and ends at substrings - 1.
+	// @param buffer		The buffer to set to the matching substring.
+	// @param maxlen		The maximum string length of the buffer.
+	// @return				True if a substring was found, False on fail/error
+	public native bool GetSubString(int str_id, char[] buffer, int maxlen);
+};
+
 /**
  * Precompile a regular expression.  Use this if you intend on using the 
  * same expression multiple times.  Pass the regex handle returned here to
@@ -104,7 +141,7 @@ enum RegexError
  * @param errcode		Regex type error code encountered, if applicable.
  * @return				Valid regex handle on success, INVALID_HANDLE on failure.
  */
-native Handle:CompileRegex(const String:pattern[], flags = 0, String:error[]="", maxLen = 0, &RegexError:errcode = REGEX_ERROR_NONE);
+native Regex CompileRegex(const char[] pattern, int flags = 0, char[] error="", int maxLen = 0, RegexError &errcode = REGEX_ERROR_NONE);
 
 /**
  * Matches a string against a pre-compiled regular expression pattern.
@@ -117,7 +154,7 @@ native Handle:CompileRegex(const String:pattern[], flags = 0, String:error[]="",
  * @note				Use the regex handle passed to this function to extract
  *						matches with GetRegexSubString().
  */
-native MatchRegex(Handle:regex, const String:str[], &RegexError:ret = REGEX_ERROR_NONE);
+native int MatchRegex(Handle regex, const char[] str, RegexError &ret = REGEX_ERROR_NONE);
 
 /**
  * Returns a matched substring from a regex handle.
@@ -130,7 +167,7 @@ native MatchRegex(Handle:regex, const String:str[], &RegexError:ret = REGEX_ERRO
  * @param maxlen		The maximum string length of the buffer.
  * @return				True if a substring was found, False on fail/error
  */
-native bool:GetRegexSubString(Handle:regex, str_id, String:buffer[], maxlen);
+native bool GetRegexSubString(Handle regex, int str_id, char[] buffer, int maxlen);
 
 /**
  * Matches a string against a regular expression pattern.
@@ -146,19 +183,15 @@ native bool:GetRegexSubString(Handle:regex, str_id, String:buffer[], maxlen);
  * @param maxLen		Maximum length of the error buffer.
  * @return				Number of substrings found or -1 on failure.
  */
-stock SimpleRegexMatch(const String:str[], const String:pattern[], flags = 0, String:error[]="", maxLen = 0)
+stock int SimpleRegexMatch(const char[] str, const char[] pattern, int flags = 0, char[] error="", int maxLen = 0)
 {
-	new Handle:regex = CompileRegex(pattern, flags, error, maxLen);
-	
-	if (regex == INVALID_HANDLE)
-	{
+	Regex regex = new Regex(pattern, flags, error, maxLen);
+	if (!regex)
 		return -1;	
-	}
 	
-	new substrings = MatchRegex(regex, str);
-	
-	CloseHandle(regex);
-	
+	int substrings = regex.Match(str);
+	delete regex;
+
 	return substrings;	
 }
 
@@ -169,7 +202,7 @@ stock SimpleRegexMatch(const String:str[], const String:pattern[], flags = 0, St
 /**
  * Do not edit below this line!
  */
-public Extension:__ext_regex = 
+public Extension __ext_regex = 
 {
 	name = "Regex Extension",
 	file = "regex.ext",
