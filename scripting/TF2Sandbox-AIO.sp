@@ -36,8 +36,6 @@
 #include "GravityGun/GravityGunsound.inc"
 #include "GravityGun/GravityGuncvars.inc"
 
-#pragma newdecls required
-
 #define MDL_TOOLGUN			"models/weapons/v_357.mdl"
 #define SND_TOOLGUN_SHOOT	"weapons/airboat/airboat_gun_lastshot1.wav"
 #define SND_TOOLGUN_SHOOT2	"weapons/airboat/airboat_gun_lastshot2.wav"
@@ -46,6 +44,22 @@
 // Toolgun
 #define EF_BONEMERGE			(1 << 0)
 #define EF_BONEMERGE_FASTCULL	(1 << 7)
+
+/* RIP new syntax PropTypeCheck change to int
+enum PropTypeCheck
+{
+	PROP_NONE = 0, 
+	PROP_RIGID = 1, 
+	PROP_PHYSBOX = 2, 
+	PROP_WEAPON = 3, 
+	PROP_TF2OBJ = 4,  //tf2 buildings
+	PROP_RAGDOLL = 5, 
+	PROP_TF2PROJ = 6,  //tf2 projectiles
+	PROP_PLAYER = 7
+};
+*/
+
+#pragma newdecls required
 
 Handle g_hSdkEquipWearable;
 int g_CollisionOffset;
@@ -164,7 +178,7 @@ char CopyableProps[][] =  {
 	"prop_physics_multiplayer", 
 	"prop_physics_override", 
 	"prop_physics_respawnable", 
-	"prop_ragdoll", 
+	"5", 
 	"func_physbox", 
 	"player"
 };
@@ -180,7 +194,7 @@ char EntityType[][] =  {
 	"prop_physics_multiplayer", 
 	"prop_physics_override", 
 	"prop_physics_respawnable", 
-	"prop_ragdoll", 
+	"5", 
 	"item_ammo_357", 
 	"item_ammo_357_large", 
 	"item_ammo_ar2", 
@@ -238,19 +252,6 @@ char DelClass[][] =  {
 	"gib"
 };
 
-enum PropTypeCheck {
-	
-	PROP_NONE = 0, 
-	PROP_RIGID = 1, 
-	PROP_PHYSBOX = 2, 
-	PROP_WEAPON = 3, 
-	PROP_TF2OBJ = 4,  //tf2 buildings
-	PROP_RAGDOLL = 5, 
-	PROP_TF2PROJ = 6,  //tf2 projectiles
-	PROP_PLAYER = 7
-	
-};
-
 //are they using grabber?
 //bool grabenabled[MAXPLAYERS + 1];
 
@@ -274,8 +275,8 @@ float nextactivetime[MAXPLAYERS + 1];
 bool entitygravitysave[MAXPLAYERS + 1];
 int entityownersave[MAXPLAYERS + 1] =  { INVALID_ENT_REFERENCE, ... };
 
-PropTypeCheck grabentitytype[MAXPLAYERS + 1];
-
+int grabentitytype[MAXPLAYERS + 1]; //PropTypeCheck 
+ 
 float grabpos[MAXPLAYERS + 1][3];
 
 Handle forwardOnClientGrabEntity = INVALID_HANDLE;
@@ -292,7 +293,7 @@ public Plugin myinfo =
 {
 	name = "TF2 Sandbox All In One Module", 
 	author = "Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, hjkwe654, BattlefieldDuck", 
-	description = "Everything in one module, isn't that cool?", 
+	description = "Everything in one module, isn't that cool? Yes", 
 	version = BUILDMOD_VER, 
 	url = "http://dtf2server.ddns.net"
 };
@@ -1016,9 +1017,9 @@ public Action Command_Copy(int client, int args)
 	}
 	
 	bool IsDoll = false;
-	if (StrEqual(szClass, "prop_ragdoll") || StrEqual(szClass, "player")) {
+	if (StrEqual(szClass, "5") || StrEqual(szClass, "player")) {
 		if (Build_IsAdmin(client, true)) {
-			g_iCopyTarget[client] = CreateEntityByName("prop_ragdoll");
+			g_iCopyTarget[client] = CreateEntityByName("5");
 			IsDoll = true;
 		} else {
 			Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to copy this prop!");
@@ -2117,12 +2118,12 @@ public Action Command_SpawnProp(int client, int args)
 		GetArrayString(g_hPropTypeArray, IndexInArray, szEntType, sizeof(szEntType));
 		
 		if (!Build_IsAdmin(client, true)) {
-			if (StrEqual(szPropName, "explosivecan") || StrEqual(szEntType, "prop_ragdoll")) {
+			if (StrEqual(szPropName, "explosivecan") || StrEqual(szEntType, "5")) {
 				Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to spawn this prop!");
 				return Plugin_Handled;
 			}
 		}
-		if (StrEqual(szEntType, "prop_ragdoll"))
+		if (StrEqual(szEntType, "5"))
 			bIsDoll = true;
 		
 		int iEntity = CreateEntityByName(szEntType);
@@ -2697,7 +2698,7 @@ public Action Command_Delete(int client, int args)
 				
 				int iOwner = Build_ReturnEntityOwner(iEntity);
 				if (iOwner != -1) {
-					if (StrEqual(szClass, "prop_ragdoll"))
+					if (StrEqual(szClass, "5"))
 						Build_SetLimit(iOwner, -1, true);
 					else
 						Build_SetLimit(iOwner, -1);
@@ -2722,7 +2723,7 @@ public Action Command_Delete(int client, int args)
 			DispatchKeyValue(iEntity, "targetname", "Del_Drop");
 		}
 		
-		if (StrEqual(szClass, "prop_ragdoll"))
+		if (StrEqual(szClass, "5"))
 			Build_SetLimit(client, -1, true);
 		else
 			Build_SetLimit(client, -1);
@@ -3008,7 +3009,7 @@ public Action Timer_DR(Handle timer, any client)
 					
 					int iOwner = Build_ReturnEntityOwner(iEntity);
 					if (iOwner != -1) {
-						if (StrEqual(szClass, "prop_ragdoll"))
+						if (StrEqual(szClass, "5"))
 							Build_SetLimit(iOwner, -1, true);
 						else
 							Build_SetLimit(iOwner, -1);
@@ -3146,7 +3147,7 @@ public Action Timer_DSfire(Handle timer, Handle hDataPack)
 				
 				int iOwner = Build_ReturnEntityOwner(iEntity);
 				if (iOwner != -1) {
-					if (StrEqual(szClass, "prop_ragdoll"))
+					if (StrEqual(szClass, "5"))
 						Build_SetLimit(iOwner, -1, true);
 					else
 						Build_SetLimit(iOwner, -1);
@@ -3302,7 +3303,7 @@ public Action Timer_DSfire2(Handle timer, Handle hDataPack)
 				}
 				int iOwner = Build_ReturnEntityOwner(iEntity);
 				if (iOwner != -1) {
-					if (StrEqual(szClass, "prop_ragdoll"))
+					if (StrEqual(szClass, "5"))
 						Build_SetLimit(iOwner, -1, true);
 					else
 						Build_SetLimit(iOwner, -1);
@@ -3965,7 +3966,7 @@ public int PropMenuPickup(Handle menu, MenuAction action, int param1, int param2
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
 {
-	if (IsPlayerAlive(client)) {
+	if (IsValidClient(client) && IsPlayerAlive(client)) {
 		
 		if (clientisgrabbingvalidobject(client)) {
 			
@@ -4022,7 +4023,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		}
 	}
 	
-	if (IsPlayerAlive(client))
+	if (IsValidClient(client) && IsPlayerAlive(client))
 	{
 		
 		int aw = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
@@ -4176,7 +4177,7 @@ public Action WeaponSwitchHook(int client, int entity)
 
 public void PreThinkHook(int client) 
 {
-	if (IsPlayerAlive(client)) 
+	if (IsValidClient(client) && IsPlayerAlive(client))
 	{
 		int buttons = GetClientButtons(client);
 		int clientteam = GetClientTeam(client);
@@ -4299,13 +4300,15 @@ void grab(int client)
 	
 	targetentity = GetClientAimEntity3(client, distancetoentity, resultpos);
 	
-	if (targetentity != -1 && !IsValidClient(targetentity)) {
+	if (IsValidEntity(targetentity) && !IsValidClient(targetentity)) 
+	{
+		int entityType = entityTypeCheck(targetentity); //PropTypeCheck 
 		
-		PropTypeCheck entityType = entityTypeCheck(targetentity);
-		
-		if (entityType && !IsPlayerAlive(GetEntPropEnt(targetentity, Prop_Send, "m_hOwnerEntity"))) {
-			
-			
+		//int Owner = -1;
+		//Owner = GetEntPropEnt(targetentity, Prop_Send, "m_hOwnerEntity");
+		if (entityType != 0 && IsValidClient(Build_ReturnEntityOwner(targetentity)))
+		{
+	
 			/*	//should we allow grab?
 				if(GetForwardFunctionCount(forwardOnClientGrabEntity) > 0){
 				
@@ -4324,23 +4327,17 @@ void grab(int client)
 					
 				}
 				*/
-			if (!clientcangrab(client))
-				
-			
-			return;
-			
-			
-			
-			
-			if (entityType == PROP_TF2OBJ && GetEntPropEnt(targetentity, Prop_Send, "m_hBuilder") != client)
+			if (!clientcangrab(client))	
+				return;
+
+			if (entityType == 4 && GetEntPropEnt(targetentity, Prop_Send, "m_hBuilder") != client)
 				return;
 			
 			grabentitytype[client] = entityType;
 			
-			if (entityType == PROP_RIGID) {
-				
+			if (entityType == 1) //PROP_RIGID
+			{
 				//SetEntProp(targetentity, Prop_Data, "m_bFirstCollisionAfterLaunch", false);
-				
 			}
 			
 			
@@ -4365,7 +4362,8 @@ void grab(int client)
 			
 			entitygravitysave[client] = Phys_IsGravityEnabled(targetentity);
 			
-			if (entityType != PROP_RIGID) {
+			if (entityType != 1) //PROP_RIGID
+			{
 				Phys_EnableGravity(targetentity, false);
 			}
 			
@@ -4424,9 +4422,9 @@ void emptyshoot(int client)
 	targetentity = GetClientAimEntity(client, distancetoentity);
 	if (targetentity != -1) {
 		
-		int PropTypeCheck:entityType = entityTypeCheck(targetentity);
+		int entityType = entityTypeCheck(targetentity); //PropTypeCheck 
 		
-		if (entityType && (distancetoentity <= GetConVarFloat(cvar_maxpulldistance)) && !IsPlayerAlive(GetEntPropEnt(targetentity, Prop_Send, "m_hOwnerEntity"))) {
+		if (entityType != 0 && (distancetoentity <= GetConVarFloat(cvar_maxpulldistance)) && !IsPlayerAlive(GetEntPropEnt(targetentity, Prop_Send, "m_hOwnerEntity"))) {
 			
 			if (GetForwardFunctionCount(forwardOnClientEmptyShootEntity) > 0) {
 				
@@ -4456,20 +4454,20 @@ void emptyshoot(int client)
 			//TeleportEntity(targetentity, NULL_VECTOR, NULL_VECTOR, NULL_VECTOR);
 			Phys_AddVelocity(targetentity, anglevector, ZeroSpeed);
 			
-			if (entityType == PROP_RIGID || entityType == PROP_PHYSBOX || entityType == PROP_RAGDOLL) {
+			if (entityType == 1 || entityType == 2 || entityType == 5) {
 				
 				SetEntPropEnt(targetentity, Prop_Data, "m_hPhysicsAttacker", client);
 				SetEntPropFloat(targetentity, Prop_Data, "m_flLastPhysicsInfluenceTime", GetGameTime());
 				
 			}
-			if (entityType == PROP_RIGID) {
+			if (entityType == 1) {
 				
 				//SetEntProp(targetentity, Prop_Data, "m_bThrownByPlayer", true);
 				
 				
 			}
 			
-			if (entityType != PROP_TF2OBJ)playsoundfromclient(client, SOUNDTYPE_GRAVITYGUN_PUNT);
+			if (entityType != 4)playsoundfromclient(client, SOUNDTYPE_GRAVITYGUN_PUNT);
 			
 		}
 		
@@ -4561,7 +4559,7 @@ void hold(int client)
 	{
 		if (Entity_InRange(grabbedentref[client], PlayerSpawnCheck, 400.0))
 		{
-			if (grabentitytype[client] != PROP_PLAYER)
+			if (grabentitytype[client] != 7)
 			{
 				Build_PrintToChat(client, "You're too near the spawn!");
 				Build_SetLimit(client, -1);
@@ -4575,7 +4573,7 @@ void hold(int client)
 	{
 		if (Entity_InRange(grabbedentref[client], !client, 400.0))
 		{
-			if (grabentitytype[client] != PROP_PLAYER)
+			if (grabentitytype[client] != 7)
 			{
 				Build_PrintToChat(client, "You're too near the spawn!");
 				Build_SetLimit(client, -1);
@@ -4585,12 +4583,12 @@ void hold(int client)
 		}
 	}
 	
-	if (grabentitytype[client] != PROP_RAGDOLL)
+	if (grabentitytype[client] != 5)
 	{
 		TeleportEntity(grabbedentref[client], NULL_VECTOR, playeranglerotate[client], NULL_VECTOR);
 	}
 	
-	if (grabentitytype[client] != PROP_RIGID)
+	if (grabentitytype[client] != 1)
 	{
 		Phys_SetVelocity(EntRefToEntIndex(grabbedentref[client]), vector, ZERO_VECTOR, true);
 	}
@@ -4605,13 +4603,13 @@ void hold(int client)
 	physgunaimfinal[1] = fOrigin[1] - aimorigin[1];
 	physgunaimfinal[2] = fOrigin[2] - aimorigin[2];
 	
-	if (grabentitytype[client] == PROP_PHYSBOX || grabentitytype[client] == PROP_RAGDOLL || grabentitytype[client] == PROP_PLAYER) {
+	if (grabentitytype[client] == 2 || grabentitytype[client] == 5 || grabentitytype[client] == 7) {
 		
 		SetEntPropEnt(grabbedentref[client], Prop_Data, "m_hPhysicsAttacker", client);
 		SetEntPropFloat(grabbedentref[client], Prop_Data, "m_flLastPhysicsInfluenceTime", GetGameTime());
 		
 	}
-	if (grabentitytype[client] == PROP_RIGID) {
+	if (grabentitytype[client] == 1) {
 		
 		float eyeposfornow[3];
 		GetClientEyePosition(client, eyeposfornow);
@@ -4629,43 +4627,43 @@ void hold(int client)
 	
 }
 
-PropTypeCheck entityTypeCheck(int entity)
+int entityTypeCheck(int entity) //PropTypeCheck
 {
 	char classname[64];
 	GetEdictClassname(entity, classname, 64);
 	
 	if (StrContains(classname, "prop_dynamic", false) != -1 || StrContains(classname, "tf_dropped_weapon", false) != -1 || StrContains(classname, "prop_door_", false) != -1 || StrContains(classname, "tf_ammo_pack", false) != -1 || StrContains(classname, "prop_physics_multiplayer", false) != -1) {
 		
-		return PROP_RIGID;
+		return 1;
 	}
 	else if (StrContains(classname, "func_physbox", false) != -1 || StrContains(classname, "prop_physics", false) != -1) {
 		
-		return PROP_PHYSBOX;
+		return 2;
 		
-	} else if (StrContains(classname, "prop_ragdoll", false) != -1) {
+	} else if (StrContains(classname, "5", false) != -1) {
 		
-		return PROP_RAGDOLL;
+		return 5;
 		
 	} else if (StrContains(classname, "weapon_", false) != -1) {
 		
-		return PROP_WEAPON;
+		return 3;
 		
 	} else if (StrContains(classname, "tf_projectile", false) != -1) {
 		
-		return PROP_TF2PROJ;
+		return 6;
 		
 	} else if (StrEqual(classname, "obj_sentrygun", false) || StrEqual(classname, "obj_dispenser", false)
 		 || StrEqual(classname, "obj_teleporter", false)) {
 		
-		return PROP_RIGID;	
+		return 1;	
 	}
 	else if (StrContains(classname, "player", false) != -1)
 	{
-		return PROP_PLAYER;
+		return 7;
 	}
 	else {
 		
-		return PROP_NONE;
+		return 0; //PROP_NONE
 		
 	}
 	
@@ -4689,7 +4687,9 @@ bool clientcanpull(int client)
 
 bool clientcangrab(int client) 
 {
-	
+	if(!IsValidClient(client))
+		return false;
+		
 	float now = GetGameTime();
 	
 	if (nextactivetime[client] <= now) {
@@ -4743,7 +4743,7 @@ public int Native_GetCurrntHeldEntity(Handle plugin, int args)
 	
 	int client = GetNativeCell(1);
 	
-	if (IsPlayerAlive(client)) {
+	if (IsValidClient(client) && IsPlayerAlive(client)) {
 		
 		return EntRefToEntIndex(grabbedentref[client]);
 		
@@ -4759,7 +4759,7 @@ public int Native_ForceDropHeldEntity(Handle plugin, int args)
 {
 	int client = GetNativeCell(1);
 	
-	if (IsPlayerAlive(client)) {
+	if (IsValidClient(client) && IsPlayerAlive(client)) {
 		
 		release(client);
 		return true;
@@ -4773,11 +4773,11 @@ public int Native_ForceGrabEntity(Handle plugin, int args)
 	int client = GetNativeCell(1);
 	int entity = GetNativeCell(2);
 	
-	if (IsPlayerAlive(client)) {
+	if (IsValidClient(client) && IsPlayerAlive(client)) {
 		
 		if (IsValidEdict(entity)) {
 			
-			PropTypeCheck entityType = entityTypeCheck(entity);
+			int entityType = entityTypeCheck(entity);
 			
 			if (entityType && !IsPlayerAlive(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"))) {
 				
