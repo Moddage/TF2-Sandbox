@@ -22,7 +22,9 @@ To Do:
 - Tool Gun
 - MSTR Sandbox Messages
 
-Main server:
+Main Steam Group:
 http://steamcommunity.com/groups/TF2Sandbox
+Official Sandbox server group:
+http://steamcommunity.com/groups/Moddage
 
 Pull requests are welcome!
