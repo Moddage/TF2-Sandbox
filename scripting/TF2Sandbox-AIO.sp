@@ -1034,6 +1034,10 @@ public Action Command_Copy(int client, int args)
 			return Plugin_Handled;
 		}
 		
+		if (StrEqual(szClass, "prop_dynamic")) {
+			szClass = "prop_dynamic_override";
+		}
+		
 		g_iCopyTarget[client] = CreateEntityByName(szClass);
 	}
 	
@@ -1041,24 +1045,32 @@ public Action Command_Copy(int client, int args)
 		if (bCanCopy) {
 			float fEntityOrigin[3], fEntityAngle[3];
 			char szModelName[128];
+			char szPropName[128];
 			char szColorR[20], szColorG[20], szColorB[20], szColor[3][128], szColor2[255];
 			
 			GetEntPropVector(iEntity, Prop_Data, "m_vecOrigin", fEntityOrigin);
 			GetEntPropVector(iEntity, Prop_Data, "m_angRotation", fEntityAngle);
 			GetEntPropString(iEntity, Prop_Data, "m_ModelName", szModelName, sizeof(szModelName));
+			GetEntPropString(iEntity, Prop_Data, "m_iName", szPropName, sizeof(szPropName));
 			if (StrEqual(szModelName, "models/props_c17/oildrum001_explosive.mdl") && !Build_IsAdmin(client, true)) {
 				Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to copy this prop!");
 				RemoveEdict(g_iCopyTarget[client]);
 				return Plugin_Handled;
 			}
 			DispatchKeyValue(g_iCopyTarget[client], "model", szModelName);
+			SetEntPropString(g_iCopyTarget[client], Prop_Data, "m_iName", szPropName);
 			
 			
 			GetEdictClassname(g_iCopyTarget[client], szClass, sizeof(szClass));
-			if (StrEqual(szClass, "prop_dynamic")) {
+			if (StrEqual(szClass, "prop_dynamic_override")) {
 				SetEntProp(g_iCopyTarget[client], Prop_Send, "m_nSolidType", 6);
 				SetEntProp(g_iCopyTarget[client], Prop_Data, "m_nSolidType", 6);
 			}
+			
+			/*if (StrEqual(szClass, "prop_dynamic_override")) {
+				SetEntProp(g_iCopyTarget[client], Prop_Send, "m_nSolidType", 6);
+				SetEntProp(g_iCopyTarget[client], Prop_Data, "m_nSolidType", 6);
+			}*/
 			
 			DispatchSpawn(g_iCopyTarget[client]);
 			TeleportEntity(g_iCopyTarget[client], fEntityOrigin, fEntityAngle, NULL_VECTOR);
@@ -5609,14 +5621,6 @@ public Action Command_TF2SBHideHud(int client, int args)
 	}
 	return Plugin_Handled;
 }
-
-stock bool IsValidClient(int client)
-{
-	if (client <= 0)return false;
-	if (client > MaxClients)return false;
-	if (!IsClientConnected(client))return false;
-	return IsClientInGame(client);
-} 
 
 stock int GetClientAimEntity3(int client, float &distancetoentity, float endpos[3]){
 

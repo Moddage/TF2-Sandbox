@@ -23,7 +23,7 @@
 #include <build>
 #include <build_stocks>
 #undef REQUIRE_PLUGIN
-#include <updater>
+//#include <updater>
 #include <steamworks>
 
 #define DEBUG 
@@ -123,7 +123,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnLibraryAdded(const char[] name)
 {
 	if (StrEqual(name, "updater"))
-		Updater_AddPlugin(UPDATE_URL);
+		//Updater_AddPlugin(UPDATE_URL);
 	
 	if (!strcmp(name, "SteamWorks", false))
 		steamworks = true;
@@ -158,7 +158,7 @@ public void OnPluginStart()
 	// Check for update status:
 	if (LibraryExists("updater"))
 	{
-		Updater_AddPlugin(UPDATE_URL);
+		//Updater_AddPlugin(UPDATE_URL);
 	}
 	
 	g_hCvarSwitch = CreateConVar("sbox_enable", "2", "Turn on, off TF2SB, or admins only.\n0 = Off\n1 = Admins Only\n2 = Enabled for everyone", 0, true, 0.0, true, 2.0);
@@ -166,7 +166,7 @@ public void OnPluginStart()
 	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly to noclip or not?", 0, true, 0.0, true, 1.0);
 	g_hCvarClPropLimit = CreateConVar("sbox_maxpropsperplayer", "120", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("sbox_maxragdolls", "10", "Player doll spawn limit.", 0, true, 0.0);
-	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit.\nDO NOT CHANGE THIS UNLESS YOU KNOW WHAT ARE YOU DOING.\nIf you're looking for changing props limit for player, check out 'sbox_maxpropsperplayer'.'", 0, true, 0.0, true, 0.0);
+	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit.\nDO NOT CHANGE THIS UNLESS YOU KNOW WHAT ARE YOU DOING.\nIf you're looking for changing props limit for player, check out 'sbox_maxpropsperplayer'.'", 0, true, 0.0);
 	g_hCvarServerTag = CreateConVar("sbox_tag", "1", "Enable 'tf2sb' tag", 0, true, 1.0);
 	g_hCvarGameDesc = CreateConVar("sbox_gamedesc", "1", "Change game name to 'TF2 Sandbox Version'?", 0, true, 1.0);
 	RegAdminCmd("sm_version", Command_Version, 0, "Show TF2SB Core version");
