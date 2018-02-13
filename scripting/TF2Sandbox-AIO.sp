@@ -1877,7 +1877,7 @@ public Action Command_SpawnDoor(int client, int args)
 	char szModel[128];
 	
 	if (StrEqual(szType[0], "1") || StrEqual(szType[0], "2") || StrEqual(szType[0], "3") || StrEqual(szType[0], "4") || StrEqual(szType[0], "5") || StrEqual(szType[0], "6") || StrEqual(szType[0], "7")) {
-		int Obj_Door = CreateEntityByName("prop_dynamic");
+		int Obj_Door = CreateEntityByName("prop_dynamic_override");
 		
 		switch (szType[0]) {
 			case '1': szModel = "models/props_c17/door01_left.mdl";
