@@ -16,7 +16,7 @@
 */
 
 #pragma semicolon 1
-
+ 
 #include <clientprefs>
 #include <sourcemod>
 #include <sdktools>
