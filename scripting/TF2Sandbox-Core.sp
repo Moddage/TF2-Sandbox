@@ -217,7 +217,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 public Action DisplayHud(Handle timer)
 {
-	SetHudTextParams(-1.0, 0.0, 1.0, 0, 255, 255, 255, 0, 1.0, 0.1, 0.2);
+	SetHudTextParams(-1.0, 0.0, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 	for(int i = 1; i <= MAXPLAYERS; i++) if (Build_IsClientValid(i, i))
 	{
 		ShowHudText(i, -1, "Type !build. This is a WORK IN PROGRESS gamemode!\n\nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);

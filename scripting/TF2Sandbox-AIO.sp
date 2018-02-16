@@ -456,7 +456,10 @@ public void OnPluginStart()
 	SetMenuTitle(g_hEquipMenu, "TF2SB - Equip...");
 	
 	AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun");
+	AddMenuItem(g_hEquipMenu, "physgunv2", "Physics Gun V2");
 	AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
+	AddMenuItem(g_hEquipMenu, "physgunv2", "-------------------");
+	AddMenuItem(g_hEquipMenu, "physgunv2", "Mưa trôi cả bầu trời nắng");
 	//	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
 	
 	SetMenuExitBackButton(g_hEquipMenu, true);
@@ -777,12 +780,10 @@ public void OnPluginStart()
 	StrCat(buffer, sizeof(buffer), "Coders: Danct12 and DaRkWoRlD\n");
 	StrCat(buffer, sizeof(buffer), "\n");
 	StrCat(buffer, sizeof(buffer), "greenteaf0718 and hjkwe654 for the original BuildMod\n");
-	StrCat(buffer, sizeof(buffer), "FlaminSarge and javalia for the GravityGun Mod\n");
+	StrCat(buffer, sizeof(buffer), "FlaminSarge and javalia for the GravityGun Mod (which creates the PhysGun v1)\n");
 	StrCat(buffer, sizeof(buffer), "Pelipoika for the ToolGun Source Code\n");
 	StrCat(buffer, sizeof(buffer), "TESTBOT#7 for making official group profile\n");
-	StrCat(buffer, sizeof(buffer), "iKiroZz for inspiring me to make this plugin\n");
-	StrCat(buffer, sizeof(buffer), "SomePanns for helping me fixing some problems at some parts\n");
-	StrCat(buffer, sizeof(buffer), "BattlefieldDuck for tweaking and making addons for TF2SB\n");
+	StrCat(buffer, sizeof(buffer), "BattlefieldDuck for tweaking and making addons for TF2SB, also the creator of PhysGun v2\n");
 	StrCat(buffer, sizeof(buffer), "Garry Newman for creating Garry's Mod, without him, this wouldn't exist\n");
 	StrCat(buffer, sizeof(buffer), "AlliedModders because without this, SourceMod wouldn't exist and this also wouldn't\n \n");
 	
@@ -794,8 +795,8 @@ public void OnPluginStart()
 	Format(buffer, sizeof(buffer), "Credits\n \n");
 	StrCat(buffer, sizeof(buffer), "Thanks to these people for tested this mod at the beginning:\n");
 	StrCat(buffer, sizeof(buffer), "periodicJudgement\n");
-	StrCat(buffer, sizeof(buffer), "Lord Lecubon | ᵁᶳᴸ\n");
-	StrCat(buffer, sizeof(buffer), "iKiroZz | Titan.TF\n");
+	StrCat(buffer, sizeof(buffer), "Lecubon\n");
+	StrCat(buffer, sizeof(buffer), "iKiroZz\n");
 	StrCat(buffer, sizeof(buffer), "Lazyneer\n");
 	StrCat(buffer, sizeof(buffer), "Cecil\n");
 	StrCat(buffer, sizeof(buffer), "TESTBOT#7\n");
@@ -1880,13 +1881,13 @@ public Action Command_SpawnDoor(int client, int args)
 		int Obj_Door = CreateEntityByName("prop_dynamic_override");
 		
 		switch (szType[0]) {
-			case '1': szModel = "models/props_c17/door01_left.mdl";
-			case '2': szModel = "models/combine_gate_citizen.mdl";
-			case '3': szModel = "models/combine_gate_Vehicle.mdl";
-			case '4': szModel = "models/props_doors/doorKLab01.mdl";
+			case '1': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '2': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '3': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '4': szModel = "models/props_lab/blastdoor001c.mdl";
 			case '5': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '6': szModel = "models/props_lab/elevatordoor.mdl";
-			case '7': szModel = "models/props_lab/RavenDoor.mdl";
+			case '6': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '7': szModel = "models/props_lab/blastdoor001c.mdl";
 		}
 		
 		DispatchKeyValue(Obj_Door, "model", szModel);
@@ -2518,7 +2519,7 @@ public void EntityInfo(int client, int iTarget)
 		}
 	}
 	
-	SetHudTextParams(0.015, 0.08, 0.1, 255, 255, 255, 255, 0, 6.0, 0.1, 0.2);
+	SetHudTextParams(0.015, 0.08, 0.01, 255, 255, 255, 255, 0, 6.0, 0.1, 0.2);
 	if (IsPlayer(iTarget)) {
 		int iHealth = GetClientHealth(iTarget);
 		if (iHealth <= 1)
@@ -2559,7 +2560,7 @@ public void EntityInfo(int client, int iTarget)
 	}
 	
 	if (Phys_IsPhysicsObject(iTarget)) {
-		SetHudTextParams(-1.0, 0.6, 0.1, 255, 0, 0, 255);
+		SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
 		if (StrContains(szClass, "prop_door_", false) == 0) {
 			ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 		}
@@ -3693,11 +3694,11 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "physgun"))
 		{
-			Build_PrintToChat(param1, "You have a Physics Gun!");
-			Build_PrintToChat(param1, "Your Physics Gun will be in the secondary slot.");
-			TF2Items_GiveWeapon(param1, 99999);
-			int weapon = GetPlayerWeaponSlot(param1, 1);
-			SetEntPropEnt(param1, Prop_Send, "m_hActiveWeapon", weapon);
+			FakeClientCommand(param1, "sm_g");
+		}
+		if (StrEqual(item, "physgunv2"))
+		{
+			FakeClientCommand(param1, "sm_p");
 		}
 		if (StrEqual(item, "toolgun"))
 		{
@@ -4047,7 +4048,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			SetEntProp(ent, Prop_Data, "m_nModelIndex", PrecacheModel(MDL_TOOLGUN), 2);
 			SetEntProp(ent, Prop_Send, "m_nSequence", 1);
 			
-			SetHudTextParams(0.0, 0.25, 0.1, 150, 150, 0, 150, 0, 0.0, 0.0, 0.0);
+			SetHudTextParams(0.0, 0.25, 0.01, 150, 150, 0, 150, 0, 0.0, 0.0, 0.0);
 			
 			switch (g_iTool[client])
 			{
@@ -4259,8 +4260,12 @@ public void PreThinkHook(int client)
 			{
 				//trying to grab something
 				if (teamcanusegravitygun(clientteam) && g_bIsWeaponGrabber[client]) {
-					grab(client);
-					
+					int iWeapon = GetPlayerWeaponSlot(client, 1);
+					int iActiveWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+					if(IsValidEntity(iWeapon) && iWeapon == iActiveWeapon && GetEntProp(iActiveWeapon, Prop_Send, "m_iEntityQuality") == 6)
+					{
+						grab(client);
+					}
 				}
 			}
 			
@@ -4368,7 +4373,7 @@ void grab(int client)
 			}
 			
 			SetEntPropEnt(targetentity, Prop_Send, "m_hOwnerEntity", client);
-			grabbedentref[client] = EntIndexToEntRef(targetentity);
+			grabbedentref[client] = targetentity; //EntIndexToEntRef(targetentity);
 			
 			//SetEntPropEnt(targetentity, Prop_Data, "m_hParent", client);
 			
@@ -4564,38 +4569,6 @@ void hold(int client)
 	resultangle2[0] = resultangle[client][0] + playeranglerotate[client][0];
 	resultangle2[1] = resultangle[client][1] + playeranglerotate[client][1];
 	resultangle2[2] = resultangle[client][2] + playeranglerotate[client][2];
-	
-	
-	int PlayerSpawnCheck;
-	
-	
-	while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
-	{
-		if (Entity_InRange(grabbedentref[client], PlayerSpawnCheck, 400.0))
-		{
-			if (grabentitytype[client] != 7)
-			{
-				Build_PrintToChat(client, "You're too near the spawn!");
-				Build_SetLimit(client, -1);
-				AcceptEntityInput(grabbedentref[client], "kill");
-				//Build_RegisterEntityOwner(grabbedentref[client], -1);
-			}
-		}
-	}
-	
-	if (grabbedentref[client] != client)
-	{
-		if (Entity_InRange(grabbedentref[client], !client, 400.0))
-		{
-			if (grabentitytype[client] != 7)
-			{
-				Build_PrintToChat(client, "You're too near the spawn!");
-				Build_SetLimit(client, -1);
-				AcceptEntityInput(grabbedentref[client], "kill");
-				//Build_RegisterEntityOwner(grabbedentref[client], -1);
-			}
-		}
-	}
 	
 	if (grabentitytype[client] != 5)
 	{
