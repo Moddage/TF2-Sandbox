@@ -409,7 +409,8 @@ public void OnPluginStart()
 	// Init thing for commands!
 	RegAdminCmd("sm_build", Command_BuildMenu, 0);
 	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
-	RegAdminCmd("sm_g", Command_PhysGun, 0);
+	RegAdminCmd("sm_g2", Command_PhysGun, 0);
+	RegAdminCmd("sm_g", Command_PhysGunNew, 0);
 	RegAdminCmd("sm_resupply", Command_Resupply, 0);
 	
 	// Build Helper (placeholder)
@@ -3412,11 +3413,16 @@ public Action Command_ToolGun(int client, int args)
 
 public Action Command_PhysGun(int client, int args)
 {
-	Build_PrintToChat(client, "You have a Physics Gun!");
+	Build_PrintToChat(client, "You have a Physics Gun v1!");
 	Build_PrintToChat(client, "Your Physics Gun will be in the secondary slot.");
 	TF2Items_GiveWeapon(client, 99999);
 	int weapon = GetPlayerWeaponSlot(client, 1);
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+}
+
+public Action Command_PhysGunNew(int client, int args)
+{
+	FakeClientCommand(client, "sm_p");
 }
 
 public Action Command_Resupply(int client, int args)
@@ -3685,7 +3691,7 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "physgun"))
 		{
-			FakeClientCommand(param1, "sm_g");
+			FakeClientCommand(param1, "sm_g2");
 		}
 		if (StrEqual(item, "physgunv2"))
 		{
