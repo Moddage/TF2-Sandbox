@@ -9,7 +9,7 @@
 
 #include <regex>
 
-#define MORE_COLORS_VERSION		"1.9.1pl2"
+#define MORE_COLORS_VERSION		"1.9.1"
 #define MAX_MESSAGE_LENGTH		256
 #define MAX_BUFFER_LENGTH		(MAX_MESSAGE_LENGTH * 4)
 
@@ -23,8 +23,6 @@
 new bool:CSkipList[MAXPLAYERS + 1];
 new Handle:CTrie;
 new CTeamColors[][] = {{0xCCCCCC, 0x4D7942, 0xFF4040}}; // Multi-dimensional array for games that don't support SayText2. First index is the game index (as defined by the GAME_ defines), second index is team. 0 = spectator, 1 = team1, 2 = team2
-
-static Handle:sm_show_activity = INVALID_HANDLE;
 
 /**
  * Prints a message to a specific client in the chat area.
@@ -382,348 +380,75 @@ stock CReplyToCommandEx(client, author, const String:message[], any:...) {
 }
 
 /**
- * Displays usage of an admin command to users depending on the 
- * setting of the sm_show_activity cvar.  
- *
- * This version does not display a message to the originating client 
- * if used from chat triggers or menus.  If manual replies are used 
- * for these cases, then this function will suffice.  Otherwise, 
- * CShowActivity2() is slightly more useful.
- * Supports color tags.
- *
- * @param client		Client index doing the action, or 0 for server.
- * @param format		Formatting rules.
- * @param ...			Variable number of format parameters.
+ * Shows admin activity with colors
+ * 
+ * @param client		Client performing an action
+ * @param message		Message (formatting rules)
  * @noreturn
- * @error
  */
-stock CShowActivity(client, const String:format[], any:...)
-{
-	if (sm_show_activity == INVALID_HANDLE)
-		sm_show_activity = FindConVar("sm_show_activity");
-		
-	new String:tag[] = "[SM] ";
-	
-	decl String:szBuffer[MAX_MESSAGE_LENGTH];
-	//decl String:szCMessage[MAX_MESSAGE_LENGTH];
-	new value = GetConVarInt(sm_show_activity);
-	new ReplySource:replyto = GetCmdReplySource();
-	
-	new String:name[MAX_NAME_LENGTH] = "Console";
-	new String:sign[MAX_NAME_LENGTH] = "ADMIN";
-	new bool:display_in_chat = false;
-	if (client != 0)
-	{
-		if (client < 0 || client > MaxClients || !IsClientConnected(client))
-			ThrowError("Client index %d is invalid", client);
-		
-		GetClientName(client, name, sizeof(name));
-		new AdminId:id = GetUserAdmin(client);
-		if (id == INVALID_ADMIN_ID
-			|| !GetAdminFlag(id, Admin_Generic, Access_Effective))
-		{
-			sign = "PLAYER";
-		}
-		
-		/* Display the message to the client? */
-		if (replyto == SM_REPLY_TO_CONSOLE)
-		{
-			SetGlobalTransTarget(client);
-			VFormat(szBuffer, sizeof(szBuffer), format, 3);
-			
-			CRemoveTags(szBuffer, sizeof(szBuffer));
-			PrintToConsole(client, "%s%s\n", tag, szBuffer);
-			display_in_chat = true;
-		}
+stock CShowActivity(client, const String:message[], any:...) {
+	CCheckTrie();
+	if(client < 0 || client > MaxClients) {
+		ThrowError("Invalid client index %d", client);
 	}
-	else
-	{
-		SetGlobalTransTarget(LANG_SERVER);
-		VFormat(szBuffer, sizeof(szBuffer), format, 3);
-		
-		CRemoveTags(szBuffer, sizeof(szBuffer));
-		PrintToServer("%s%s\n", tag, szBuffer);
+	if(client != 0 && !IsClientInGame(client)) {
+		ThrowError("Client %d is not in game", client);
 	}
-	
-	if (!value)
-	{
-		return 1;
-	}
-	
-	for (new i = 1; i <= MaxClients; i++)
-	{
-		if (!IsClientInGame(i)
-			|| IsFakeClient(i)
-			|| (display_in_chat && i == client))
-		{
-			continue;
-		}
-		new AdminId:id = GetUserAdmin(i);
-		SetGlobalTransTarget(i);
-		if (id == INVALID_ADMIN_ID
-			|| !GetAdminFlag(id, Admin_Generic, Access_Effective))
-		{
-			/* Treat this as a normal user. */
-			if ((value & 1) | (value & 2))
-			{
-				new String:newsign[MAX_NAME_LENGTH];
-				newsign = sign;
-				if ((value & 2) || (i == client))
-				{
-					newsign = name;
-				}
-				VFormat(szBuffer, sizeof(szBuffer), format, 3);
-				
-				CPrintToChatEx(i, client, "%s%s: %s", tag, newsign, szBuffer);
-			}
-		}
-		else
-		{
-			/* Treat this as an admin user */
-			new bool:is_root = GetAdminFlag(id, Admin_Root, Access_Effective);
-			if ((value & 4)
-				|| (value & 8)
-				|| ((value & 16) && is_root))
-			{
-				new String:newsign[MAX_NAME_LENGTH];
-				newsign = sign;
-				if ((value & 8) || ((value & 16) && is_root) || (i == client))
-				{
-					newsign = name;
-				}
-				VFormat(szBuffer, sizeof(szBuffer), format, 3);
-				
-				CPrintToChatEx(i, client, "%s%s: %s", tag, newsign, szBuffer);
-			}
-		}
-	}
-	
-	return 1;
+	decl String:buffer[MAX_BUFFER_LENGTH], String:buffer2[MAX_BUFFER_LENGTH];
+	Format(buffer, sizeof(buffer), "\x01%s", message);
+	VFormat(buffer2, sizeof(buffer2), buffer, 3);
+	CReplaceColorCodes(buffer2);
+	ShowActivity(client, "%s", buffer2);
 }
 
 /**
- * Same as CShowActivity(), except the tag parameter is used instead of "[SM] " (note that you must supply any spacing).
- * Supports color tags.
- *
- * @param client		Client index doing the action, or 0 for server.
- * @param tags			Tag to display with.
- * @param format		Formatting rules.
- * @param ...			Variable number of format parameters.
+ * Shows admin activity with colors
+ * 
+ * @param client		Client performing an action
+ * @param tag			Tag to prepend to the message (color tags supported)
+ * @param message		Message (formatting rules)
  * @noreturn
- * @error
  */
-stock CShowActivityEx(client, const String:tag[], const String:format[], any:...)
-{
-	if (sm_show_activity == INVALID_HANDLE)
-		sm_show_activity = FindConVar("sm_show_activity");
-		
-	decl String:szBuffer[MAX_MESSAGE_LENGTH];
-	//decl String:szCMessage[MAX_MESSAGE_LENGTH];
-	new value = GetConVarInt(sm_show_activity);
-	new ReplySource:replyto = GetCmdReplySource();
-	
-	new String:name[MAX_NAME_LENGTH] = "Console";
-	new String:sign[MAX_NAME_LENGTH] = "ADMIN";
-	new bool:display_in_chat = false;
-	if (client != 0)
-	{
-		if (client < 0 || client > MaxClients || !IsClientConnected(client))
-			ThrowError("Client index %d is invalid", client);
-		
-		GetClientName(client, name, sizeof(name));
-		new AdminId:id = GetUserAdmin(client);
-		if (id == INVALID_ADMIN_ID
-			|| !GetAdminFlag(id, Admin_Generic, Access_Effective))
-		{
-			sign = "PLAYER";
-		}
-		
-		/* Display the message to the client? */
-		if (replyto == SM_REPLY_TO_CONSOLE)
-		{
-			SetGlobalTransTarget(client);
-			VFormat(szBuffer, sizeof(szBuffer), format, 4);
-			
-			CRemoveTags(szBuffer, sizeof(szBuffer));
-			PrintToConsole(client, "%s%s\n", tag, szBuffer);
-			display_in_chat = true;
-		}
+stock CShowActivityEx(client, const String:tag[], const String:message[], any:...) {
+	CCheckTrie();
+	if(client < 0 || client > MaxClients) {
+		ThrowError("Invalid client index %d", client);
 	}
-	else
-	{
-		SetGlobalTransTarget(LANG_SERVER);
-		VFormat(szBuffer, sizeof(szBuffer), format, 4);
-		
-		CRemoveTags(szBuffer, sizeof(szBuffer));
-		PrintToServer("%s%s\n", tag, szBuffer);
+	if(client != 0 && !IsClientInGame(client)) {
+		ThrowError("Client %d is not in game", client);
 	}
-	
-	if (!value)
-	{
-		return 1;
-	}
-	
-	for (new i = 1; i <= MaxClients; i++)
-	{
-		if (!IsClientInGame(i)
-			|| IsFakeClient(i)
-			|| (display_in_chat && i == client))
-		{
-			continue;
-		}
-		new AdminId:id = GetUserAdmin(i);
-		SetGlobalTransTarget(i);
-		if (id == INVALID_ADMIN_ID
-			|| !GetAdminFlag(id, Admin_Generic, Access_Effective))
-		{
-			/* Treat this as a normal user. */
-			if ((value & 1) | (value & 2))
-			{
-				new String:newsign[MAX_NAME_LENGTH];
-				newsign = sign;
-				if ((value & 2) || (i == client))
-				{
-					newsign = name;
-				}
-				VFormat(szBuffer, sizeof(szBuffer), format, 4);
-				
-				CPrintToChatEx(i, client, "%s%s: %s", tag, newsign, szBuffer);
-			}
-		}
-		else
-		{
-			/* Treat this as an admin user */
-			new bool:is_root = GetAdminFlag(id, Admin_Root, Access_Effective);
-			if ((value & 4)
-				|| (value & 8)
-				|| ((value & 16) && is_root))
-			{
-				new String:newsign[MAX_NAME_LENGTH];
-				newsign = sign;
-				if ((value & 8) || ((value & 16) && is_root) || (i == client))
-				{
-					newsign = name;
-				}
-				VFormat(szBuffer, sizeof(szBuffer), format, 4);
-				
-				CPrintToChatEx(i, client, "%s%s: %s", tag, newsign, szBuffer);
-			}
-		}
-	}
-	
-	return 1;
+	decl String:buffer[MAX_BUFFER_LENGTH], String:buffer2[MAX_BUFFER_LENGTH];
+	Format(buffer, sizeof(buffer), "\x01%s", message);
+	VFormat(buffer2, sizeof(buffer2), buffer, 4);
+	CReplaceColorCodes(buffer2);
+	strcopy(buffer, sizeof(buffer), tag);
+	CReplaceColorCodes(buffer);
+	ShowActivityEx(client, tag, "%s", buffer2);
 }
 
 /**
- * Displays usage of an admin command to users depending on the setting of the sm_show_activity cvar.
- * All users receive a message in their chat text, except for the originating client, 
- * who receives the message based on the current ReplySource.
- * Supports color tags.
- *
- * @param client		Client index doing the action, or 0 for server.
- * @param tags			Tag to prepend to the message.
- * @param format		Formatting rules.
- * @param ...			Variable number of format parameters.
+ * Shows admin activity with colors
+ * 
+ * @param client		Client performing an action
+ * @param tag			Tag to prepend to the message (color tags supported)
+ * @param message		Message (formatting rules)
  * @noreturn
- * @error
  */
-stock CShowActivity2(client, const String:tag[], const String:format[], any:...)
-{
-	if (sm_show_activity == INVALID_HANDLE)
-		sm_show_activity = FindConVar("sm_show_activity");
-	
-	decl String:szBuffer[MAX_MESSAGE_LENGTH];
-	//decl String:szCMessage[MAX_MESSAGE_LENGTH];
-	new value = GetConVarInt(sm_show_activity);
-	//new ReplySource:replyto = GetCmdReplySource();
-	
-	new String:name[MAX_NAME_LENGTH] = "Console";
-	new String:sign[MAX_NAME_LENGTH] = "ADMIN";
-	if (client != 0)
-	{
-		if (client < 0 || client > MaxClients || !IsClientConnected(client))
-			ThrowError("Client index %d is invalid", client);
-		
-		GetClientName(client, name, sizeof(name));
-		new AdminId:id = GetUserAdmin(client);
-		if (id == INVALID_ADMIN_ID
-		|| !GetAdminFlag(id, Admin_Generic, Access_Effective))
-		{
-			sign = "PLAYER";
-		}
-		
-		SetGlobalTransTarget(client);
-		VFormat(szBuffer, sizeof(szBuffer), format, 4);
-		
-		/* We don't display directly to the console because the chat text 
-		 * simply gets added to the console, so we don't want it to print 
-		 * twice.
-		 */
-		CPrintToChatEx(client, client, "%s%s", tag, szBuffer);
+stock CShowActivity2(client, const String:tag[], const String:message[], any:...) {
+	CCheckTrie();
+	if(client < 0 || client > MaxClients) {
+		ThrowError("Invalid client index %d", client);
 	}
-	else
-	{
-		SetGlobalTransTarget(LANG_SERVER);
-		VFormat(szBuffer, sizeof(szBuffer), format, 4);
-		
-		CRemoveTags(szBuffer, sizeof(szBuffer));
-		PrintToServer("%s%s\n", tag, szBuffer);
+	if(client != 0 && !IsClientInGame(client)) {
+		ThrowError("Client %d is not in game", client);
 	}
-	
-	if (!value)
-	{
-		return 1;
-	}
-	
-	for (new i = 1; i <= MaxClients; i++)
-	{
-		if (!IsClientInGame(i)
-		|| IsFakeClient(i)
-		|| i == client)
-		{
-			continue;
-		}
-		new AdminId:id = GetUserAdmin(i);
-		SetGlobalTransTarget(i);
-		if (id == INVALID_ADMIN_ID
-		|| !GetAdminFlag(id, Admin_Generic, Access_Effective))
-		{
-			/* Treat this as a normal user. */
-			if ((value & 1) | (value & 2))
-			{
-				new String:newsign[MAX_NAME_LENGTH];
-				newsign = sign;
-				if ((value & 2))
-				{
-					newsign = name;
-				}
-				VFormat(szBuffer, sizeof(szBuffer), format, 4);
-				
-				CPrintToChatEx(i, client, "%s%s: %s", tag, newsign, szBuffer);
-			}
-		}
-		else
-		{
-			/* Treat this as an admin user */
-			new bool:is_root = GetAdminFlag(id, Admin_Root, Access_Effective);
-			if ((value & 4)
-			|| (value & 8)
-			|| ((value & 16) && is_root))
-			{
-				new String:newsign[MAX_NAME_LENGTH];
-				newsign = sign;
-				if ((value & 8) || ((value & 16) && is_root))
-				{
-					newsign = name;
-				}
-				VFormat(szBuffer, sizeof(szBuffer), format, 4);
-				
-				CPrintToChatEx(i, client, "%s%s: %s", tag, newsign, szBuffer);
-			}
-		}
-	}
-	
-	return 1;	
+	decl String:buffer[MAX_BUFFER_LENGTH], String:buffer2[MAX_BUFFER_LENGTH];
+	Format(buffer, sizeof(buffer), "\x01%s", message);
+	VFormat(buffer2, sizeof(buffer2), buffer, 4);
+	CReplaceColorCodes(buffer2);
+	strcopy(buffer, sizeof(buffer), tag);
+	CReplaceColorCodes(buffer);
+	ShowActivity2(client, buffer, "%s", buffer2);
 }
 
 /**
@@ -795,13 +520,11 @@ stock Handle:InitColorTrie() {
 	SetTrieValue(hTrie, "collectors", 0xAA0000); // same as Collector's item quality in TF2
 	SetTrieValue(hTrie, "common", 0xB0C3D9); // same as Common item rarity in Dota 2
 	SetTrieValue(hTrie, "community", 0x70B04A); // same as Community item quality in TF2
-	SetTrieValue(hTrie, "completed", 0x8650AC); // same as Unusual quality in TF2
 	SetTrieValue(hTrie, "coral", 0xFF7F50);
 	SetTrieValue(hTrie, "cornflowerblue", 0x6495ED);
 	SetTrieValue(hTrie, "cornsilk", 0xFFF8DC);
 	SetTrieValue(hTrie, "corrupted", 0xA32C2E); // same as Corrupted item quality in Dota 2
 	SetTrieValue(hTrie, "crimson", 0xDC143C);
-	SetTrieValue(hTrie, "customized", 0x00FF00);
 	SetTrieValue(hTrie, "cyan", 0x00FFFF);
 	SetTrieValue(hTrie, "darkblue", 0x00008B);
 	SetTrieValue(hTrie, "darkcyan", 0x008B8B);
@@ -824,7 +547,6 @@ stock Handle:InitColorTrie() {
 	SetTrieValue(hTrie, "darkviolet", 0x9400D3);
 	SetTrieValue(hTrie, "deeppink", 0xFF1493);
 	SetTrieValue(hTrie, "deepskyblue", 0x00BFFF);
-	SetTrieValue(hTrie, "developer", 0xA50F79); // same as Valve item quality in TF2
 	SetTrieValue(hTrie, "dimgray", 0x696969);
 	SetTrieValue(hTrie, "dimgrey", 0x696969);
 	SetTrieValue(hTrie, "dodgerblue", 0x1E90FF);
@@ -873,7 +595,7 @@ stock Handle:InitColorTrie() {
 	SetTrieValue(hTrie, "lightslategrey", 0x778899);
 	SetTrieValue(hTrie, "lightsteelblue", 0xB0C4DE);
 	SetTrieValue(hTrie, "lightyellow", 0xFFFFE0);
-	SetTrieValue(hTrie, "lime", 0x00FF00);	// same as customized in TF2
+	SetTrieValue(hTrie, "lime", 0x00FF00);
 	SetTrieValue(hTrie, "limegreen", 0x32CD32);
 	SetTrieValue(hTrie, "linen", 0xFAF0E6);
 	SetTrieValue(hTrie, "magenta", 0xFF00FF);
@@ -913,10 +635,6 @@ stock Handle:InitColorTrie() {
 	SetTrieValue(hTrie, "powderblue", 0xB0E0E6);
 	SetTrieValue(hTrie, "purple", 0x800080);
 	SetTrieValue(hTrie, "rare", 0x4B69FF); // same as Rare item rarity in Dota 2
-	SetTrieValue(hTrie, "rarity1", 0x4B69FF); // same as Rare item rarity in Dota 2
-	SetTrieValue(hTrie, "rarity2", 0x8D834B); // same as Rarity2 item in TF2
-	SetTrieValue(hTrie, "rarity3", 0x70550F); // same as Rarity3 item in TF2
-	SetTrieValue(hTrie, "rarity4", 0x70550F); // same as Rarity3 item in TF2
 	SetTrieValue(hTrie, "red", 0xFF4040); // same as RED/Terrorist team color
 	SetTrieValue(hTrie, "rosybrown", 0xBC8F8F);
 	SetTrieValue(hTrie, "royalblue", 0x4169E1);

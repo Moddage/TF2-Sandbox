@@ -522,7 +522,7 @@ stock sendFadeMsg(client, duration, holdtime, fadeflag, r, g, b, a){
 
 //쉐이크 유저메시지 함수의 상수
 enum ShakeCommand_t{
-	// I'm very lazy to fix'
+	
 	/*SHAKE_START = 0,		// Starts the screen shake for all players within the radius.
 	SHAKE_STOP,				// Stops the screen shake for all players within the radius.
 	SHAKE_AMPLITUDE,		// Modifies the amplitude of an active screen shake for all players within the radius.
@@ -809,7 +809,7 @@ stock SetClientButtons(client, buttons){
 	
 }
 
-stock bool:getTraceResult(const Float:pos[3], const Float:angle[3], const Float:maxtracedistance, &resultent, Float:resultvecpos[3], Float:resultvecnormal[3], TraceEntityFilter:function, filter){
+stock bool:getTraceResult(const Float:pos[3], const Float:angle[3], const Float:maxtracedistance, &resultent, Float:resultvecpos[3], Float:resultvecnormal[3], TraceEntityFilter, filter){
 
 	new Handle:traceresulthandle = INVALID_HANDLE;
 	
@@ -854,7 +854,7 @@ stock bool:getTraceResult(const Float:pos[3], const Float:angle[3], const Float:
 }
 
 //살아있는 클라이언트의 에임방향으로부터 일정 거리 떨어진 곳을 구해서 돌려준다
-stock bool:getClientAimPosition(client, Float:maxtracedistance, Float:resultvecpos[3], Float:resultvecnormal[3], TraceEntityFilter:function, filter){
+stock bool:getClientAimPosition(client, Float:maxtracedistance, Float:resultvecpos[3], Float:resultvecnormal[3], TraceEntityFilter, filter){
 	
 	decl Float:cleyepos[3], Float:cleyeangle[3], Float:eyeanglevector[3];
 	GetClientEyePosition(client, cleyepos); 

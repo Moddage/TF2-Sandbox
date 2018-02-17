@@ -13,7 +13,7 @@
  * @return				True if the attribute was added successfully, false if entity does not have m_AttributeList.
  * @error				Invalid entity index or attribute name passed.
  */
-native bool TF2Attrib_SetByName(int iEntity, char[] strAttrib, float flValue);
+native bool:TF2Attrib_SetByName(iEntity, String:strAttrib[], Float:flValue);
 
 /**
  * Sets an attribute's value on an entity, adding it if it isn't on the entity.
@@ -25,7 +25,7 @@ native bool TF2Attrib_SetByName(int iEntity, char[] strAttrib, float flValue);
  * @return				True if the attribute was added successfully, false if entity does not have m_AttributeList.
  * @error				Invalid entity index or attribute name passed.
  */
-native bool TF2Attrib_SetByDefIndex(int iEntity, int iDefIndex, float flValue);
+native bool:TF2Attrib_SetByDefIndex(iEntity, iDefIndex, Float:flValue);
 
 /**
  * Returns the address of an attribute on an entity.
@@ -36,7 +36,7 @@ native bool TF2Attrib_SetByDefIndex(int iEntity, int iDefIndex, float flValue);
  * @return				Address of the attribute on the entity, or Address_Null if the attribute does not exist on the entity.
  * @error				Invalid entity index or attribute name passed.
  */
-native Address TF2Attrib_GetByName(int iEntity, char[] strAttrib);
+native Address:TF2Attrib_GetByName(iEntity, String:strAttrib[]);
 
 /**
  * Returns the address of an attribute (by attribute index) on an entity.
@@ -47,7 +47,7 @@ native Address TF2Attrib_GetByName(int iEntity, char[] strAttrib);
  * @return				Address of the attribute on the entity, or Address_Null if the attribute does not exist on the entity.
  * @error				Invalid entity index or attribute index passed.
  */
-native Address TF2Attrib_GetByDefIndex(int iEntity, int iDefIndex);
+native Address:TF2Attrib_GetByDefIndex(iEntity, iDefIndex);
 
 /**
  * Removes an attribute from an entity.
@@ -58,7 +58,7 @@ native Address TF2Attrib_GetByDefIndex(int iEntity, int iDefIndex);
  * @return				True if the SDKCall was made, false if entity had invalid address or m_AttributeList missing.
  * @error				Invalid entity index or attribute name passed.
  */
-native bool TF2Attrib_RemoveByName(int iEntity, char[] strAttrib);
+native bool:TF2Attrib_RemoveByName(iEntity, String:strAttrib[]);
 
 /**
  * Removes an attribute from an entity.
@@ -69,7 +69,7 @@ native bool TF2Attrib_RemoveByName(int iEntity, char[] strAttrib);
  * @return				True if the SDKCall was made, false if entity had invalid address or m_AttributeList missing.
  * @error				Invalid entity index or attribute index passed.
  */
-native bool TF2Attrib_RemoveByDefIndex(int iEntity, int iDefIndex);
+native bool:TF2Attrib_RemoveByDefIndex(iEntity, iDefIndex);
 
 /**
  * Removes all attributes from an entity.
@@ -79,11 +79,13 @@ native bool TF2Attrib_RemoveByDefIndex(int iEntity, int iDefIndex);
  * @return				True if the SDKCall was made, false if entity had invalid address or m_AttributeList missing.
  * @error				Invalid entity index passed.
  */
-native bool TF2Attrib_RemoveAll(int iEntity);
+native bool:TF2Attrib_RemoveAll(iEntity);
 
 /**
+ * WARNING: Currently silently fails because I haven't tested it and I don't want it crashing.
+ *
  * Clears and presumably rebuilds the attribute cache for an entity, 'refreshing' attributes.
- * Call this after making changes to an attribute with any of the TF2Attrib_Set*(Address pAttrib, arg) natives below.
+ * Call this after making changes to an attribute with any of the TF2Attrib_Set*(Address:pAttrib, arg) natives below.
  * You may also need to call this on the entity's m_hOwnerEntity if it is a weapon or wearable.
  * You do NOT need to call this after calls to TF2Attrib_SetByName, TF2Attrib_Remove, and TF2Attrib_RemoveAll.
  *
@@ -92,7 +94,7 @@ native bool TF2Attrib_RemoveAll(int iEntity);
  * @return				True if the SDKCall was made, false if entity had invalid address or m_AttributeList missing.
  * @error				Invalid entity index passed.
  */
-native bool TF2Attrib_ClearCache(int iEntity);
+native bool:TF2Attrib_ClearCache(iEntity);
 
 /**
  * Sets the value of m_iAttributeDefinitionIndex (the attribute ID) on an attribute.
@@ -104,7 +106,7 @@ native bool TF2Attrib_ClearCache(int iEntity);
  *
  * @noreturn
  */
-native void TF2Attrib_SetDefIndex(Address pAttrib, int iDefIndex);
+native TF2Attrib_SetDefIndex(Address:pAttrib, iDefIndex);
 
 /**
  * Returns the value of m_iAttributeDefinitionIndex (the attribute ID) on an attribute.
@@ -113,7 +115,7 @@ native void TF2Attrib_SetDefIndex(Address pAttrib, int iDefIndex);
  *
  * @return				The integer value of m_iAttributeDefinitionIndex on the attribute.
  */
-native int TF2Attrib_GetDefIndex(Address pAttrib);
+native TF2Attrib_GetDefIndex(Address:pAttrib);
 
 /**
  * Sets the value of m_flValue on an attribute.
@@ -123,7 +125,7 @@ native int TF2Attrib_GetDefIndex(Address pAttrib);
  *
  * @noreturn
  */
-native void TF2Attrib_SetValue(Address pAttrib, float flValue);
+native TF2Attrib_SetValue(Address:pAttrib, Float:flValue);
 
 /**
  * Returns the value of m_flValue on an attribute.
@@ -132,7 +134,7 @@ native void TF2Attrib_SetValue(Address pAttrib, float flValue);
  *
  * @return				The floating point value of m_flValue on the attribute.
  */
-native float TF2Attrib_GetValue(Address pAttrib);
+native Float:TF2Attrib_GetValue(Address:pAttrib);
 
 /**
  * Sets the value of m_nRefundableCurrency on an attribute.
@@ -142,7 +144,7 @@ native float TF2Attrib_GetValue(Address pAttrib);
  *
  * @noreturn
  */
-native void TF2Attrib_SetRefundableCurrency(Address pAttrib, int nCurrency);
+native TF2Attrib_SetRefundableCurrency(Address:pAttrib, nCurrency);
 
 /**
  * Returns the value of m_nRefundableCurrency on an attribute.
@@ -151,10 +153,10 @@ native void TF2Attrib_SetRefundableCurrency(Address pAttrib, int nCurrency);
  *
  * @return				The (unsigned) integer value of m_nRefundableCurrency on the attribute.
  */
-native int TF2Attrib_GetRefundableCurrency(Address pAttrib);
+native TF2Attrib_GetRefundableCurrency(Address:pAttrib);
 
 /**
- * Returns an array containing the attributes (as indices) present on an entity.
+ * Returns the value of m_nRefundableCurrency on an attribute.
  *
  * @param iEntity		Entity index to get attribute list from. Must have m_AttributeList.
  * @param iDefIndices	Array (max size 16) of attribute definition indices found on the entity.
@@ -162,53 +164,68 @@ native int TF2Attrib_GetRefundableCurrency(Address pAttrib);
  * @return				The number of attributes found on the entity's attribute list, or -1 if some error happened.
  * @error				Invalid entity index passed.
  */
-native int TF2Attrib_ListDefIndices(int iEntity, int[] iDefIndices);
+native TF2Attrib_ListDefIndices(iEntity, iDefIndices[]);
+
+//flInitialValue and bSetBonus don't exist anymore
+/**
+ * Sets the value of m_flInitialValue on an attribute.
+ *
+ * @param pAttrib		Address of the attribute.
+ * @param flValue		Value to set m_flInitialValue to.
+ *
+ * @noreturn
+ */
+//native TF2Attrib_SetInitialValue(Address:pAttrib, Float:flValue);
 
 /**
- * Returns arrays containing the static attributes and their values present on an item definition.
+ * Returns the value of m_flInitialValue on an attribute.
  *
- * @param iItemDefIndex		Item definition index (e.g. 7 for Shovel) to get static attribute list from.
- * @param iAttribIndices	Array (max size 16) of attribute definition indices found on the item definition.
- * @param flAttribValues	Array (max size 16) of attribute values found on the item definition, corresponding to the indices.
+ * @param pAttrib		Address of the attribute.
  *
- * @return					The number of attributes found on the item definition's static attribute list, or -1 if no schema or item definition found.
- * @error					Gamedata for this function failed to load.
+ * @return				The floating point value of m_flInitialValue on the attribute.
  */
-native int TF2Attrib_GetStaticAttribs(int iItemDefIndex, int[] iAttribIndices, float[] flAttribValues);
+//native Float:TF2Attrib_GetInitialValue(Address:pAttrib);
 
 /**
- * Returns arrays containing the item server (SOC) attributes and their values present on an item definition.
+ * Sets the boolean value of m_bSetBonus on an attribute.
  *
- * @param iEntity			Entity index to get the item server attribute list from.
- * @param iAttribIndices	Array (max size 16) of attribute definition indices found.
- * @param flAttribValues	Array (max size 16) of attribute values found, corresponding to the indices.
+ * @param pAttrib		Address of the attribute.
+ * @param bSetBonus		Value to set m_bSetBonus to.
  *
- * @return					The number of attributes found on the item's SOC attribute list, or -1 if some error happened.
- * @error					Invalid entity index passed or gamedata for this function failed to load.
+ * @noreturn
  */
-native int TF2Attrib_GetSOCAttribs(int iEntity, int[] iAttribIndices, float[] flAttribValues);
+//native TF2Attrib_SetIsSetBonus(Address:pAttrib, bool:bSetBonus);
+
+/**
+ * Returns the boolean value of m_bSetBonus on an attribute.
+ *
+ * @param pAttrib		Address of the attribute.
+ *
+ * @return				The boolean value of m_bSetBonus on the attribute.
+ */
+//native bool:TF2Attrib_GetIsSetBonus(Address:pAttrib);
 
 /**
  * Gets whether an attribute is stored as an integer or as a float.
- * Use TF2Attrib_SetValue(attribute, view_as<float>(intValue)) on attributes that store values as ints
- *   to avoid compiler tag mismatch warnings.
- *
+ * Use TF2Attrib_SetValue(attribute, Float:intValue) on attributes that store values as ints.
+ * 
  * @param iDefIndex		Index of the attribute (as returned by TF2Attrib_GetDefIndex()).
  *
  * @return				True if attribute value is supposed to be an int, false if float.
  */
-native bool TF2Attrib_IsIntegerValue(int iDefIndex);
+stock TF2Attrib_IsIntegerValue(iDefIndex)
+{
+	switch (iDefIndex)
+	{
+		case 133, 143, 147, 152, 184, 185, 186, 192, 193, 194, 198, 211, 214, 227, 228, 229, 262, 294, 302, 372, 373, 374, 379, 381, 383, 403, 420:
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
-/**
- * Gets whether the plugin loaded without ANY errors.
- * For the purpose of allowing dependencies to ignore the plugin if this returns false.
- * Check in OnAllPluginsLoaded() or something. I dunno.
- *
- * @return				True if no errors while loading, false otherwise.
- */
-native bool TF2Attrib_IsReady();
-
-public SharedPlugin __pl_tf2attributes =
+public SharedPlugin:__pl_tf2attributes = 
 {
 	name = "tf2attributes",
 	file = "tf2attributes.smx",
@@ -234,70 +251,12 @@ public __pl_tf2attributes_SetNTVOptional()
 	MarkNativeAsOptional("TF2Attrib_GetDefIndex");
 	MarkNativeAsOptional("TF2Attrib_SetValue");
 	MarkNativeAsOptional("TF2Attrib_GetValue");
-	MarkNativeAsOptional("TF2Attrib_SetRefundableCurrency");
-	MarkNativeAsOptional("TF2Attrib_GetRefundableCurrency");
-	MarkNativeAsOptional("TF2Attrib_ListDefIndices");
-	MarkNativeAsOptional("TF2Attrib_GetStaticAttribs");
-	MarkNativeAsOptional("TF2Attrib_GetSOCAttribs");
-	MarkNativeAsOptional("TF2Attrib_ListDefIndices");
-	MarkNativeAsOptional("TF2Attrib_IsIntegerValue");
-	MarkNativeAsOptional("TF2Attrib_IsReady");
-
 	MarkNativeAsOptional("TF2Attrib_SetInitialValue");
 	MarkNativeAsOptional("TF2Attrib_GetInitialValue");
+	MarkNativeAsOptional("TF2Attrib_SetRefundableCurrency");
+	MarkNativeAsOptional("TF2Attrib_GetRefundableCurrency");
 	MarkNativeAsOptional("TF2Attrib_SetIsSetBonus");
 	MarkNativeAsOptional("TF2Attrib_GetIsSetBonus");
+	MarkNativeAsOptional("TF2Attrib_ListDefIndices");
 }
 #endif
-
-//OLD things lie here
-//flInitialValue and bSetBonus don't exist anymore
-/**
- * Sets the value of m_flInitialValue on an attribute.
- *
- * @param pAttrib		Address of the attribute.
- * @param flValue		Value to set m_flInitialValue to.
- *
- * @noreturn
- */
-//native TF2Attrib_SetInitialValue(Address pAttrib, float flValue);
-
-/**
- * Returns the value of m_flInitialValue on an attribute.
- *
- * @param pAttrib		Address of the attribute.
- *
- * @return				The floating point value of m_flInitialValue on the attribute.
- */
-//native float TF2Attrib_GetInitialValue(Address pAttrib);
-
-/**
- * Sets the boolean value of m_bSetBonus on an attribute.
- *
- * @param pAttrib		Address of the attribute.
- * @param bSetBonus		Value to set m_bSetBonus to.
- *
- * @noreturn
- */
-//native TF2Attrib_SetIsSetBonus(Address pAttrib, bool bSetBonus);
-
-/**
- * Returns the boolean value of m_bSetBonus on an attribute.
- *
- * @param pAttrib		Address of the attribute.
- *
- * @return				The boolean value of m_bSetBonus on the attribute.
- */
-//native bool TF2Attrib_GetIsSetBonus(Address pAttrib);
-
-//stock TF2Attrib_IsIntegerValue(iDefIndex)
-//{
-//	switch (iDefIndex)
-//	{
-//		case 133, 143, 147, 152, 184, 185, 186, 192, 193, 194, 198, 211, 214, 227, 228, 229, 262, 294, 302, 372, 373, 374, 379, 381, 383, 403, 420:
-//		{
-//			return true;
-//		}
-//	}
-//	return false;
-//}

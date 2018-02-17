@@ -129,7 +129,7 @@ stock MatrixAngles(angtoworld[matrix3x4_t], Float:outputangle[3]){
 	
 	if ( xyDist > 0.001 ){
 	
-		// (yaw)	y = ATAN( forward.y, forward.x );		-- input our space, forward is the X axis
+		// (yaw)	y = ATAN( forward.y, forward.x );		-- in_matrix our space, forward is the X axis
 		outputangle[1] = RadToDeg( ArcTangent2( fwd[1], fwd[0] ) );
 		// (pitch)	x = ATAN( -forward.z, sqrt(forward.x*forward.x+forward.y*forward.y) );
 		outputangle[0] = RadToDeg( ArcTangent2( fwd[2] * -1, xyDist ) );
@@ -142,7 +142,7 @@ stock MatrixAngles(angtoworld[matrix3x4_t], Float:outputangle[3]){
 		outputangle[1] = RadToDeg( ArcTangent2( right[0]  * -1, right[1] ) );
 		// (pitch)	x = ATAN( -forward.z, sqrt(forward.x*forward.x+forward.y*forward.y) );
 		outputangle[0] = RadToDeg( ArcTangent2( fwd[2]  * -1, xyDist ) );
-		// Assume no roll input this case as one degree of freedom has been lost (i.e. yaw == roll)
+		// Assume no roll in_matrix this case as one degree of freedom has been lost (i.e. yaw == roll)
 		outputangle[2] = 0.0;
 		
 	}
@@ -183,24 +183,24 @@ stock TransformAnglesToLocalSpace(Float:angle[3], Float:out[3], parentMatrix[mat
 
 }
 
-stock MatrixInvert(input[matrix3x4_t], out[matrix3x4_t]){
+stock MatrixInvert(in_matrix[matrix3x4_t], out[matrix3x4_t]){
 
-	out[row0][0] = input[row0][0];
-	out[row0][1] = input[row1][0];
-	out[row0][2] = input[row2][0];
+	out[row0][0] = in_matrix[row0][0];
+	out[row0][1] = in_matrix[row1][0];
+	out[row0][2] = in_matrix[row2][0];
 
-	out[row1][0] = input[row0][1];
-	out[row1][1] = input[row1][1];
-	out[row1][2] = input[row2][1];
+	out[row1][0] = in_matrix[row0][1];
+	out[row1][1] = in_matrix[row1][1];
+	out[row1][2] = in_matrix[row2][1];
 
-	out[row2][0] = input[row0][2];
-	out[row2][1] = input[row1][2];
-	out[row2][2] = input[row2][2];
+	out[row2][0] = in_matrix[row0][2];
+	out[row2][1] = in_matrix[row1][2];
+	out[row2][2] = in_matrix[row2][2];
 	
 	decl Float:tmp[3], Float:outrow0[3], Float:outrow1[3], Float:outrow2[3];
-	tmp[0] = input[row0][3];
-	tmp[1] = input[row1][3];
-	tmp[2] = input[row2][3];
+	tmp[0] = in_matrix[row0][3];
+	tmp[1] = in_matrix[row1][3];
+	tmp[2] = in_matrix[row2][3];
 	
 	outrow0[0] = out[row0][0];
 	outrow0[1] = out[row0][1];
@@ -261,10 +261,10 @@ stock ZeroVector(Float:vector[3]){
 
 }
 
-stock CopyVector(const Float:input[3], Float:out[3]){
+stock CopyVector(const Float:in_matrix[3], Float:out[3]){
 
-	out[0] = input[0];
-	out[1] = input[1];
-	out[2] = input[2];
+	out[0] = in_matrix[0];
+	out[1] = in_matrix[1];
+	out[2] = in_matrix[2];
 
 }
