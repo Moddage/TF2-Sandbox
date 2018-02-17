@@ -456,11 +456,9 @@ public void OnPluginStart()
 	g_hEquipMenu = CreateMenu(EquipMenu);
 	SetMenuTitle(g_hEquipMenu, "TF2SB - Equip...");
 	
-	AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun");
+	AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
 	AddMenuItem(g_hEquipMenu, "physgunv2", "Physics Gun V2");
 	AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
-	AddMenuItem(g_hEquipMenu, "physgunv2", "-------------------");
-	AddMenuItem(g_hEquipMenu, "physgunv2", "Mưa trôi cả bầu trời nắng");
 	//	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
 	
 	SetMenuExitBackButton(g_hEquipMenu, true);
