@@ -1268,6 +1268,17 @@ public Action Command_OpenableDoorProp(int client, int args)
 		
 		TeleportEntity(iDoor, fOriginAim, NULL_VECTOR, NULL_VECTOR);
 		
+		int PlayerSpawnCheck;
+		
+		while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+		{
+			if (Entity_InRange(iDoor, PlayerSpawnCheck, 400.0))
+			{
+				
+				
+			}
+		}
+		
 		Format(szNamePropDoor, sizeof(szNamePropDoor), "TF2SB_Door%i", GetRandomInt(1000, 5000));
 		DispatchKeyValue(iDoor, "targetname", szNamePropDoor);
 		SetVariantString(szNamePropDoor);
@@ -1803,6 +1814,16 @@ public Action Command_LightDynamic(int client, int args)
 		DispatchSpawn(Obj_LightDynamic);
 		TeleportEntity(Obj_LightDynamic, fOriginAim, NULL_VECTOR, NULL_VECTOR);
 		
+		int PlayerSpawnCheck;
+		
+		while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+		{
+			if (Entity_InRange(Obj_LightDMelon, PlayerSpawnCheck, 400.0))
+			{
+				
+			}
+		}
+		
 		Format(szNameMelon, sizeof(szNameMelon), "Obj_LightDMelon%i", GetRandomInt(1000, 5000));
 		DispatchKeyValue(Obj_LightDMelon, "targetname", szNameMelon);
 		SetVariantString(szNameMelon);
@@ -1869,6 +1890,17 @@ public Action Command_SpawnDoor(int client, int args)
 		if (Build_RegisterEntityOwner(Obj_Door, client)) {
 			TeleportEntity(Obj_Door, iAim, NULL_VECTOR, NULL_VECTOR);
 			DispatchSpawn(Obj_Door);
+			
+			int PlayerSpawnCheck;
+			
+			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+			{
+				if (Entity_InRange(Obj_Door, PlayerSpawnCheck, 400.0))
+				{
+					
+					
+				}
+			}
 		}
 	} else if (StrEqual(szType[0], "a") || StrEqual(szType[0], "b") || StrEqual(szType[0], "c")) {
 		
@@ -2167,6 +2199,18 @@ public Action Command_SpawnProp(int client, int args)
 			
 			// Debugging issues
 			//PrintToChatAll(szPropString);
+			
+			int PlayerSpawnCheck;
+			
+			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+			{
+				if (Entity_InRange(iEntity, PlayerSpawnCheck, 400.0))
+				{
+					
+					
+				}
+			}
+			
 			
 			if (!StrEqual(szPropFrozen, "")) {
 				if (Phys_IsPhysicsObject(iEntity))
@@ -3368,9 +3412,8 @@ public Action Command_ToolGun(int client, int args)
 
 public Action Command_PhysGun(int client, int args)
 {
-	Build_PrintToChat(client, "You have a Physics Gun v1!");
-	Build_PrintToChat(client, "Your Physics Gun will be in the Secondary slot.");
-	Build_PrintToChat(client, "NOTE: Please check out v2 of Physics Gun by typing /p");
+	Build_PrintToChat(client, "You have a Physics Gun!");
+	Build_PrintToChat(client, "Your Physics Gun will be in the secondary slot.");
 	TF2Items_GiveWeapon(client, 99999);
 	int weapon = GetPlayerWeaponSlot(client, 1);
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
@@ -5154,6 +5197,17 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 							SetEntProp(PropDuped, Prop_Data, "m_nSolidType", 6);
 							DispatchSpawn(PropDuped);
 							ActivateEntity(PropDuped);
+							
+							int PlayerSpawnCheck;
+							
+							while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+							{
+								if (Entity_InRange(PropDuped, PlayerSpawnCheck, 400.0))
+								{
+									
+									
+								}
+							}
 							
 							//PrintToChatAll("Prop name pasted %s", modelnamedupe);
 						}
