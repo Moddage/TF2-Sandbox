@@ -1876,12 +1876,12 @@ public Action Command_SpawnDoor(int client, int args)
 		
 		switch (szType[0]) {
 			case '1': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '2': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '3': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '4': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '5': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '6': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '7': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '2': szModel = "models/combine_gate_citizen.mdl";
+            case '3': szModel = "models/combine_gate_Vehicle.mdl";
+            case '4': szModel = "models/props_doors/doorKLab01.mdl";
+            case '5': szModel = "models/props_lab/elevatordoor.mdl";
+            case '6': szModel = "models/props_lab/RavenDoor.mdl";
+            case '7': szModel = "models/props_lab/blastdoor001c.mdl";
 		}
 		
 		DispatchKeyValue(Obj_Door, "model", szModel);
