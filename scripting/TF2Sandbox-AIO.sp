@@ -4368,13 +4368,20 @@ void grab(int client)
 			}
 			
 			SetEntPropEnt(targetentity, Prop_Send, "m_hOwnerEntity", client);
-			grabbedentref[client] = targetentity; //EntIndexToEntRef(targetentity);
+			grabbedentref[client] = EntIndexToEntRef(targetentity);
 			
 			//SetEntPropEnt(targetentity, Prop_Data, "m_hParent", client);
 			
 			//SetEntProp(targetentity, Prop_Data, "m_iEFlags", GetEntProp(targetentity, Prop_Data, "m_iEFlags") | EFL_NO_PHYSCANNON_INTERACTION);
 			
-			entitygravitysave[client] = Phys_IsGravityEnabled(targetentity);
+			char szClass[64];
+			GetEdictClassname(targetentity, szClass, sizeof(szClass));
+			
+			if (StrEqual(szClass, "prop_physics"))
+			{
+				entitygravitysave[client] = Phys_IsGravityEnabled(targetentity);
+			}
+			else entitygravitysave[client] = false;
 			
 			if (entityType != 1) //PROP_RIGID
 			{
@@ -5052,6 +5059,12 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 		{
 			case 1:
 			{
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				if (iHitEntity > 0 && IsValidEntity(iHitEntity))
 				{
 					if (StrContains(classname, "player", false) != -1)
@@ -5070,6 +5083,12 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			}
 			case 2:
 			{
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				if (Build_IsAdmin(client))
 				{
 					int ent = CreateEntityByName("info_particle_system");
@@ -5093,6 +5112,12 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			}
 			case 3:
 			{
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				if (iHitEntity > 0)
 				{
 					if (Build_IsAdmin(client))
@@ -5133,8 +5158,15 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			}
 			case 4:
 			{
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				if (g_bAttackWasMouse2[client])
 				{
+					
 					if (iHitEntity > 0)
 					{
 						if (Build_IsEntityOwner(client, iHitEntity))
@@ -5146,6 +5178,7 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 				}
 				else
 				{
+					
 					if (iHitEntity > 0)
 					{
 						if (Build_IsEntityOwner(client, iHitEntity))
@@ -5160,6 +5193,12 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			case 5:
 			{
 				flEyeAng[0] = 0.0;
+				
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
 				
 				int PropDuped = CreateEntityByName("prop_dynamic_override");
 				
@@ -5189,13 +5228,6 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 					}
 					else
 					{
-						
-						int currentTime = GetTime();
-						if (currentTime - LastUsed[client] < 1)
-							return Plugin_Handled;
-						
-						LastUsed[client] = currentTime;
-						
 						if (Build_RegisterEntityOwner(PropDuped, client))
 						{
 							DispatchKeyValueVector(PropDuped, "origin", flHitPos);
@@ -5228,6 +5260,12 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			}
 			case 6:
 			{
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				int alphatest[4];
 				flEyeAng[0] = 0.0;
 				
@@ -5265,6 +5303,12 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			case 7:
 			{
 				flEyeAng[0] = 0.0;
+				
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
 				
 				if (g_bAttackWasMouse3[client])
 				{
@@ -5342,6 +5386,13 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			case 8:
 			{
 				flEyeAng[0] = 0.0;
+				
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				if (iHitEntity > 0) {
 					if (g_bAttackWasMouse2[client])
 					{
@@ -5367,6 +5418,13 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			case 9:
 			{
 				flEyeAng[0] = 0.0;
+				
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				if (g_bAttackWasMouse3[client])
 				{
 					if (g_iEffectTool[client] < 17)
@@ -5420,6 +5478,12 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			{
 				flEyeAng[0] = 0.0;
 				
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				if (g_bAttackWasMouse2[client])
 				{
 					if (iHitEntity > 0) {
@@ -5439,12 +5503,24 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			{
 				flEyeAng[0] = 0.0;
 				
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
+				
 				FakeClientCommand(client, "sm_simplelight");
 				
 			}
 			case 12:
 			{
 				flEyeAng[0] = 0.0;
+				
+				int currentTime = GetTime();
+				if (currentTime - LastUsed[client] < 1)
+					return Plugin_Handled;
+				
+				LastUsed[client] = currentTime;
 				
 				FakeClientCommand(client, "sm_propdoor");
 				
