@@ -2541,8 +2541,8 @@ public void EntityInfo(int client, int iTarget)
 	
 	int iOwner = Build_ReturnEntityOwner(iTarget);
 	GetEntPropString(iTarget, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
-	if (iOwner != -1)
-		GetClientName(iOwner, szOwner, sizeof(szOwner));
+	if (Build_IsClientValid(iOwner, iOwner))
+        GetClientName(iOwner, szOwner, sizeof(szOwner));
 	else if (iOwner > MAXPLAYERS) {
 		szOwner = "*Disconnected";
 	} else {
