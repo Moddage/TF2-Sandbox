@@ -276,7 +276,7 @@ bool entitygravitysave[MAXPLAYERS + 1];
 int entityownersave[MAXPLAYERS + 1] =  { INVALID_ENT_REFERENCE, ... };
 
 int grabentitytype[MAXPLAYERS + 1]; //PropTypeCheck 
- 
+
 float grabpos[MAXPLAYERS + 1][3];
 
 Handle forwardOnClientGrabEntity = INVALID_HANDLE;
@@ -289,7 +289,7 @@ int g_iHalo;
 //int g_iLaser;
 int g_iPhys;
 
-public Plugin myinfo =  
+public Plugin myinfo = 
 {
 	name = "TF2 Sandbox All In One Module", 
 	author = "Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, hjkwe654, BattlefieldDuck", 
@@ -298,7 +298,7 @@ public Plugin myinfo =
 	url = "http://dtf2server.ddns.net"
 };
 
-public void OnPluginStart() 
+public void OnPluginStart()
 {
 	// client Language Base
 	g_hCookieClientLang = RegClientCookie("cookie_BuildModClientLang", "TF2SB client Language.", CookieAccess_Private);
@@ -514,7 +514,7 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuPickup, "platesandvich", "Sandvich Plate");
 	AddMenuItem(g_hPropMenuPickup, "platesteak", "Steak Plate");
 	AddMenuItem(g_hPropMenuPickup, "plate_robo_sandwich", "Sandvich Robo Plate");
-
+	
 	// Prop Menu Weapons
 	g_hPropMenuWeapons = CreateMenu(PropMenuWeapons);
 	SetMenuTitle(g_hPropMenuWeapons, "TF2SB - Weapon Props\nSay /g in chat to move Entities!");
@@ -742,7 +742,7 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuConstructions, "work_table001", "Work Table");
 	AddMenuItem(g_hPropMenuConstructions, "barrel01", "Yellow Barrel");
 	AddMenuItem(g_hPropMenuConstructions, "barrel03", "Yellow Barrel 2");
-
+	
 	
 	/*	g_hPropNameArray = CreateArray(33, 2048);		// Max Prop List is 1024-->2048
 	g_hPropModelPathArray = CreateArray(128, 2048);	// Max Prop List is 1024-->2048
@@ -850,7 +850,7 @@ stock float GetEntitiesDistance(int ent1, int ent2)
 	return GetVectorDistance(orig1, orig2);
 }
 
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) 
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("GG_GetCurrentHeldEntity", Native_GetCurrntHeldEntity);
 	CreateNative("GG_ForceDropHeldEntity", Native_ForceDropHeldEntity);
@@ -866,7 +866,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
-public void OnMapStart() 
+public void OnMapStart()
 {
 	g_Halo = PrecacheModel("materials/sprites/halo01.vmt");
 	g_Beam = PrecacheModel("materials/sprites/laser.vmt");
@@ -876,7 +876,7 @@ public void OnMapStart()
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav", true);
 	PrecacheSound("npc/strider/charging.wav", true);
 	PrecacheSound("npc/strider/fire.wav", true);
-	for (int i = 1; i < MaxClients; i++) 
+	for (int i = 1; i < MaxClients; i++)
 	{
 		g_szConnectedClient[i] = "";
 		if (Build_IsClientValid(i, i))
@@ -900,7 +900,7 @@ public void OnMapStart()
 	AutoExecConfig();
 }
 
-public void OnClientPutInServer(int client) 
+public void OnClientPutInServer(int client)
 {
 	GetClientAuthId(client, AuthId_Steam2, g_szConnectedClient[client], sizeof(g_szConnectedClient));
 	
@@ -912,7 +912,7 @@ public void OnClientPutInServer(int client)
 	SDKHook(client, SDKHook_WeaponSwitch, WeaponSwitchHook);
 }
 
-public void OnClientDisconnect(int client) 
+public void OnClientDisconnect(int client)
 {
 	FakeClientCommand(client, "sm_delall");
 	/*g_szConnectedClient[client] = "";
@@ -940,22 +940,22 @@ public void OnClientDisconnect(int client)
 	release(client);
 }
 
-public void OnClientConnected(int client) 
+public void OnClientConnected(int client)
 {
 	g_RememberGodmode[client] = 1;
 }
 
-public Action Timer_Disconnect(Handle timer, Handle hPack) 
+public Action Timer_Disconnect(Handle timer, Handle hPack)
 {
 	ResetPack(hPack);
 	int client = ReadPackCell(hPack);
 	
 	int iCount;
-	for (int iCheck = client; iCheck < MAX_HOOK_ENTITIES; iCheck++) 
+	for (int iCheck = client; iCheck < MAX_HOOK_ENTITIES; iCheck++)
 	{
-		if (IsValidEntity(iCheck)) 
+		if (IsValidEntity(iCheck))
 		{
-			if (g_iTempOwner[iCheck] == client) 
+			if (g_iTempOwner[iCheck] == client)
 			{
 				AcceptEntityInput(iCheck, "Kill", -1);
 				iCount++;
@@ -965,9 +965,9 @@ public Action Timer_Disconnect(Handle timer, Handle hPack)
 	return;
 }
 
-public Action OnClientCommand(int client, int args) 
+public Action OnClientCommand(int client, int args)
 {
-	if (Build_IsClientValid(client, client) && client > 0) 
+	if (Build_IsClientValid(client, client) && client > 0)
 	{
 		char Lang[8];
 		GetClientCookie(client, g_hCookieClientLang, Lang, sizeof(Lang));
@@ -978,7 +978,7 @@ public Action OnClientCommand(int client, int args)
 	}
 }
 
-public Action Command_Copy(int client, int args) 
+public Action Command_Copy(int client, int args)
 {
 	if (g_bBuffer[client])
 	{
@@ -1111,7 +1111,7 @@ public Action Command_Copy(int client, int args)
 	}
 }
 
-public Action Command_Paste(int client, int args) 
+public Action Command_Paste(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client))
 		return Plugin_Handled;
@@ -1120,9 +1120,9 @@ public Action Command_Paste(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Timer_CopyBeam(Handle timer, any client) 
+public Action Timer_CopyBeam(Handle timer, any client)
 {
-	if (IsValidEntity(g_iCopyTarget[client]) && Build_IsClientValid(client, client)) 
+	if (IsValidEntity(g_iCopyTarget[client]) && Build_IsClientValid(client, client))
 	{
 		float fOriginPlayer[3], fOriginEntity[3];
 		
@@ -1146,9 +1146,9 @@ public Action Timer_CopyBeam(Handle timer, any client)
 	}
 }
 
-public Action Timer_CopyRing(Handle timer, any client) 
+public Action Timer_CopyRing(Handle timer, any client)
 {
-	if (IsValidEntity(g_iCopyTarget[client]) && Build_IsClientValid(client, client)) 
+	if (IsValidEntity(g_iCopyTarget[client]) && Build_IsClientValid(client, client))
 	{
 		float fOriginEntity[3];
 		
@@ -1170,9 +1170,9 @@ public Action Timer_CopyRing(Handle timer, any client)
 	}
 }
 
-public Action Timer_CopyMain(Handle timer, any client) 
+public Action Timer_CopyMain(Handle timer, any client)
 {
-	if (IsValidEntity(g_iCopyTarget[client]) && Build_IsClientValid(client, client)) 
+	if (IsValidEntity(g_iCopyTarget[client]) && Build_IsClientValid(client, client))
 	{
 		float fOriginEntity[3], fOriginPlayer[3];
 		
@@ -1214,7 +1214,7 @@ public Action Timer_CoolDown(Handle hTimer, any iBuffer)
 	if (g_bBuffer[iClient])g_bBuffer[iClient] = false;
 }
 
-public Action Command_OpenableDoorProp(int client, int args) 
+public Action Command_OpenableDoorProp(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1293,7 +1293,7 @@ public Action Command_OpenableDoorProp(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_kill(int client, int args) 
+public Action Command_kill(int client, int args)
 {
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1306,7 +1306,7 @@ public Action Command_kill(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_ReloadAIOPlugin(int client, int args) 
+public Action Command_ReloadAIOPlugin(int client, int args)
 {
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1321,7 +1321,7 @@ public Action Command_ReloadAIOPlugin(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_Render(int client, int args) 
+public Action Command_Render(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1388,7 +1388,7 @@ public Action Command_Render(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_Color(int client, int args) 
+public Action Command_Color(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1450,7 +1450,7 @@ public Action Command_Color(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_PropScale(int client, int args) 
+public Action Command_PropScale(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1511,7 +1511,7 @@ public Action Command_PropScale(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_Skin(int client, int args) 
+public Action Command_Skin(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1561,7 +1561,7 @@ public Action Command_Skin(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_Rotate(int client, int args) 
+public Action Command_Rotate(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1585,7 +1585,7 @@ public Action Command_Rotate(int client, int args)
 	
 	if (Build_IsEntityOwner(client, iEntity)) {
 		char szAngleX[8], szAngleY[8], szAngleZ[8];
-		float fEntityOrigin[3],  fEntityAngle[3];
+		float fEntityOrigin[3], fEntityAngle[3];
 		GetCmdArg(1, szAngleX, sizeof(szAngleX));
 		GetCmdArg(2, szAngleY, sizeof(szAngleY));
 		GetCmdArg(3, szAngleZ, sizeof(szAngleZ));
@@ -1626,7 +1626,7 @@ public Action Command_Rotate(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_Fly(int client, int args) 
+public Action Command_Fly(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true) || !Build_AllowFly(client))
 		return Plugin_Handled;
@@ -1644,7 +1644,7 @@ public Action Command_Fly(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_SimpleLight(int client, int args) 
+public Action Command_SimpleLight(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1670,7 +1670,7 @@ public Action Command_SimpleLight(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_AccurateRotate(int client, int args) 
+public Action Command_AccurateRotate(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1733,7 +1733,7 @@ public Action Command_AccurateRotate(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_LightDynamic(int client, int args) 
+public Action Command_LightDynamic(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1807,7 +1807,7 @@ public Action Command_LightDynamic(int client, int args)
 		SetVariantString(szColor);
 		AcceptEntityInput(Obj_LightDynamic, "color", -1);
 		SetEntProp(Obj_LightDMelon, Prop_Send, "m_nSolidType", 6);
-			
+		
 		DispatchSpawn(Obj_LightDMelon);
 		TeleportEntity(Obj_LightDMelon, fOriginAim, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(Obj_LightDynamic);
@@ -1833,7 +1833,7 @@ public Action Command_LightDynamic(int client, int args)
 		RemoveEdict(Obj_LightDMelon);
 	
 	char szTemp[33], szArgs[128];
-	for (int i = 1; i <= GetCmdArgs(); i++) 
+	for (int i = 1; i <= GetCmdArgs(); i++)
 	{
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
@@ -1842,7 +1842,7 @@ public Action Command_LightDynamic(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_SpawnDoor(int client, int args) 
+public Action Command_SpawnDoor(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client))
 		return Plugin_Handled;
@@ -1875,13 +1875,13 @@ public Action Command_SpawnDoor(int client, int args)
 		int Obj_Door = CreateEntityByName("prop_dynamic_override");
 		
 		switch (szType[0]) {
-			case '1': szModel = "models/props_lab/blastdoor001c.mdl";
-			case '2': szModel = "models/combine_gate_citizen.mdl";
-            case '3': szModel = "models/combine_gate_Vehicle.mdl";
-            case '4': szModel = "models/props_doors/doorKLab01.mdl";
-            case '5': szModel = "models/props_lab/elevatordoor.mdl";
-            case '6': szModel = "models/props_lab/RavenDoor.mdl";
-            case '7': szModel = "models/props_lab/blastdoor001c.mdl";
+			case '1':szModel = "models/props_lab/blastdoor001c.mdl";
+			case '2':szModel = "models/combine_gate_citizen.mdl";
+			case '3':szModel = "models/combine_gate_Vehicle.mdl";
+			case '4':szModel = "models/props_doors/doorKLab01.mdl";
+			case '5':szModel = "models/props_lab/elevatordoor.mdl";
+			case '6':szModel = "models/props_lab/RavenDoor.mdl";
+			case '7':szModel = "models/props_lab/blastdoor001c.mdl";
 		}
 		
 		DispatchKeyValue(Obj_Door, "model", szModel);
@@ -1982,7 +1982,7 @@ public Action Command_SpawnDoor(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_Move(int client, int args) 
+public Action Command_Move(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -2048,7 +2048,7 @@ public Action Command_Move(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_SetName(int client, int args) 
+public Action Command_SetName(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -2079,7 +2079,7 @@ public Action Command_SetName(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_SpawnProp(int client, int args) 
+public Action Command_SpawnProp(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -2229,7 +2229,7 @@ public Action Command_SpawnProp(int client, int args)
 	return Plugin_Handled;
 }
 
-void ReadProps() 
+void ReadProps()
 {
 	BuildPath(Path_SM, g_szFile, sizeof(g_szFile), "configs/buildmod/props.ini");
 	
@@ -2275,7 +2275,7 @@ void ReadProps()
 	CloseHandle(iFile);
 }
 
-void ReadPropsLine(const char[] szLine, int iCountProps) 
+void ReadPropsLine(const char[] szLine, int iCountProps)
 {
 	char szPropInfo[4][128];
 	ExplodeString(szLine, ", ", szPropInfo, sizeof(szPropInfo), sizeof(szPropInfo[]));
@@ -2308,7 +2308,7 @@ public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
 	nextactivetime[client] = GetGameTime();
 }
 
-public Action Command_ChangeGodMode(int client, int args) 
+public Action Command_ChangeGodMode(int client, int args)
 {
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -2329,7 +2329,7 @@ public Action Command_ChangeGodMode(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_EnableGrab(int client, int args) 
+public Action Command_EnableGrab(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -2382,13 +2382,13 @@ public Action Command_EnableGrab(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_DisableGrab(int client, int args) 
+public Action Command_DisableGrab(int client, int args)
 {
 	g_bGrabIsRunning[client] = false;
 	return Plugin_Handled;
 }
 
-public Action Timer_GrabBeam(Handle timer, any client) 
+public Action Timer_GrabBeam(Handle timer, any client)
 {
 	if (IsValidEntity(g_iGrabTarget[client]) && Build_IsClientValid(client, client)) {
 		float vOriginEntity[3], vOriginPlayer[3];
@@ -2412,9 +2412,9 @@ public Action Timer_GrabBeam(Handle timer, any client)
 	}
 }
 
-public Action Timer_GrabRing(Handle timer, any client) 
+public Action Timer_GrabRing(Handle timer, any client)
 {
-	if (IsValidEntity(g_iGrabTarget[client]) && Build_IsClientValid(client, client)) 
+	if (IsValidEntity(g_iGrabTarget[client]) && Build_IsClientValid(client, client))
 	{
 		float vOriginEntity[3];
 		GetEntPropVector(g_iGrabTarget[client], Prop_Data, "m_vecOrigin", vOriginEntity);
@@ -2434,7 +2434,7 @@ public Action Timer_GrabRing(Handle timer, any client)
 	}
 }
 
-public Action Timer_GrabMain(Handle timer, any client) 
+public Action Timer_GrabMain(Handle timer, any client)
 {
 	if (IsValidEntity(g_iGrabTarget[client]) && Build_IsClientValid(client, client)) {
 		if (!Build_IsAdmin(client)) {
@@ -2482,7 +2482,7 @@ public Action Timer_GrabMain(Handle timer, any client)
 }
 
 // Messages
-public Action Display_Msgs(Handle timer) 
+public Action Display_Msgs(Handle timer)
 {
 	for (int client = 1; client <= MaxClients; client++) {
 		if (Build_IsClientValid(client, client, true) && !IsFakeClient(client)) {
@@ -2494,7 +2494,7 @@ public Action Display_Msgs(Handle timer)
 	return;
 }
 
-public void EntityInfo(int client, int iTarget) 
+public void EntityInfo(int client, int iTarget)
 {
 	if (IsFunc(iTarget))
 		return;
@@ -2572,7 +2572,7 @@ public void EntityInfo(int client, int iTarget)
 	return;
 }
 
-bool IsFunc(int iEntity) 
+bool IsFunc(int iEntity)
 {
 	char szClass[32];
 	GetEdictClassname(iEntity, szClass, sizeof(szClass));
@@ -2581,7 +2581,7 @@ bool IsFunc(int iEntity)
 	return false;
 }
 
-bool IsNpc(int iEntity) 
+bool IsNpc(int iEntity)
 {
 	char szClass[32];
 	GetEdictClassname(iEntity, szClass, sizeof(szClass));
@@ -2590,7 +2590,7 @@ bool IsNpc(int iEntity)
 	return false;
 }
 
-bool IsWorldEnt(int iEntity) 
+bool IsWorldEnt(int iEntity)
 {
 	int szOwner = -1;
 	if (IsValidEntity(iEntity))
@@ -2601,7 +2601,7 @@ bool IsWorldEnt(int iEntity)
 	return false;
 }
 
-bool IsPlayer(int iEntity) 
+bool IsPlayer(int iEntity)
 {
 	if ((GetEntityFlags(iEntity) & (FL_CLIENT | FL_FAKECLIENT)))
 		return true;
@@ -2610,7 +2610,7 @@ bool IsPlayer(int iEntity)
 
 // Remover.sp
 
-public Action Command_DeleteAll(int client, int args) 
+public Action Command_DeleteAll(int client, int args)
 {
 	if (!Build_AllowToUse(client) || !Build_IsClientValid(client, client))
 		return Plugin_Handled;
@@ -2650,7 +2650,7 @@ public Action Command_DeleteAll(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_Delete(int client, int args) 
+public Action Command_Delete(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -2744,7 +2744,7 @@ public Action Command_Delete(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_DelRange(int client, int args) 
+public Action Command_DelRange(int client, int args)
 {
 	if (!Build_IsClientValid(client, client))
 		return Plugin_Handled;
@@ -2771,7 +2771,7 @@ public Action Command_DelRange(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_DelStrider(int client, int args) 
+public Action Command_DelStrider(int client, int args)
 {
 	if (!Build_IsClientValid(client, client))
 		return Plugin_Handled;
@@ -2799,12 +2799,12 @@ public Action Command_DelStrider(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_DelStrider2(int client, int args) 
+public Action Command_DelStrider2(int client, int args)
 {
 	if (!Build_IsClientValid(client, client))
 		return Plugin_Handled;
 	
-	float fRange; 
+	float fRange;
 	char szRange[5];
 	float vOriginAim[3];
 	GetCmdArg(1, szRange, sizeof(szRange));
@@ -2827,7 +2827,7 @@ public Action Command_DelStrider2(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Timer_DR(Handle timer, any client) 
+public Action Timer_DR(Handle timer, any client)
 {
 	if (!Build_IsClientValid(client, client))
 		return;
@@ -3031,7 +3031,7 @@ public Action Timer_DR(Handle timer, any client)
 	}
 }
 
-public Action Timer_DScharge(Handle timer, Handle hDataPack) 
+public Action Timer_DScharge(Handle timer, Handle hDataPack)
 {
 	float vOriginAim[3], vOriginPlayer[3];
 	ResetPack(hDataPack);
@@ -3102,7 +3102,7 @@ public Action Timer_DScharge(Handle timer, Handle hDataPack)
 	WritePackFloat(hNewPack, vOriginPlayer[2]);
 }
 
-public Action Timer_DSfire(Handle timer, Handle hDataPack) 
+public Action Timer_DSfire(Handle timer, Handle hDataPack)
 {
 	float vOriginAim[3], vOriginPlayer[3];
 	ResetPack(hDataPack);
@@ -3259,7 +3259,7 @@ public Action Timer_DScharge2(Handle timer, Handle hDataPack)
 	WritePackFloat(hNewPack, vOriginPlayer[2]);
 }
 
-public Action Timer_DSfire2(Handle timer, Handle hDataPack) 
+public Action Timer_DSfire2(Handle timer, Handle hDataPack)
 {
 	float vOriginAim[3], vOriginPlayer[3];
 	ResetPack(hDataPack);
@@ -3324,13 +3324,13 @@ public Action Timer_DSfire2(Handle timer, Handle hDataPack)
 		Build_PrintToChat(client, "Deleted %i props.", iCount);
 }
 
-public void OnPropBreak(const char[] output, int iEntity, int iActivator, float delay) 
+public void OnPropBreak(const char[] output, int iEntity, int iActivator, float delay)
 {
 	if (IsValidEntity(iEntity))
 		CreateTimer(0.1, Timer_PropBreak, iEntity);
 }
 
-public Action Timer_PropBreak(Handle timer, any iEntity) 
+public Action Timer_PropBreak(Handle timer, any iEntity)
 {
 	if (!IsValidEntity(iEntity))
 		return;
@@ -3342,7 +3342,7 @@ public Action Timer_PropBreak(Handle timer, any iEntity)
 	}
 }
 
-stock int DrowLine(float vPoint1[3], float vPoint2[3], Color[4], bool bFinale = false) 
+stock int DrowLine(float vPoint1[3], float vPoint2[3], Color[4], bool bFinale = false)
 {
 	if (bFinale)
 		TE_SetupBeamPoints(vPoint1, vPoint2, g_Beam, g_Halo, 0, 66, 0.5, 7.0, 7.0, 0, 0.0, Color, 20);
@@ -3351,7 +3351,7 @@ stock int DrowLine(float vPoint1[3], float vPoint2[3], Color[4], bool bFinale = 
 	TE_SendToAll();
 }
 
-stock int CreatePush(float vOrigin[3], float fMagnitude, float fRange, char szSpawnFlags[8]) 
+stock int CreatePush(float vOrigin[3], float fMagnitude, float fRange, char szSpawnFlags[8])
 {
 	int Push_Index = CreateEntityByName("point_push");
 	TeleportEntity(Push_Index, vOrigin, NULL_VECTOR, NULL_VECTOR);
@@ -3363,7 +3363,7 @@ stock int CreatePush(float vOrigin[3], float fMagnitude, float fRange, char szSp
 	return Push_Index;
 }
 
-stock int CreateCore(float vOrigin[3], float fScale, char szSpawnFlags[8]) 
+stock int CreateCore(float vOrigin[3], float fScale, char szSpawnFlags[8])
 {
 	int Core_Index = CreateEntityByName("env_citadel_energy_core");
 	TeleportEntity(Core_Index, vOrigin, NULL_VECTOR, NULL_VECTOR);
@@ -3454,7 +3454,7 @@ public int MainMenu(Handle menu, MenuAction action, int param1, int param2)
 		if (StrEqual(item, "buildhelper"))
 		{
 			DisplayMenu(g_hBuildHelperMenu, param1, MENU_TIME_FOREVER);
-		}	
+		}
 	}
 }
 
@@ -4043,12 +4043,12 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			SetEntProp(ent, Prop_Data, "m_nModelIndex", PrecacheModel(MDL_TOOLGUN), 2);
 			SetEntProp(ent, Prop_Send, "m_nSequence", 1);
 			
-			SetHudTextParams(0.0, 0.25, 0.01, 150, 150, 0, 150, 0, 0.0, 0.0, 0.0);
+			SetHudTextParams(0.0, 0.25, 1.0, 150, 150, 0, 150, 0, 0.0, 0.0, 0.0);
 			
 			switch (g_iTool[client])
 			{
 				case 1:ShowHudText(client, -1, "TOOL:\nREMOVER\n\n\n\n[PRIMARY] Remove\n[SECONDARY] Remove\n[RELOAD] Switch Tools");
-				case 2:ShowHudText(client, -1, "TOOL:\nALLAHU AKBAR!!\n\n\n\n[PRIMARY] BOOM!\n[RELOAD] Switch Tools");
+				case 2:ShowHudText(client, -1, "TOOL:\nTHE EXPLOSION TOOL\n\n\n\n[PRIMARY] BOOM!\n[RELOAD] Switch Tools");
 				case 3:ShowHudText(client, -1, "TOOL:\nRESIZE TOOL\n\n\n\n[PRIMARY] Larger\n[SECONDARY] Smaller\n[RELOAD] Switch Tools");
 				case 4:ShowHudText(client, -1, "TOOL:\nNO COLLIDE\n\n\n\n[PRIMARY] No Collide\n[SECONDARY] Collide\n[RELOAD] Switch Tools");
 				case 5:ShowHudText(client, -1, "TOOL:\nDUPLICATOR\n\n\n\n[PRIMARY] Paste\n[SECONDARY] Copy\n[RELOAD] Switch Tools");
@@ -4098,7 +4098,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	
 }
 
-public Action WeaponSwitchHook(int client, int entity) 
+public Action WeaponSwitchHook(int client, int entity)
 {
 	char weaponname[64];
 	if (!IsPlayerAlive(client) || !IsValidEntity(entity)) {
@@ -4185,7 +4185,7 @@ public Action WeaponSwitchHook(int client, int entity)
 	
 }
 
-public void PreThinkHook(int client) 
+public void PreThinkHook(int client)
 {
 	if (IsValidClient(client) && IsPlayerAlive(client))
 	{
@@ -4257,7 +4257,7 @@ public void PreThinkHook(int client)
 				if (teamcanusegravitygun(clientteam) && g_bIsWeaponGrabber[client]) {
 					int iWeapon = GetPlayerWeaponSlot(client, 1);
 					int iActiveWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-					if(IsValidEntity(iWeapon) && iWeapon == iActiveWeapon && GetEntProp(iActiveWeapon, Prop_Send, "m_iEntityQuality") == 6)
+					if (IsValidEntity(iWeapon) && iWeapon == iActiveWeapon && GetEntProp(iActiveWeapon, Prop_Send, "m_iEntityQuality") == 6)
 					{
 						grab(client);
 					}
@@ -4307,14 +4307,14 @@ public void PreThinkHook(int client)
 	
 }
 
-void grab(int client) 
+void grab(int client)
 {
 	int targetentity;
 	float distancetoentity, resultpos[3];
 	
 	targetentity = GetClientAimEntity3(client, distancetoentity, resultpos);
 	
-	if (IsValidEntity(targetentity) && !IsValidClient(targetentity)) 
+	if (IsValidEntity(targetentity) && !IsValidClient(targetentity))
 	{
 		int entityType = entityTypeCheck(targetentity); //PropTypeCheck 
 		
@@ -4322,7 +4322,7 @@ void grab(int client)
 		//Owner = GetEntPropEnt(targetentity, Prop_Send, "m_hOwnerEntity");
 		if (entityType != 0 && IsValidClient(Build_ReturnEntityOwner(targetentity)))
 		{
-	
+			
 			/*	//should we allow grab?
 				if(GetForwardFunctionCount(forwardOnClientGrabEntity) > 0){
 				
@@ -4341,9 +4341,9 @@ void grab(int client)
 					
 				}
 				*/
-			if (!clientcangrab(client))	
+			if (!clientcangrab(client))
 				return;
-
+			
 			if (entityType == 4 && GetEntPropEnt(targetentity, Prop_Send, "m_hBuilder") != client)
 				return;
 			
@@ -4422,7 +4422,7 @@ void grab(int client)
 	}
 }
 
-void emptyshoot(int client) 
+void emptyshoot(int client)
 {
 	
 	if (!clientcanpull(client)) {
@@ -4489,13 +4489,13 @@ void emptyshoot(int client)
 	
 }
 
-void release(int client) 
+void release(int client)
 {
-	if (EntRefToEntIndex(grabbedentref[client]) != -1) 
+	if (EntRefToEntIndex(grabbedentref[client]) != -1)
 	{
 		Phys_EnableGravity(EntRefToEntIndex(grabbedentref[client]), entitygravitysave[client]);
 		SetEntPropEnt(grabbedentref[client], Prop_Send, "m_hOwnerEntity", EntRefToEntIndex(entityownersave[client]));
-		if (IsValidClient(client) && IsClientInGame(client)) 
+		if (IsValidClient(client) && IsClientInGame(client))
 		{
 			playsoundfromclient(client, SOUNDTYPE_GRAVITYGUN_DROP);
 		}
@@ -4507,7 +4507,7 @@ void release(int client)
 	stopentitysound(client, SOUND_GRAVITYGUN_HOLD);
 }
 
-void hold(int client) 
+void hold(int client)
 {
 	float resultpos[3], resultvecnormal[3];
 	GetClientAimPosition(client, grabdistance[client], resultpos, resultvecnormal, tracerayfilterrocket, client);
@@ -4542,7 +4542,7 @@ void hold(int client)
 	
 	matrix3x4_t playerlocalspace[matrix3x4_t], playerlocalspaceafterchange[matrix3x4_t];
 	
-	matrix3x4FromAnglesNoOrigin( clienteyeangle, playerlocalspace);
+	matrix3x4FromAnglesNoOrigin(clienteyeangle, playerlocalspace);
 	matrix3x4FromAnglesNoOrigin(clienteyeangleafterchange, playerlocalspaceafterchange);
 	
 	
@@ -4637,7 +4637,7 @@ int entityTypeCheck(int entity) //PropTypeCheck
 	} else if (StrEqual(classname, "obj_sentrygun", false) || StrEqual(classname, "obj_dispenser", false)
 		 || StrEqual(classname, "obj_teleporter", false)) {
 		
-		return 1;	
+		return 1;
 	}
 	else if (StrContains(classname, "player", false) != -1)
 	{
@@ -4651,7 +4651,7 @@ int entityTypeCheck(int entity) //PropTypeCheck
 	
 }
 
-bool clientcanpull(int client) 
+bool clientcanpull(int client)
 {
 	float now = GetGameTime();
 	
@@ -4667,11 +4667,11 @@ bool clientcanpull(int client)
 	
 }
 
-bool clientcangrab(int client) 
+bool clientcangrab(int client)
 {
-	if(!IsValidClient(client))
+	if (!IsValidClient(client))
 		return false;
-		
+	
 	float now = GetGameTime();
 	
 	if (nextactivetime[client] <= now) {
@@ -4700,12 +4700,12 @@ bool clientcangrab(int client)
 			
 			GetForwardFunctionCount(forwardOnClientGrabEntity) == 1;
 			return true;
-		}	
+		}
 	}
 	return false;
 }
 
-bool clientisgrabbingvalidobject(int client) 
+bool clientisgrabbingvalidobject(int client)
 {
 	
 	if (EntRefToEntIndex(grabbedentref[client]) != -1 && Phys_IsPhysicsObject(EntRefToEntIndex(grabbedentref[client]))) {
@@ -4720,7 +4720,7 @@ bool clientisgrabbingvalidobject(int client)
 	
 }
 
-public int Native_GetCurrntHeldEntity(Handle plugin, int args) 
+public int Native_GetCurrntHeldEntity(Handle plugin, int args)
 {
 	
 	int client = GetNativeCell(1);
@@ -4737,7 +4737,7 @@ public int Native_GetCurrntHeldEntity(Handle plugin, int args)
 	
 }
 
-public int Native_ForceDropHeldEntity(Handle plugin, int args) 
+public int Native_ForceDropHeldEntity(Handle plugin, int args)
 {
 	int client = GetNativeCell(1);
 	
@@ -4750,7 +4750,7 @@ public int Native_ForceDropHeldEntity(Handle plugin, int args)
 	return false;
 }
 
-public int Native_ForceGrabEntity(Handle plugin, int args) 
+public int Native_ForceGrabEntity(Handle plugin, int args)
 {
 	int client = GetNativeCell(1);
 	int entity = GetNativeCell(2);
@@ -4792,11 +4792,11 @@ public Action ClientRemoveAll(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	char arg[65];// , cmd[192];
+	char arg[65]; // , cmd[192];
 	GetCmdArg(1, arg, sizeof(arg));
 	
 	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS]; 
+	int target_list[MAXPLAYERS];
 	int target_count;
 	bool tn_is_ml;
 	
@@ -4870,7 +4870,7 @@ stock bool GetAimOrigin(int client, float hOrigin[3])
 
 // BlackList
 
-public Action Command_AddBL(int client, int args) 
+public Action Command_AddBL(int client, int args)
 {
 	if (args < 1) {
 		ReplyToCommand(client, "[SM] Usage: sm_bl <#userid|name>");
@@ -4881,7 +4881,7 @@ public Action Command_AddBL(int client, int args)
 	GetCmdArg(1, arg, sizeof(arg));
 	
 	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count; 
+	int target_list[MAXPLAYERS], target_count;
 	bool tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(arg, client, target_list, MAXPLAYERS, 0, target_name, sizeof(target_name), tn_is_ml)) <= 0) {
@@ -4910,7 +4910,7 @@ public Action Command_AddBL(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_RemoveBL(int client, int args) 
+public Action Command_RemoveBL(int client, int args)
 {
 	if (args < 1) {
 		ReplyToCommand(client, "[SM] Usage: sm_unbl <#userid|name>");
@@ -4921,7 +4921,7 @@ public Action Command_RemoveBL(int client, int args)
 	GetCmdArg(1, arg, sizeof(arg));
 	
 	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count; 
+	int target_list[MAXPLAYERS], target_count;
 	bool tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(arg, client, target_list, MAXPLAYERS, 0, target_name, sizeof(target_name), tn_is_ml)) <= 0) {
@@ -4976,7 +4976,9 @@ stock void GiveToolgun(int client)
 		
 		TF2Items_SetAttribute(hWeapon, 2, 106, 0.0); //Accuracy bonus
 		TF2Items_SetAttribute(hWeapon, 3, 1, 0.0); //Damage Penalty
-		TF2Items_SetNumAttributes(hWeapon, 4);
+		TF2Items_SetAttribute(hWeapon, 2, 6, 2.0); // Fire Rate Bonus
+		//TF2Items_SetAttribute(hWeapon, 2, 5, -1.0); // No limit = fun
+		TF2Items_SetNumAttributes(hWeapon, 5);
 		
 		int weapon = TF2Items_GiveNamedItem(client, hWeapon);
 		EquipPlayerWeapon(client, weapon);
@@ -5070,17 +5072,19 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 			{
 				if (Build_IsAdmin(client))
 				{
-					int explosion = CreateEntityByName("env_explosion");
-					DispatchKeyValue(explosion, "magnitude", "10000");
-					DispatchKeyValue(explosion, "radius_override", "256");
-					DispatchKeyValue(explosion, "rendermode", "5");
-					DispatchKeyValue(explosion, "spawnflags", "0");
-					TeleportEntity(explosion, flHitPos, NULL_VECTOR, NULL_VECTOR);
-					DispatchSpawn(explosion);
-					ActivateEntity(explosion);
-					AcceptEntityInput(explosion, "Explode");
-					
-					AcceptEntityInput(explosion, "Kill");
+					int ent = CreateEntityByName("info_particle_system");
+					if (IsValidEntity(ent))
+					{
+						TeleportEntity(ent, flHitPos, NULL_VECTOR, NULL_VECTOR);
+						DispatchKeyValue(ent, "effect_name", "asplode_hoodoo");
+						DispatchSpawn(ent);
+						ActivateEntity(ent);
+						AcceptEntityInput(ent, "start");
+						SetVariantString("OnUser1 !self:Kill::8:-1");
+						AcceptEntityInput(ent, "AddOutput");
+						AcceptEntityInput(ent, "FireUser1");
+						EmitAmbientSound("weapons/explode3.wav", flHitPos, _, SNDLEVEL_SCREAMING);
+					}
 				}
 				else
 				{
@@ -5449,16 +5453,26 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 		
 		int random = GetRandomInt(0, 1);
 		if (random == 1) {
-			EmitAmbientSound(SND_TOOLGUN_SHOOT2, flHitPos, iHitEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-			EmitAmbientSound(SND_TOOLGUN_SHOOT2, fOrigin, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			/* Fuck you all toolgun spammers. I made this change so you guys cannot rape people ears. Thank you.
+			I'd rather change the toolgun sound to play the entire Em Gai Mua song, but LeadKiller doesn't want me so then, that's it all.
+			*/
+			//EmitAmbientSound(SND_TOOLGUN_SHOOT2, flHitPos, iHitEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			//EmitAmbientSound(SND_TOOLGUN_SHOOT2, fOrigin, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT2, iHitEntity, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT2, client, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			/*EmitSoundToAll(SND_TOOLGUN_SHOOT2, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
 			EmitSoundToClient(client, SND_TOOLGUN_SHOOT2);*/
 		} else {
 			/*EmitSoundToAll(SND_TOOLGUN_SHOOT, weapon, SNDCHAN_WEAPON, SNDLEVEL_RAIDSIREN);
 			EmitSoundToClient(client, SND_TOOLGUN_SHOOT);*/
 			
-			EmitAmbientSound(SND_TOOLGUN_SHOOT, flHitPos, iHitEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-			EmitAmbientSound(SND_TOOLGUN_SHOOT, fOrigin, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			// Fuck you all toolgun spammers. I made this change so you guys cannot rape people ears. Thank you.
+			//EmitAmbientSound(SND_TOOLGUN_SHOOT, flHitPos, iHitEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			//EmitAmbientSound(SND_TOOLGUN_SHOOT, fOrigin, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT, iHitEntity, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			EmitSoundToClient(client, SND_TOOLGUN_SHOOT, client, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 		}
 		
 		TE_SetupBeamRingPoint(flHitPos, 10.0, 150.0, g_Beam, g_Halo, 0, 10, 0.6, 3.0, 0.5, ColorWhite, 20, 0);
@@ -5577,7 +5591,7 @@ public Action Command_TF2SBHideHud(int client, int args)
 	
 	if (hidehudnumber == 2048)
 	{
-		Client_SetHideHud( client, HIDEHUD_ALL);
+		Client_SetHideHud(client, HIDEHUD_ALL);
 		Client_SetDrawViewModel(client, false);
 	}
 	else
@@ -5588,23 +5602,23 @@ public Action Command_TF2SBHideHud(int client, int args)
 	return Plugin_Handled;
 }
 
-stock int GetClientAimEntity3(int client, float &distancetoentity, float endpos[3]){
-
+stock int GetClientAimEntity3(int client, float &distancetoentity, float endpos[3]) {
+	
 	float cleyepos[3], cleyeangle[3];
-	GetClientEyePosition(client, cleyepos); 
+	GetClientEyePosition(client, cleyepos);
 	GetClientEyeAngles(client, cleyeangle);
 	
 	Handle traceresulthandle = INVALID_HANDLE;
 	
 	traceresulthandle = TR_TraceRayFilterEx(cleyepos, cleyeangle, MASK_SOLID, RayType_Infinite, tracerayfilterdefault, client);
 	
-	if(TR_DidHit(traceresulthandle) == true){
+	if (TR_DidHit(traceresulthandle) == true) {
 		
 		TR_GetEndPosition(endpos, traceresulthandle);
 		
 		//거리가 일정 이하일 경우
 		distancetoentity = GetVectorDistance(cleyepos, endpos);
-		int entindextoreturn = TR_GetEntityIndex(traceresulthandle); 
+		int entindextoreturn = TR_GetEntityIndex(traceresulthandle);
 		
 		CloseHandle(traceresulthandle);
 		
@@ -5620,21 +5634,21 @@ stock int GetClientAimEntity3(int client, float &distancetoentity, float endpos[
 stock bool GetClientAimPosition(int client, float maxtracedistance, float resultvecpos[3], float resultvecnormal[3], TraceEntityFilter Tfunction, int filter)
 {
 	float cleyepos[3], cleyeangle[3], eyeanglevector[3];
-	GetClientEyePosition(client, cleyepos); 
+	GetClientEyePosition(client, cleyepos);
 	GetClientEyeAngles(client, cleyeangle);
 	
 	Handle traceresulthandle = INVALID_HANDLE;
 	
 	traceresulthandle = TR_TraceRayFilterEx(cleyepos, cleyeangle, MASK_SOLID, RayType_Infinite, Tfunction, filter);
 	
-	if(TR_DidHit(traceresulthandle) == true){
+	if (TR_DidHit(traceresulthandle) == true) {
 		
 		float endpos[3];
 		TR_GetEndPosition(endpos, traceresulthandle);
 		TR_GetPlaneNormal(traceresulthandle, resultvecnormal);
 		
 		//거리가 일정 이하일 경우
-		if((GetVectorDistance(cleyepos, endpos) <= maxtracedistance) || maxtracedistance <= 0){
+		if ((GetVectorDistance(cleyepos, endpos) <= maxtracedistance) || maxtracedistance <= 0) {
 			
 			resultvecpos[0] = endpos[0];
 			resultvecpos[1] = endpos[1];
@@ -5643,7 +5657,7 @@ stock bool GetClientAimPosition(int client, float maxtracedistance, float result
 			CloseHandle(traceresulthandle);
 			return true;
 			
-		}else{
+		} else {
 			
 			GetAngleVectors(cleyeangle, eyeanglevector, NULL_VECTOR, NULL_VECTOR);
 			NormalizeVector(eyeanglevector, eyeanglevector);
@@ -5665,7 +5679,7 @@ stock bool GetClientAimPosition(int client, float maxtracedistance, float result
 public bool tracerayfilterrocket(int entity, int mask, any data)
 {
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	if(entity != data && owner != data)
+	if (entity != data && owner != data)
 	{
 		return true;
 	}
@@ -5677,12 +5691,12 @@ public bool tracerayfilterrocket(int entity, int mask, any data)
 
 public bool tracerayfilterdefault(int entity, int mask, any data)
 {
-	if(entity != data)
+	if (entity != data)
 	{
-		return true;	
+		return true;
 	}
 	else
 	{
 		return false;
 	}
-}
+} 
