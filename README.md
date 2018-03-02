@@ -4,7 +4,7 @@ This is a fork mod of the original BuildMod for HL2DM (https://sourceforge.net/p
 
 TF2: Sandbox is a open-source gamemode for Team Fortress 2 that introduces PhysGun, ability to build.
 
-In this game, players can releash their creative head and build things they love, you can roleplay, can build, can do many things like building a parkour, building a house, a restaurant and many more.
+In this game, players can releash their creative head and build things they love, you can roleplay, can build, can do many things like building a parkour, building a house, and many more.
 
 General Sandbox Features:
 - Spawn Props - Spawn any props in order to build something.
@@ -18,9 +18,7 @@ General Sandbox Features:
 - Set Pitch (not done yet)
 
 To Do:
-- Assign a WeaponID to the Physics Gun.
-- Tool Gun
-- MSTR Sandbox Messages
+- Please refer to #todo on Moddage Discord.
 
 Main Steam Group:
 http://steamcommunity.com/groups/TF2Sandbox
@@ -29,3 +27,5 @@ Official Sandbox server group:
 http://steamcommunity.com/groups/Moddage
 
 Pull requests are welcome!
+
+The code is very crap but it works, feel free to help me tidy it!
