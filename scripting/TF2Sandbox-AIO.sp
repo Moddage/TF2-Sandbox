@@ -116,6 +116,7 @@ char g_szDelRangeStatus[MAXPLAYERS][8];
 bool g_szDelRangeCancel[MAXPLAYERS] =  { false, ... };
 
 int g_RememberGodmode[MAXPLAYERS];
+int g_RememberBuddha[MAXPLAYERS];
 
 int ColorBlue[4] =  {
 	50, 
@@ -338,7 +339,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Doors creator.");
 	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light.");
 	RegAdminCmd("sm_fly", Command_Fly, 0, "I BELIEVE I CAN FLYYYYYYY, I BELIEVE THAT I CAN TOUCH DE SKY");
-	RegAdminCmd("sm_setname", Command_SetName, 0, "SetPropname");
+	RegAdminCmd("sm_setname", Command_SetName, 0, "Set name of a prop!");
 	RegAdminCmd("sm_simplelight", Command_SimpleLight, 0, "Spawn a Light, in a very simple way.");
 	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, 0, "Making a door, in prop_door way.");
 	RegAdminCmd("sm_propscale", Command_PropScale, ADMFLAG_SLAY, "Resizing a prop");
@@ -365,6 +366,7 @@ public void OnPluginStart()
 	// Godmode Spawn
 	HookEvent("player_spawn", Event_Spawn);
 	RegAdminCmd("sm_god", Command_ChangeGodMode, 0, "Turn Godmode On/Off");
+	RegAdminCmd("sm_buddha", Command_ChangeBuddha, 0, "Turn Buddha On/Off");
 	
 	// Grab
 	RegAdminCmd("+grab", Command_EnableGrab, 0, "Grab props.");
@@ -415,7 +417,7 @@ public void OnPluginStart()
 	
 	// Build Helper (placeholder)
 	g_hBuildHelperMenu = CreateMenu(BuildHelperMenu);
-	SetMenuTitle(g_hBuildHelperMenu, "TF2SB - Build Helper\nThis was actually a placeholder because we can't figure out how to make a toolgun");
+	SetMenuTitle(g_hBuildHelperMenu, "TF2SB - Build Helper\nType /toolgun for toolgun\nThis menu was here because not all features are in ToolGun.");
 	
 	AddMenuItem(g_hBuildHelperMenu, "delprop", "Delete Prop");
 	AddMenuItem(g_hBuildHelperMenu, "colors", "Color (see chat)");
@@ -444,7 +446,7 @@ public void OnPluginStart()
 	//	AddMenuItem(g_hCondMenu, "infammo", "Inf. Ammo");
 	AddMenuItem(g_hCondMenu, "speedboost", "Speed Boost");
 	AddMenuItem(g_hCondMenu, "resupply", "Resupply");
-	//	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
+	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
 	AddMenuItem(g_hCondMenu, "minicrits", "Mini-Crits");
 	AddMenuItem(g_hCondMenu, "fly", "Fly");
 	//	AddMenuItem(g_hCondMenu, "infclip", "Inf. Clip");
@@ -456,9 +458,14 @@ public void OnPluginStart()
 	g_hEquipMenu = CreateMenu(EquipMenu);
 	SetMenuTitle(g_hEquipMenu, "TF2SB - Equip...");
 	
-	AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
-	AddMenuItem(g_hEquipMenu, "physgunv2", "Physics Gun V2");
+	
+	AddMenuItem(g_hEquipMenu, "physgunv2", "Physics Gun V3");
 	AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
+	AddMenuItem(g_hEquipMenu, "blankspacec101", "");
+	AddMenuItem(g_hEquipMenu, "blankspacec101", "");
+	AddMenuItem(g_hEquipMenu, "blankspacec101", "");
+	AddMenuItem(g_hEquipMenu, "blankspacec106", "// STOP USE PHYSGUN 1.0!!");
+	AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
 	//	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
 	
 	SetMenuExitBackButton(g_hEquipMenu, true);
@@ -1977,7 +1984,7 @@ public Action Command_SpawnDoor(int client, int args)
 		Build_PrintToChat(client, "!sdoor a = Select door");
 		Build_PrintToChat(client, "!sdoor b = Select button (Shoot to open)");
 		Build_PrintToChat(client, "!sdoor c = Select button (Press to open)");
-		Build_PrintToChat(client, "NOTE: Not all doors movable using PhysGun, use the !move command!");
+		Build_PrintToChat(client, "NOTE: As for the current update, sdoors are fixed.");
 	}
 	return Plugin_Handled;
 }
@@ -2305,6 +2312,11 @@ public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
 		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
 	}
 	
+	if(g_RememberBuddha[client] == 1.0)
+	{
+		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
+	}
+	
 	nextactivetime[client] = GetGameTime();
 }
 
@@ -2323,7 +2335,30 @@ public Action Command_ChangeGodMode(int client, int args)
 	{
 		Build_PrintToChat(client, "God Mode ON");
 		g_RememberGodmode[client] = 1;
+		g_RememberBuddha[client] = 0;
 		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
+	}
+	
+	return Plugin_Handled;
+}
+
+public Action Command_ChangeBuddha(int client, int args)
+{
+	if (!Build_IsClientValid(client, client, true))
+		return Plugin_Handled;
+	
+	if (GetEntProp(client, Prop_Data, "m_takedamage") == 1)
+	{
+		Build_PrintToChat(client, "Buddha OFF");
+		g_RememberBuddha[client] = 0;
+		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
+	}
+	else
+	{
+		Build_PrintToChat(client, "Buddha ON");
+		g_RememberBuddha[client] = 1;
+		g_RememberGodmode[client] = 0;
+		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
 	}
 	
 	return Plugin_Handled;
@@ -2509,6 +2544,8 @@ public void EntityInfo(int client, int iTarget)
 		}
 	}
 	
+	int hidehudnumber = GetEntProp(client, Prop_Send, "m_iHideHUD");
+	
 	SetHudTextParams(0.015, 0.08, 0.01, 255, 255, 255, 255, 0, 6.0, 0.1, 0.2);
 	if (IsPlayer(iTarget)) {
 		int iHealth = GetClientHealth(iTarget);
@@ -2518,9 +2555,14 @@ public void EntityInfo(int client, int iTarget)
 			char szSteamId[32], szIP[16];
 			GetClientAuthId(iTarget, AuthId_Steam2, szSteamId, sizeof(szSteamId));
 			GetClientIP(iTarget, szIP, sizeof(szIP));
+			if (hidehudnumber == 2048){
 			ShowHudText(client, -1, "Player: %N\nHealth: %i\nUserID: %i\nSteamID:%s", iTarget, iHealth, GetClientUserId(iTarget), szSteamId);
+		}
 		} else {
+			if (hidehudnumber == 2048)
+			{
 			ShowHudText(client, -1, "Player: %N\nHealth: %i", iTarget, iHealth);
+		}
 		}
 		return;
 	}
@@ -2551,11 +2593,17 @@ public void EntityInfo(int client, int iTarget)
 	
 	if (Phys_IsPhysicsObject(iTarget)) {
 		SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
+		
 		if (StrContains(szClass, "prop_door_", false) == 0) {
+			if (hidehudnumber == 2048){
 			ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 		}
+		}
 		else {
-			ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
+			if (hidehudnumber == 2048)
+			{
+				ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
+			}
 		}
 		//if (g_bClientLang[client])
 		
@@ -2564,7 +2612,10 @@ public void EntityInfo(int client, int iTarget)
 		//ShowHudText(client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s\nMass:%f", szClass, iTarget, szModel, szOwner, Phys_GetMass(iTarget));
 	} else {
 		if (g_bClientLang[client])
-			ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
+			if (hidehudnumber == 2048)
+			{
+				ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
+			}
 		//ShowHudText(client, -1, "類型: %s\n編號: %i\n模組: %s\n擁有者: %s", szClass, iTarget, szModel, szOwner);
 		//else
 		//ShowHudText(client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s", szClass, iTarget, szModel, szOwner);
@@ -3412,7 +3463,8 @@ public Action Command_ToolGun(int client, int args)
 public Action Command_PhysGun(int client, int args)
 {
 	Build_PrintToChat(client, "You have a Physics Gun v1!");
-	Build_PrintToChat(client, "Your Physics Gun will be in the secondary slot.");
+	Build_PrintToChat(client, "GAWH, WHY ARE YOU USING PHYSGUN 1.0??");
+	Build_PrintToChat(client, "USE 2.0 ALREADY! (/g)");
 	TF2Items_GiveWeapon(client, 99999);
 	int weapon = GetPlayerWeaponSlot(client, 1);
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
@@ -3420,7 +3472,7 @@ public Action Command_PhysGun(int client, int args)
 
 public Action Command_PhysGunNew(int client, int args)
 {
-	FakeClientCommand(client, "sm_p");
+	FakeClientCommand(client, "sm_pg");
 }
 
 public Action Command_Resupply(int client, int args)
@@ -3550,6 +3602,11 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_god");
 		}
 		
+		if (StrEqual(item, "buddha"))
+		{
+			FakeClientCommand(param1, "sm_buddha");
+		}
+		
 		/*if (StrEqual(item, "buddha"))
 		{
 			FakeClientCommand(param1, "sm_buddha");				
@@ -3663,8 +3720,7 @@ public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "model"))
 		{
-			Build_PrintToChat(param1, "Not yet implemented");
-			DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_bonemerge");
 		}
 		
 		if (StrEqual(item, "pitch"))
@@ -3693,7 +3749,7 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		}
 		if (StrEqual(item, "physgunv2"))
 		{
-			FakeClientCommand(param1, "sm_p");
+			FakeClientCommand(param1, "sm_pg");
 		}
 		if (StrEqual(item, "toolgun"))
 		{

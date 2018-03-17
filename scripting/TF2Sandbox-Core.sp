@@ -76,7 +76,7 @@ int g_iServerCurrent;
 int g_iEntOwner[MAX_HOOK_ENTITIES] =  { -1, ... };
 
 //char
-static const char tips[10][] =  
+static const char tips[12][] =  
 {
 	"Type /g to get the Physics Gun and move props around.", 
 	"You can rotate a prop by holding down the Reload button.", 
@@ -87,7 +87,9 @@ static const char tips[10][] =
 	"Type /build to begin building.", 
 	"TF2SB Source Code: https://github.com/Danct12/TF2SB", 
 	"TF2SB official group: http://steamcommunity.com/groups/TF2Sandbox", 
-	"Tired to be in Godmode? Why not turn it off? Say !god"
+	"Tired to be in Godmode? Why not turn it off? Say !god",
+	"If you want to rocket jump while in GodMode, say !buddha",
+	"Ever wanted to know what changed in each versions? Say !changelog"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) 
@@ -196,7 +198,7 @@ public void OnPluginStart()
 	g_hBlackListArray = CreateArray(33, 128); // 33 arrays, every array size is 128
 	ReadBlackList();
 	PrintToServer("[TF2SB] Plugin successfully started!");
-	PrintToServer("This plugin is a work in progress thing, if you have any issues about it, please make a issue post on TF2SB Github: https://github.com/Danct12/TF2SB");
+	PrintToServer("This plugin is a work in progress thing, if you have any issues about it, please contact Huong Tram Singer.");
 	CreateTimer(120.0, HandleTips, 0, 1);	
 }
 
@@ -220,7 +222,12 @@ public Action DisplayHud(Handle timer)
 	SetHudTextParams(-1.0, 0.0, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 	for(int i = 1; i <= MAXPLAYERS; i++) if (Build_IsClientValid(i, i))
 	{
-		ShowHudText(i, -1, "Type !build. This is a WORK IN PROGRESS gamemode!\n\nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
+		int hidehudnumber = GetEntProp(i, Prop_Send, "m_iHideHUD");
+	
+		if (hidehudnumber == 2048)
+		{
+			ShowHudText(i, -1, "Type !build. This is a WORK IN PROGRESS gamemode!\n\nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
+		}
 	}
 	CreateTimer(0.1, DisplayHud);
 }
@@ -765,8 +772,8 @@ public int Native_IsBlacklisted(Handle hPlugin, int iNumParams)
 		} 
 		else 
 		{
-			Build_PrintToChat(client, "You were blacklisted :(");
-			Build_PrintToChat(client, "You may ask admins to unblacklist you :(");
+			Build_PrintToChat(client, "You're banned from TF2 Sandbox! :(");
+			Build_PrintToChat(client, "For more details, appeal ban to LeadKiller.");
 		}
 		return true;
 	}
