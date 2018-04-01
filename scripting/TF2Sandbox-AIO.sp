@@ -773,6 +773,7 @@ public void OnPluginStart()
 		{
 			SDKHook(i, SDKHook_PreThink, PreThinkHook);
 			SDKHook(i, SDKHook_WeaponSwitch, WeaponSwitchHook);
+			SDKHook(i, SDKHook_WeaponSwitchPost, WeaponSwitchHookPost);
 		}
 	}
 	
@@ -4095,11 +4096,11 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		int aw = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
 		if (IsValidEntity(aw) && g_bIsToolgun[aw])
 		{
-			int ent = GetEntPropEnt(client, Prop_Data, "m_hViewModel");
+			/*int ent = GetEntPropEnt(client, Prop_Data, "m_hViewModel");
 			SetEntProp(ent, Prop_Data, "m_nModelIndex", PrecacheModel(MDL_TOOLGUN), 2);
-			SetEntProp(ent, Prop_Send, "m_nSequence", 1);
+			SetEntProp(ent, Prop_Send, "m_nSequence", 1);*/
 			
-			SetHudTextParams(0.0, 0.25, 1.0, 150, 150, 0, 150, 0, 0.0, 0.0, 0.0);
+			SetHudTextParams(0.0, 0.25, 3.0, 150, 150, 0, 150, 0, 0.0, 0.0, 0.0);
 			
 			switch (g_iTool[client])
 			{
@@ -5832,3 +5833,37 @@ public bool tracerayfilterdefault(int entity, int mask, any data)
 		return false;
 	}
 } 
+
+public Action WeaponSwitchHookPost(int client, int entity) 
+{
+	if(IsValidClient(client) && IsPlayerAlive(client))
+	{
+		int aw = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
+		int iViewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+		if(g_bIsToolgun[aw])
+		{
+			SetEntProp(iViewModel, Prop_Send, "m_nModelIndex", PrecacheModel(MDL_TOOLGUN), 2);
+			SetEntProp(iViewModel, Prop_Send, "m_nSequence", 2);
+		}
+		else
+		{
+			if(GetEntProp(iViewModel, Prop_Send, "m_nModelIndex", 2) == PrecacheModel(MDL_TOOLGUN))
+			{
+				char sArmModel[128];
+				switch (TF2_GetPlayerClass(client))
+				{
+					case TFClass_Scout: 	Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_scout_arms.mdl");
+					case TFClass_Soldier: 	Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_soldier_arms.mdl");
+					case TFClass_Pyro: 		Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_pyro_arms.mdl");
+					case TFClass_DemoMan: 	Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_demo_arms.mdl");
+					case TFClass_Heavy:		Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_heavy_arms.mdl");
+					case TFClass_Engineer: 	Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_engineer_arms.mdl");
+					case TFClass_Medic: 	Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_medic_arms.mdl");
+					case TFClass_Sniper: 	Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_sniper_arms.mdl");
+					case TFClass_Spy: 		Format(sArmModel, sizeof(sArmModel), "models/weapons/c_models/c_spy_arms.mdl");
+				}
+				if(strlen(sArmModel) > 0)	SetEntProp(iViewModel, Prop_Send, "m_nModelIndex", PrecacheModel(sArmModel, true), 2);
+			}
+		}
+	}	
+}
