@@ -31,6 +31,7 @@
 #include <tf2attributes>
 #include <entity_prop_stocks>
 #include <tf2items>
+#include <advancedinfiniteammo>
 //#include <stocklib>
 #include <matrixmath>
 #include "GravityGun/GravityGunsound.inc"
@@ -158,12 +159,15 @@ Handle g_hEquipMenu = INVALID_HANDLE;
 Handle g_hPoseMenu = INVALID_HANDLE;
 Handle g_hPlayerStuff = INVALID_HANDLE;
 Handle g_hCondMenu = INVALID_HANDLE;
+Handle g_hModelMenu = INVALID_HANDLE;
+Handle g_hDSPMenu = INVALID_HANDLE;
 Handle g_hRemoveMenu = INVALID_HANDLE;
 Handle g_hBuildHelperMenu = INVALID_HANDLE;
 Handle g_hPropMenuComic = INVALID_HANDLE;
 Handle g_hPropMenuConstructions = INVALID_HANDLE;
 Handle g_hPropMenuWeapons = INVALID_HANDLE;
 Handle g_hPropMenuPickup = INVALID_HANDLE;
+Handle g_hPropMenuLead = INVALID_HANDLE;
 Handle g_hPropMenuHL2 = INVALID_HANDLE;
 
 /*char g_szFile[128];
@@ -293,7 +297,7 @@ int g_iPhys;
 public Plugin myinfo = 
 {
 	name = "TF2 Sandbox All In One Module", 
-	author = "Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, hjkwe654, BattlefieldDuck", 
+	author = "Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, hjkwe654, BattlefieldDuck, LeadKiller", 
 	description = "Everything in one module, isn't that cool? Yes", 
 	version = BUILDMOD_VER, 
 	url = "http://dtf2server.ddns.net"
@@ -346,9 +350,10 @@ public void OnPluginStart()
 	
 	// HL2 Props
 	g_hPropMenuHL2 = CreateMenu(PropMenuHL2);
-	SetMenuTitle(g_hPropMenuHL2, "TF2SB - HL2 Props and Miscs\nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuHL2, "TF2SB - Miscellaneous"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuHL2, true);
-	AddMenuItem(g_hPropMenuHL2, "removeprops", "|Remove");
+	AddMenuItem(g_hPropMenuHL2, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuHL2, "blank", "", ITEMDRAW_IGNORE);
 	
 	g_hCookieSDoorTarget = RegClientCookie("cookie_SDoorTarget", "For SDoor.", CookieAccess_Private);
 	g_hCookieSDoorModel = RegClientCookie("cookie_SDoorModel", "For SDoor.", CookieAccess_Private);
@@ -367,6 +372,9 @@ public void OnPluginStart()
 	HookEvent("player_spawn", Event_Spawn);
 	RegAdminCmd("sm_god", Command_ChangeGodMode, 0, "Turn Godmode On/Off");
 	RegAdminCmd("sm_buddha", Command_ChangeBuddha, 0, "Turn Buddha On/Off");
+
+	// Health
+	RegAdminCmd("sm_addhealth", Command_Health, 0, "Add onto your health.");
 	
 	// Grab
 	RegAdminCmd("+grab", Command_EnableGrab, 0, "Grab props.");
@@ -390,11 +398,14 @@ public void OnPluginStart()
 	
 	// Simple Menu
 	g_hMainMenu = CreateMenu(MainMenu);
-	SetMenuTitle(g_hMainMenu, "TF2SB - Spawnlist v2");
+	// SetMenuTitle(g_hMainMenu, "TF2SB - Spawnlist v2");
+	SetMenuTitle(g_hMainMenu, "TF2SB - Spawnlist");
 	AddMenuItem(g_hMainMenu, "spawnlist", "Spawn...");
 	AddMenuItem(g_hMainMenu, "equipmenu", "Equip...");
 	AddMenuItem(g_hMainMenu, "playerstuff", "Player...");
-	AddMenuItem(g_hMainMenu, "buildhelper", "Build Helper...");
+	// AddMenuItem(g_hMainMenu, "entities", "~Entities~", ITEMDRAW_DISABLED);
+	// AddMenuItem(g_hMainMenu, "door", "Door");
+	// AddMenuItem(g_hMainMenu, "buildhelper", "Build Helper...");
 	
 	// Player Stuff for now
 	g_hPlayerStuff = CreateMenu(PlayerStuff);
@@ -414,28 +425,30 @@ public void OnPluginStart()
 	RegAdminCmd("sm_g2", Command_PhysGun, 0);
 	RegAdminCmd("sm_g", Command_PhysGunNew, 0);
 	RegAdminCmd("sm_resupply", Command_Resupply, 0);
+
+	// RegAdminCmd("sm_test", Command_Test, 0);
 	
 	// Build Helper (placeholder)
 	g_hBuildHelperMenu = CreateMenu(BuildHelperMenu);
-	SetMenuTitle(g_hBuildHelperMenu, "TF2SB - Build Helper\nType /toolgun for toolgun\nThis menu was here because not all features are in ToolGun.");
+	SetMenuTitle(g_hBuildHelperMenu, "TF2SB - Build Helper"); // \nType /toolgun for toolgun\nThis menu was here because not all features are in ToolGun.");
 	
-	AddMenuItem(g_hBuildHelperMenu, "delprop", "Delete Prop");
+	AddMenuItem(g_hBuildHelperMenu, "delprop", "| Delete");
 	AddMenuItem(g_hBuildHelperMenu, "colors", "Color (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "effects", "Effects (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "skin", "Skin (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "rotate", "Rotate (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "accuraterotate", "Accurate Rotate (see chat)");
-	AddMenuItem(g_hBuildHelperMenu, "doors", "Doors (see chat)");
-	AddMenuItem(g_hBuildHelperMenu, "lights", "Lights");
-	SetMenuExitBackButton(g_hBuildHelperMenu, true);
+	// AddMenuItem(g_hBuildHelperMenu, "doors", "Doors (see chat)");
+	AddMenuItem(g_hBuildHelperMenu, "lights", "Lights (see chat)");
+	// SetMenuExitBackButton(g_hBuildHelperMenu, true);
 	
 	// Remove Command
-	g_hRemoveMenu = CreateMenu(RemoveMenu);
-	SetMenuTitle(g_hRemoveMenu, "TF2SB - Remove");
-	AddMenuItem(g_hRemoveMenu, "remove", "Remove that prop");
-	AddMenuItem(g_hRemoveMenu, "delallfail", "To delete all, type !delall (there is no comeback)");
+	// g_hRemoveMenu = CreateMenu(RemoveMenu);
+	// SetMenuTitle(g_hRemoveMenu, "TF2SB - Remove");
+	// AddMenuItem(g_hRemoveMenu, "remove", "Remove that prop");
+	// AddMenuItem(g_hRemoveMenu, "delallfail", "To delete all, type !delall (there is no comeback)");
 	
-	SetMenuExitBackButton(g_hRemoveMenu, true);
+	// SetMenuExitBackButton(g_hRemoveMenu, true);
 	
 	//Addcond Menu
 	g_hCondMenu = CreateMenu(CondMenu);
@@ -443,29 +456,40 @@ public void OnPluginStart()
 	AddMenuItem(g_hCondMenu, "godmode", "Godmode");
 	AddMenuItem(g_hCondMenu, "crits", "Crits");
 	AddMenuItem(g_hCondMenu, "noclip", "Noclip");
-	//	AddMenuItem(g_hCondMenu, "infammo", "Inf. Ammo");
+	AddMenuItem(g_hCondMenu, "infammo", "Inf. Ammo");
 	AddMenuItem(g_hCondMenu, "speedboost", "Speed Boost");
 	AddMenuItem(g_hCondMenu, "resupply", "Resupply");
 	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
-	AddMenuItem(g_hCondMenu, "minicrits", "Mini-Crits");
-	AddMenuItem(g_hCondMenu, "fly", "Fly");
+	// AddMenuItem(g_hCondMenu, "minicrits", "Mini-Crits");
+	// AddMenuItem(g_hCondMenu, "fly", "Fly");
 	//	AddMenuItem(g_hCondMenu, "infclip", "Inf. Clip");
-	AddMenuItem(g_hCondMenu, "damagereduce", "Damage Reduction");
+	// AddMenuItem(g_hCondMenu, "damagereduce", "Damage Reduction");
 	AddMenuItem(g_hCondMenu, "removeweps", "Remove Weapons");
 	SetMenuExitBackButton(g_hCondMenu, true);
+
+	//voice fx
+	g_hDSPMenu = CreateMenu(DSPMenu);
+	SetMenuTitle(g_hDSPMenu, "TF2SB - Voice Effects...");
+	AddMenuItem(g_hDSPMenu, "0", "None");
+	AddMenuItem(g_hDSPMenu, "20", "Echo");
+	AddMenuItem(g_hDSPMenu, "23", "Blur");
+	AddMenuItem(g_hDSPMenu, "30", "Quiet");
+	AddMenuItem(g_hDSPMenu, "134", "Fly");
+	AddMenuItem(g_hDSPMenu, "135", "Demon");
+	AddMenuItem(g_hDSPMenu, "116", "Micspam");
+	SetMenuExitBackButton(g_hDSPMenu, true);
 	
 	// Equip Menu
 	g_hEquipMenu = CreateMenu(EquipMenu);
 	SetMenuTitle(g_hEquipMenu, "TF2SB - Equip...");
-	
-	
-	AddMenuItem(g_hEquipMenu, "physgunv2", "Physics Gun V3");
+	CreateTimer(2.0, TF2SB_DelayedStuff); // what the fuck is this hack holy shit
+
 	AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
-	AddMenuItem(g_hEquipMenu, "blankspacec101", "");
-	AddMenuItem(g_hEquipMenu, "blankspacec101", "");
-	AddMenuItem(g_hEquipMenu, "blankspacec101", "");
-	AddMenuItem(g_hEquipMenu, "blankspacec106", "// STOP USE PHYSGUN 1.0!!");
-	AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
+	// AddMenuItem(g_hEquipMenu, "blankspacec101", "");
+	// AddMenuItem(g_hEquipMenu, "blankspacec101", "");
+	// AddMenuItem(g_hEquipMenu, "blankspacec101", "");
+	// AddMenuItem(g_hEquipMenu, "blankspacec106", "// STOP USE PHYSGUN 1.0!!");
+	// AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
 	//	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
 	
 	SetMenuExitBackButton(g_hEquipMenu, true);
@@ -486,20 +510,36 @@ public void OnPluginStart()
 	
 	// Prop Menu INIT
 	g_hPropMenu = CreateMenu(PropMenu);
-	SetMenuTitle(g_hPropMenu, "TF2SB - Spawn...\nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenu, "TF2SB - Spawn..."); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenu, true);
-	AddMenuItem(g_hPropMenu, "removeprops", "|Remove");
+	AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenu, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
 	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
-	AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
+	AddMenuItem(g_hPropMenu, "pickupprops", "Item Props");
 	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
-	AddMenuItem(g_hPropMenu, "hl2props", "HL2 Props and Miscs");
-	
+	AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
+	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
+
+	// Lead's Specialty Menu
+	g_hPropMenuLead = CreateMenu(PropMenuLead);
+	SetMenuTitle(g_hPropMenuLead, "TF2SB - Specialty"); // \nSay /g in chat to move Entities!");
+	SetMenuExitBackButton(g_hPropMenuLead, true);
+	AddMenuItem(g_hPropMenuLead, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuLead, "emptyspace", "", ITEMDRAW_IGNORE);
+	// AddMenuItem(g_hPropMenuLead, "tv001", "Television");
+	AddMenuItem(g_hPropMenuLead, "light", "Light");
+	AddMenuItem(g_hPropMenuLead, "sign", "Sign");
+	AddMenuItem(g_hPropMenuLead, "door", "Door");
+	AddMenuItem(g_hPropMenuLead, "sdoor", "Sliding Door");
+	AddMenuItem(g_hPropMenuLead, "sdoor2", "Blast Door");
+
 	// Prop Menu Pickup
 	g_hPropMenuPickup = CreateMenu(PropMenuPickup);
-	SetMenuTitle(g_hPropMenuPickup, "TF2SB - Pickup Props\nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuPickup, "TF2SB - Item Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuPickup, true);
-	AddMenuItem(g_hPropMenuPickup, "removeprops", "|Remove");
+	AddMenuItem(g_hPropMenuPickup, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuPickup, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenuPickup, "ammopack_large", "Ammo Pack Large");
 	AddMenuItem(g_hPropMenuPickup, "ammopack_large_bday", "Ammo Pack Large Bday");
 	AddMenuItem(g_hPropMenuPickup, "ammopack_medium", "Ammo Pack Medium");
@@ -519,14 +559,15 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuPickup, "medkit_small", "Medkit Small");
 	AddMenuItem(g_hPropMenuPickup, "medkit_small_bday", "Medkit Small Bday");
 	AddMenuItem(g_hPropMenuPickup, "platesandvich", "Sandvich Plate");
-	AddMenuItem(g_hPropMenuPickup, "platesteak", "Steak Plate");
+	// AddMenuItem(g_hPropMenuPickup, "platesteak", "Steak Plate");
 	AddMenuItem(g_hPropMenuPickup, "plate_robo_sandwich", "Sandvich Robo Plate");
 	
 	// Prop Menu Weapons
 	g_hPropMenuWeapons = CreateMenu(PropMenuWeapons);
-	SetMenuTitle(g_hPropMenuWeapons, "TF2SB - Weapon Props\nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuWeapons, "TF2SB - Weapon Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuWeapons, true);
-	AddMenuItem(g_hPropMenuWeapons, "removeprops", "|Remove");
+	AddMenuItem(g_hPropMenuWeapons, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuWeapons, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenuWeapons, "w_baseball", "Baseball");
 	AddMenuItem(g_hPropMenuWeapons, "w_bat", "Bat");
 	AddMenuItem(g_hPropMenuWeapons, "w_cigarette_case", "Cigarette Case");
@@ -558,9 +599,10 @@ public void OnPluginStart()
 	
 	// Prop Menu Comics Prop
 	g_hPropMenuComic = CreateMenu(PropMenuComics);
-	SetMenuTitle(g_hPropMenuComic, "TF2SB - Comic Props\nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuComic, "TF2SB - Comic Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuComic, true);
-	AddMenuItem(g_hPropMenuComic, "removeprops", "|Remove");
+	AddMenuItem(g_hPropMenuComic, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuComic, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenuComic, "air_intake", "Air Fan");
 	AddMenuItem(g_hPropMenuComic, "barbell", "Barbell");
 	AddMenuItem(g_hPropMenuComic, "sign_barricade001a", "Barricade for Signs");
@@ -657,9 +699,10 @@ public void OnPluginStart()
 	
 	// Prop Menu Constructions Prop
 	g_hPropMenuConstructions = CreateMenu(PropMenuConstructions);
-	SetMenuTitle(g_hPropMenuConstructions, "TF2SB - Construction Props\nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuConstructions, "TF2SB - Construction Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuConstructions, true);
-	AddMenuItem(g_hPropMenuConstructions, "removeprops", "|Remove");
+	AddMenuItem(g_hPropMenuConstructions, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuConstructions, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenuConstructions, "barrel_flatbed01", "Barrel Flatbed");
 	AddMenuItem(g_hPropMenuConstructions, "bench001a", "Bench 1");
 	AddMenuItem(g_hPropMenuConstructions, "bench001b", "Bench 2");
@@ -786,13 +829,14 @@ public void OnPluginStart()
 	Format(buffer, sizeof(buffer), "Credits\n \n");
 	StrCat(buffer, sizeof(buffer), "Coders: Danct12 and DaRkWoRlD\n");
 	StrCat(buffer, sizeof(buffer), "\n");
-	StrCat(buffer, sizeof(buffer), "greenteaf0718 and hjkwe654 for the original BuildMod\n");
-	StrCat(buffer, sizeof(buffer), "FlaminSarge and javalia for the GravityGun Mod (which creates the PhysGun v1)\n");
-	StrCat(buffer, sizeof(buffer), "Pelipoika for the ToolGun Source Code\n");
-	StrCat(buffer, sizeof(buffer), "TESTBOT#7 for making official group profile\n");
-	StrCat(buffer, sizeof(buffer), "BattlefieldDuck for tweaking and making addons for TF2SB, also the creator of PhysGun v2\n");
-	StrCat(buffer, sizeof(buffer), "Garry Newman for creating Garry's Mod, without him, this wouldn't exist\n");
-	StrCat(buffer, sizeof(buffer), "AlliedModders because without this, SourceMod wouldn't exist and this also wouldn't\n \n");
+	StrCat(buffer, sizeof(buffer), "greenteaf0718 and hjkwe654 for the original Build Mod\n");
+	StrCat(buffer, sizeof(buffer), "FlaminSarge and javalia for the GravityGun Mod (which helped with Physgun v1)\n");
+	StrCat(buffer, sizeof(buffer), "Pelipoika for the Tool Gun\n");
+	StrCat(buffer, sizeof(buffer), "TESTBOT#7 for making the official group\n");
+	StrCat(buffer, sizeof(buffer), "BattlefieldDuck for updating, tweaking, and making addons for TF2SB\n");
+	StrCat(buffer, sizeof(buffer), "LeadKiller for updating TF2SB to be more modern\n");
+	StrCat(buffer, sizeof(buffer), "The AlliedModders Community for lots of help!\n");
+	StrCat(buffer, sizeof(buffer), "Garry Newman for creating Garry's Mod, without him, this gamemode wouldn't exist!\n\n");
 	
 	SetMenuTitle(g_hMenuCredits, buffer);
 	AddMenuItem(g_hMenuCredits, "0", "Next");
@@ -807,15 +851,39 @@ public void OnPluginStart()
 	StrCat(buffer, sizeof(buffer), "Lazyneer\n");
 	StrCat(buffer, sizeof(buffer), "Cecil\n");
 	StrCat(buffer, sizeof(buffer), "TESTBOT#7\n");
-	StrCat(buffer, sizeof(buffer), "The Moddage community for hosting the server\n");
+	//StrCat(buffer, sizeof(buffer), "The Moddage community for hosting the server\n");
+	// kind of shameless advertisement, even if it's official it's not just a tf2sandbox community!
 	StrCat(buffer, sizeof(buffer), "And every players who have joined to test it out!\n \n");
 	StrCat(buffer, sizeof(buffer), "THANKS FOR PLAYING!\n");
 	
 	SetMenuTitle(g_hMenuCredits2, buffer);
 	AddMenuItem(g_hMenuCredits2, "0", "Back");
 	RegAdminCmd("sm_tf2sb", Command_TF2SBCred, 0);
-	RegAdminCmd("hidehudtf2sb", Command_TF2SBHideHud, 0);
+	RegAdminCmd("sm_hidehud", Command_TF2SBHideHud, 0);
 	
+}
+
+public Action TF2SB_DelayedStuff(Handle useless)
+{
+	if(GetCommandFlags("sm_sbpg") != INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hEquipMenu, "physgun2", "Physics Gun V2");
+	}
+
+	if(GetCommandFlags("sm_pg") != INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hEquipMenu, "physgunv2", "Physics Gun V3");
+	}
+
+	if(GetCommandFlags("sm_physgun") != INVALID_FCVAR_FLAGS)
+	{
+    	AddMenuItem(g_hEquipMenu, "physgunnew", "Physics Gun V4");
+	}  
+
+	if(GetCommandFlags("sm_physgun") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_pg") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_sbpg") == INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
+	}
 }
 
 public Action Command_TF2SBCred(int client, int args)
@@ -1990,6 +2058,7 @@ public Action Command_SpawnDoor(int client, int args)
 	return Plugin_Handled;
 }
 
+
 public Action Command_Move(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
@@ -2365,6 +2434,25 @@ public Action Command_ChangeBuddha(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_Health(int client, int args)
+{
+	if (!Build_IsClientValid(client, client, true))
+		return Plugin_Handled;
+	
+	if (args < 1) {
+		Build_PrintToChat(client, "Usage: !addhealth <number>");
+		return Plugin_Handled;
+	}
+	
+	char szHealth[128];
+	GetCmdArg(1, szHealth, sizeof(szHealth));
+	Build_PrintToChat(client, "Added %s onto your health", szHealth);
+	TF2Attrib_RemoveByName(client, "max health additive bonus");
+	TF2Attrib_SetByName(client, "max health additive bonus", StringToFloat(szHealth));
+	TF2_RegeneratePlayer(client);
+	return Plugin_Handled;
+}
+
 public Action Command_EnableGrab(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
@@ -2545,8 +2633,6 @@ public void EntityInfo(int client, int iTarget)
 		}
 	}
 	
-	int hidehudnumber = GetEntProp(client, Prop_Send, "m_iHideHUD");
-	
 	SetHudTextParams(0.015, 0.08, 0.01, 255, 255, 255, 255, 0, 6.0, 0.1, 0.2);
 	if (IsPlayer(iTarget)) {
 		int iHealth = GetClientHealth(iTarget);
@@ -2556,14 +2642,9 @@ public void EntityInfo(int client, int iTarget)
 			char szSteamId[32], szIP[16];
 			GetClientAuthId(iTarget, AuthId_Steam2, szSteamId, sizeof(szSteamId));
 			GetClientIP(iTarget, szIP, sizeof(szIP));
-			if (hidehudnumber == 2048){
 			ShowHudText(client, -1, "Player: %N\nHealth: %i\nUserID: %i\nSteamID:%s", iTarget, iHealth, GetClientUserId(iTarget), szSteamId);
-		}
 		} else {
-			if (hidehudnumber == 2048)
-			{
 			ShowHudText(client, -1, "Player: %N\nHealth: %i", iTarget, iHealth);
-		}
 		}
 		return;
 	}
@@ -2594,17 +2675,11 @@ public void EntityInfo(int client, int iTarget)
 	
 	if (Phys_IsPhysicsObject(iTarget)) {
 		SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
-		
 		if (StrContains(szClass, "prop_door_", false) == 0) {
-			if (hidehudnumber == 2048){
 			ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 		}
-		}
 		else {
-			if (hidehudnumber == 2048)
-			{
-				ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
-			}
+			ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
 		}
 		//if (g_bClientLang[client])
 		
@@ -2613,10 +2688,7 @@ public void EntityInfo(int client, int iTarget)
 		//ShowHudText(client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s\nMass:%f", szClass, iTarget, szModel, szOwner, Phys_GetMass(iTarget));
 	} else {
 		if (g_bClientLang[client])
-			if (hidehudnumber == 2048)
-			{
-				ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
-			}
+			ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
 		//ShowHudText(client, -1, "類型: %s\n編號: %i\n模組: %s\n擁有者: %s", szClass, iTarget, szModel, szOwner);
 		//else
 		//ShowHudText(client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s", szClass, iTarget, szModel, szOwner);
@@ -3455,7 +3527,15 @@ public Action Command_ToolGun(int client, int args)
 	
 	if (client > 0 && client <= MaxClients && IsClientInGame(client) && IsPlayerAlive(client))
 	{
-		GiveToolgun(client);
+		if(GetCommandFlags("sm_tg") != INVALID_FCVAR_FLAGS)
+		{
+		FakeClientCommand(client, "sm_tg");
+		}
+		else
+		{
+		DisplayMenu(g_hBuildHelperMenu, client, MENU_TIME_FOREVER); // probably going to use this for now, menus are better.
+		}
+		// GiveToolgun(client);
 	}
 	
 	return Plugin_Handled;
@@ -3463,12 +3543,21 @@ public Action Command_ToolGun(int client, int args)
 
 public Action Command_PhysGun(int client, int args)
 {
-	Build_PrintToChat(client, "You have a Physics Gun v1!");
-	Build_PrintToChat(client, "GAWH, WHY ARE YOU USING PHYSGUN 1.0??");
-	Build_PrintToChat(client, "USE 2.0 ALREADY! (/g)");
-	TF2Items_GiveWeapon(client, 99999);
-	int weapon = GetPlayerWeaponSlot(client, 1);
-	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	if(GetCommandFlags("sm_physgun") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_pg") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_sbpg") == INVALID_FCVAR_FLAGS)
+	{
+		Build_PrintToChat(client, "You have been given Physics Gun V1!");
+		// Build_PrintToChat(client, "GAWH, WHY ARE YOU USING PHYSGUN 1.0??");
+		// Build_PrintToChat(client, "USE 2.0 ALREADY! (/g)");
+		Build_PrintToChat(client, "This version is full of bugs, please use the latest from:");
+		Build_PrintToChat(client, "https://github.com/tf2-sandbox-studio/Module-PhysicsGun");
+		TF2Items_GiveWeapon(client, 99999);
+		int weapon = GetPlayerWeaponSlot(client, 1);
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	}
+	else
+	{
+		Build_PrintToChat(client, "Physgun V1 is full of bugs, use V2/V3/V4!");
+	}
 }
 
 public Action Command_PhysGunNew(int client, int args)
@@ -3508,6 +3597,11 @@ public int MainMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			DisplayMenu(g_hBuildHelperMenu, param1, MENU_TIME_FOREVER);
 		}
+
+		if (StrEqual(item, "door"))
+		{
+			FakeClientCommand(param1, "sm_propdoor");
+		}
 	}
 }
 
@@ -3523,7 +3617,8 @@ public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(info, "removeprops"))
 		{
-			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
 		}
 		else if (StrEqual(info, "constructprops"))
 		{
@@ -3540,6 +3635,10 @@ public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 		else if (StrEqual(info, "pickupprops"))
 		{
 			DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
+		}
+		else if (StrEqual(info, "leadprops"))
+		{
+			DisplayMenu(g_hPropMenuLead, param1, MENU_TIME_FOREVER);
 		}
 		else if (StrEqual(info, "hl2props"))
 		{
@@ -3578,12 +3677,22 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			}
 		}
 		
-		/*if (StrEqual(item, "infammo"))
+		if (StrEqual(item, "infammo"))
 		{
-			Build_PrintToChat(param1, "Learn more at !aiamenu");
+			if (AIA_HasAIA(param1))
+			{
+				Build_PrintToChat(param1, "Infinite Ammo OFF");
+				AIA_SetAIA(param1, false);
+			}
+			else
+			{
+				Build_PrintToChat(param1, "Infinite Ammo ON");
+				AIA_SetAIA(param1, true);
+			}
+			// Build_PrintToChat(param1, "Learn more at !aiamenu");
 		}
 		
-		if (StrEqual(item, "infclip"))
+		/*if (StrEqual(item, "infclip"))
 		{
 			Build_PrintToChat(param1, "Learn more at !aiamenu");
 		}*/
@@ -3684,6 +3793,25 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 	return 0;
 }
 
+public int DSPMenu(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hDSPMenu, param1, MENU_TIME_FOREVER);
+		char item[64];
+		GetMenuItem(menu, param2, item, sizeof(item));
+		float itemf = StringToFloat(item);
+		TF2Attrib_RemoveByName(param1, "SET BONUS: special dsp");
+		TF2Attrib_SetByName(param1, "SET BONUS: special dsp", itemf);
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
+	}
+	return 0;
+}
+
+
 public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
@@ -3726,8 +3854,7 @@ public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "pitch"))
 		{
-			Build_PrintToChat(param1, "Not yet implemented");
-			DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
+			DisplayMenu(g_hDSPMenu, param1, MENU_TIME_FOREVER);
 		}
 	}
 	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
@@ -3748,9 +3875,17 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			FakeClientCommand(param1, "sm_g2");
 		}
+		if (StrEqual(item, "physgun2"))
+		{
+			FakeClientCommand(param1, "sm_sbpg");
+		}
 		if (StrEqual(item, "physgunv2"))
 		{
 			FakeClientCommand(param1, "sm_pg");
+		}
+		if (StrEqual(item, "physgunnew"))
+		{
+			FakeClientCommand(param1, "sm_physgun");
 		}
 		if (StrEqual(item, "toolgun"))
 		{
@@ -3771,7 +3906,8 @@ public int RemoveMenu(Handle menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
 	{
-		DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+		// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
 		char item[64];
 		GetMenuItem(menu, param2, item, sizeof(item));
 		
@@ -3820,7 +3956,7 @@ public int BuildHelperMenu(Handle menu, MenuAction action, int param1, int param
 		}
 		else if (StrEqual(item, "lights"))
 		{
-			FakeClientCommand(param1, "sm_simplelight");
+			FakeClientCommand(param1, "sm_ld");
 		}
 		else if (StrEqual(item, "doors"))
 		{
@@ -3915,7 +4051,8 @@ public int PropMenuHL2(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(info, "removeprops"))
 		{
-			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
 		}
 		else
 		{
@@ -3940,7 +4077,8 @@ public int PropMenuConstructions(Handle menu, MenuAction action, int param1, int
 		
 		if (StrEqual(info, "removeprops"))
 		{
-			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
 		}
 		else
 		{
@@ -3965,7 +4103,8 @@ public int PropMenuComics(Handle menu, MenuAction action, int param1, int param2
 		
 		if (StrEqual(info, "removeprops"))
 		{
-			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
 		}
 		else
 		{
@@ -3990,7 +4129,8 @@ public int PropMenuWeapons(Handle menu, MenuAction action, int param1, int param
 		
 		if (StrEqual(info, "removeprops"))
 		{
-			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
 		}
 		else
 		{
@@ -4015,7 +4155,8 @@ public int PropMenuPickup(Handle menu, MenuAction action, int param1, int param2
 		
 		if (StrEqual(info, "removeprops"))
 		{
-			DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
 		}
 		else
 		{
@@ -4027,6 +4168,68 @@ public int PropMenuPickup(Handle menu, MenuAction action, int param1, int param2
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
 }
+
+public int PropMenuLead(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	{
+		DisplayMenuAtItem(g_hPropMenuLead, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
+		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
+		char info[255];
+		
+		GetMenuItem(menu, param2, info, sizeof(info));
+		
+		if (StrEqual(info, "removeprops"))
+		{
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
+		}
+		else if (StrEqual(info, "light"))
+		{
+			FakeClientCommand(param1, "sm_simplelight");
+		}
+		else if (StrEqual(info, "door"))
+		{
+			FakeClientCommand(param1, "sm_propdoor");
+		}
+		else if (StrEqual(info, "sdoor"))
+		{
+			// Command_SpawnDoor(param1, 5);
+			FakeClientCommand(param1, "sm_sdoor 5");
+			g_bBuffer[param1] = false;
+			FakeClientCommand(param1, "sm_sdoor a");
+			g_bBuffer[param1] = false;
+			FakeClientCommand(param1, "sm_sdoor b");
+			g_bBuffer[param1] = true;
+		}
+		else if (StrEqual(info, "sdoor2"))
+		{
+			// Command_SpawnDoor(param1, 5);
+			FakeClientCommand(param1, "sm_sdoor 1");
+			g_bBuffer[param1] = false;
+			FakeClientCommand(param1, "sm_sdoor a");
+			g_bBuffer[param1] = false;
+			FakeClientCommand(param1, "sm_sdoor b");
+			g_bBuffer[param1] = true;	
+		}
+		else if (StrEqual(info, "sign"))
+		{
+			FakeClientCommand(param1, "sm_spawnprop signpost001");
+			g_bBuffer[param1] = false;
+			FakeClientCommand(param1, "sm_setname \"Use !setname to set text\"");
+			g_bBuffer[param1] = true;
+		}
+		else
+		{
+			FakeClientCommand(param1, "sm_prop %s", info);
+		}
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
+	}
+}
+
 
 
 // GravityGun.SP
@@ -4113,9 +4316,9 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 				case 7:ShowHudText(client, -1, "TOOL:\nCOLORS\n%s\n\n\n[PRIMARY] Apply\n[SECONDARY] Restore\n[TERTIARY] Change Colors\n[RELOAD] Switch Tools", g_sCurrentColor[client]);
 				case 8:ShowHudText(client, -1, "TOOL:\nSKIN\n\n\n\n[PRIMARY] Next Skin\n[SECONDARY] Previous Skin\n[RELOAD] Switch Tools");
 				case 9:ShowHudText(client, -1, "TOOL:\nRENDER FX\n%i\n\n\n[PRIMARY] Apply\n[SECONDARY] Restore\n[TERTIARY] Change FX\n[RELOAD] Switch Tools", g_fxEffectTool[client]);
-				case 10:ShowHudText(client, -1, "TOOL:\nSDOOR\n\n\n\n[PRIMARY] Spawn Door\n[SECONDARY] Shoot to Open\n[RELOAD] Switch Tools");
-				case 11:ShowHudText(client, -1, "TOOL:\nLIGHTS\n\n\n\n[PRIMARY] Spawn Light\n[RELOAD] Switch Tools");
-				case 12:ShowHudText(client, -1, "TOOL:\nPROPDOOR\n\n\n\n[PRIMARY] Spawn Propdoor\n[RELOAD] Switch Tools");
+				// case 10:ShowHudText(client, -1, "TOOL:\nSDOOR\n\n\n\n[PRIMARY] Spawn Door\n[SECONDARY] Shoot to Open\n[RELOAD] Switch Tools");
+				case 10:ShowHudText(client, -1, "TOOL:\nLIGHTS\n\n\n\n[PRIMARY] Spawn Light\n[RELOAD] Switch Tools");
+				case 11:ShowHudText(client, -1, "TOOL:\nPROPDOOR\n\n\n\n[PRIMARY] Spawn Propdoor\n[RELOAD] Switch Tools");
 			}
 			
 			if (buttons & IN_ATTACK2)
@@ -4138,7 +4341,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			
 			if (buttons & IN_RELOAD && !g_bPlayerPressedReload[client])
 			{
-				if (g_iTool[client] < 12)
+				if (g_iTool[client] < 11)
 					g_iTool[client]++;
 				else
 					g_iTool[client] = 1;
@@ -5531,7 +5734,8 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 					}
 				}
 			}
-			case 10:
+			// Now in Specialty!
+			/*case 10:
 			{
 				flEyeAng[0] = 0.0;
 				
@@ -5555,8 +5759,8 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 				}
 				//FakeClientCommand(client, "sm_sdoor 7");
 				
-			}
-			case 11:
+			}*/
+			case 10:
 			{
 				flEyeAng[0] = 0.0;
 				
@@ -5569,7 +5773,7 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 				FakeClientCommand(client, "sm_simplelight");
 				
 			}
-			case 12:
+			case 11:
 			{
 				flEyeAng[0] = 0.0;
 				

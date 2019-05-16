@@ -213,21 +213,34 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	if ((buttons & IN_SCORE))
 	{
 		// If so, add the button to use (+use)
-		buttons += IN_USE;
+		int iAimTarget = Build_ClientAimEntity(client, false, true);
+		char szClass[32];
+		if (iAimTarget != -1 && IsValidEdict(iAimTarget))
+		{
+			GetEdictClassname(iAimTarget, szClass, sizeof(szClass));
+			if (StrContains(szClass, "prop_door_", false) == 0)
+			{
+					buttons += IN_USE;
+			}
+		}
+		else
+		{
+			FakeClientCommand(client, "sm_build");
+		}
 	}
 }
 
 public Action DisplayHud(Handle timer)
 {
-	SetHudTextParams(-1.0, 0.0, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
+	SetHudTextParams(-1.0, 0.01, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 	for(int i = 1; i <= MAXPLAYERS; i++) if (Build_IsClientValid(i, i))
 	{
-		int hidehudnumber = GetEntProp(i, Prop_Send, "m_iHideHUD");
+		//int hidehudnumber = GetEntProp(i, Prop_Send, "m_iHideHUD");
 	
-		if (hidehudnumber == 2048)
-		{
-			ShowHudText(i, -1, "Type !build. This is a WORK IN PROGRESS gamemode!\n\nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
-		}
+		//if (hidehudnumber == 2048)
+		//{
+			ShowHudText(i, -1, "\nPress TAB or say !build. \nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
+		//}
 	}
 	CreateTimer(0.1, DisplayHud);
 }
