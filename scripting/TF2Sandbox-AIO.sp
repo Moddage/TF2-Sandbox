@@ -116,8 +116,8 @@ float g_fDelRangePoint3[MAXPLAYERS][3];
 char g_szDelRangeStatus[MAXPLAYERS][8];
 bool g_szDelRangeCancel[MAXPLAYERS] =  { false, ... };
 
-int g_RememberGodmode[MAXPLAYERS];
-int g_RememberBuddha[MAXPLAYERS];
+bool g_bGodmode[MAXPLAYERS];
+bool g_bBuddha[MAXPLAYERS];
 
 int ColorBlue[4] =  {
 	50, 
@@ -1018,7 +1018,7 @@ public void OnClientDisconnect(int client)
 
 public void OnClientConnected(int client)
 {
-	g_RememberGodmode[client] = 1;
+	g_bGodmode[client] = true;
 }
 
 public Action Timer_Disconnect(Handle timer, Handle hPack)
@@ -2377,12 +2377,11 @@ public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	LastUsed[client] = 0;
 	
-	if (g_RememberGodmode[client] == 1.0)
+	if (g_bGodmode[client])
 	{
 		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
 	}
-	
-	if(g_RememberBuddha[client] == 1.0)
+	else if(g_bBuddha[client])
 	{
 		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
 	}
@@ -2395,18 +2394,21 @@ public Action Command_ChangeGodMode(int client, int args)
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
 	
-	if (GetEntProp(client, Prop_Data, "m_takedamage") == 0)
+	g_bGodmode[client] = !g_bGodmode[client];
+	
+	if (g_bGodmode[client])
 	{
-		Build_PrintToChat(client, "God Mode OFF");
-		g_RememberGodmode[client] = 0;
-		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
+		Build_PrintToChat(client, "God Mode ON");
+		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
+		
+		g_bBuddha[client] = false;
 	}
 	else
 	{
-		Build_PrintToChat(client, "God Mode ON");
-		g_RememberGodmode[client] = 1;
-		g_RememberBuddha[client] = 0;
-		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
+		Build_PrintToChat(client, "God Mode OFF");
+		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
+		
+		g_bBuddha[client] = false;
 	}
 	
 	return Plugin_Handled;
@@ -2417,18 +2419,21 @@ public Action Command_ChangeBuddha(int client, int args)
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
 	
-	if (GetEntProp(client, Prop_Data, "m_takedamage") == 1)
+	g_bBuddha[client] = !g_bBuddha[client];
+	
+	if (g_bBuddha[client])
 	{
-		Build_PrintToChat(client, "Buddha OFF");
-		g_RememberBuddha[client] = 0;
-		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
+		Build_PrintToChat(client, "Buddha ON");
+		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
+		
+		g_bGodmode[client] = false;
 	}
 	else
 	{
-		Build_PrintToChat(client, "Buddha ON");
-		g_RememberBuddha[client] = 1;
-		g_RememberGodmode[client] = 0;
-		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
+		Build_PrintToChat(client, "Buddha OFF");
+		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
+		
+		g_bGodmode[client] = false;
 	}
 	
 	return Plugin_Handled;
@@ -3907,7 +3912,7 @@ public int RemoveMenu(Handle menu, MenuAction action, int param1, int param2)
 	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
 	{
 		// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
-			FakeClientCommand(param1, "sm_del");
+		//FakeClientCommand(param1, "sm_del");
 		char item[64];
 		GetMenuItem(menu, param2, item, sizeof(item));
 		

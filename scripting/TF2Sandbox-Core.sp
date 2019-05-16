@@ -50,6 +50,7 @@ public Plugin myinfo =
 //bool
 bool steamworks = false;
 bool g_bclientLang[MAXPLAYERS];
+bool g_bIN_SCORE[MAXPLAYERS + 1];
 
 //Handle
 Handle g_hCookieclientLang;
@@ -210,7 +211,7 @@ public void OnMapStart()
 
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
-	if ((buttons & IN_SCORE))
+	if (buttons & IN_SCORE)
 	{
 		// If so, add the button to use (+use)
 		int iAimTarget = Build_ClientAimEntity(client, false, true);
@@ -220,13 +221,21 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			GetEdictClassname(iAimTarget, szClass, sizeof(szClass));
 			if (StrContains(szClass, "prop_door_", false) == 0)
 			{
-					buttons += IN_USE;
+				buttons += IN_USE;
 			}
 		}
 		else
 		{
-			FakeClientCommand(client, "sm_build");
+			if (!g_bIN_SCORE[client])
+			{
+				FakeClientCommand(client, "sm_build");
+				g_bIN_SCORE[client] = true;
+			}
 		}
+	}
+	else
+	{
+		g_bIN_SCORE[client] = false;
 	}
 }
 
@@ -239,7 +248,12 @@ public Action DisplayHud(Handle timer)
 	
 		//if (hidehudnumber == 2048)
 		//{
+			
+		if (!g_bIN_SCORE[i])
+		{
 			ShowHudText(i, -1, "\nPress TAB or say !build. \nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
+		}
+		
 		//}
 	}
 	CreateTimer(0.1, DisplayHud);
