@@ -361,7 +361,7 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuHL2, "blank", "", ITEMDRAW_IGNORE);
 	
 	g_hPropMenuDonor = CreateMenu(PropMenuDonor);
-	SetMenuTitle(g_hPropMenuDonor, "TF2SB - Donator"); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuDonor, "TF2SB - Donator \nKeep in mind some of these props may not be removable!");
 	SetMenuExitBackButton(g_hPropMenuDonor, true);
 	AddMenuItem(g_hPropMenuDonor, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuDonor, "blank", "", ITEMDRAW_IGNORE);
@@ -2214,7 +2214,7 @@ public Action Command_SpawnProp(int client, int args)
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
 	
-	if (IndexInArray != -1 || (IndexInArray2 != -1 && CheckCommandAccess(client, "sm_footsteps", ADMFLAG_GENERIC))) {
+	if (IndexInArray != -1) {
 		bool bIsDoll = false;
 		char szEntType[33];
 		GetArrayString(g_hPropTypeArray, IndexInArray, szEntType, sizeof(szEntType));
@@ -2312,7 +2312,105 @@ public Action Command_SpawnProp(int client, int args)
 			}
 		} else
 			RemoveEdict(iEntity);
-	} else {
+	} else if (IndexInArray2 != -1 && CheckCommandAccess(client, "sm_footsteps", ADMFLAG_GENERIC)) {
+		bool bIsDoll = false;
+		char szEntType[33];
+		GetArrayString(g_hPropTypeArrayDonor, IndexInArray2, szEntType, sizeof(szEntType));
+		
+		if (!Build_IsAdmin(client, true)) {
+			if (StrEqual(szPropName, "explosivecan") || StrEqual(szEntType, "5")) {
+				Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to spawn this prop!");
+				return Plugin_Handled;
+			}
+		}
+		if (StrEqual(szEntType, "5"))
+			bIsDoll = true;
+		
+		int iEntity = CreateEntityByName(szEntType);
+		
+		if (Build_RegisterEntityOwner(iEntity, client, bIsDoll)) {
+			float fOriginWatching[3], fOriginFront[3], fAngles[3], fRadiansX, fRadiansY;
+			
+			float iAim[3];
+			float vOriginPlayer[3];
+			
+			GetClientEyePosition(client, fOriginWatching);
+			GetClientEyeAngles(client, fAngles);
+			
+			fRadiansX = DegToRad(fAngles[0]);
+			fRadiansY = DegToRad(fAngles[1]);
+			
+			fOriginFront[0] = fOriginWatching[0] + (100 * Cosine(fRadiansY) * Cosine(fRadiansX));
+			fOriginFront[1] = fOriginWatching[1] + (100 * Sine(fRadiansY) * Cosine(fRadiansX));
+			fOriginFront[2] = fOriginWatching[2] - 20;
+			
+			GetArrayString(g_hPropModelPathArrayDonor, IndexInArray2, szModelPath, sizeof(szModelPath));
+			
+			
+			GetArrayString(g_hPropStringArrayDonor, IndexInArray2, szPropString, sizeof(szPropString));
+			
+			if (!IsModelPrecached(szModelPath))
+				PrecacheModel(szModelPath);
+			
+			DispatchKeyValue(iEntity, "model", szModelPath);
+			
+			//DispatchKeyValue(iEntity, "propnametf2sb", szPropString);
+			SetEntPropString(iEntity, Prop_Data, "m_iName", szPropString);
+			
+			if (StrEqual(szEntType, "prop_dynamic"))
+				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
+			
+			if (StrEqual(szEntType, "prop_dynamic_override"))
+				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
+			
+			Build_ClientAimOrigin(client, iAim);
+			iAim[2] = iAim[2] + 10;
+			
+			GetClientAbsOrigin(client, vOriginPlayer);
+			vOriginPlayer[2] = vOriginPlayer[2] + 50;
+			
+			
+			DispatchSpawn(iEntity);
+			TeleportEntity(iEntity, iAim, NULL_VECTOR, NULL_VECTOR);
+			
+			
+			
+			TE_SetupBeamPoints(iAim, vOriginPlayer, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
+			TE_SendToAll();
+			
+			int random = GetRandomInt(0, 1);
+			if (random == 1) {
+				EmitAmbientSound("buttons/button3.wav", iAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+				EmitAmbientSound("buttons/button3.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			} else {
+				EmitAmbientSound("buttons/button3.wav", iAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+				EmitAmbientSound("buttons/button3.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
+			}
+			
+			SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
+			
+			// Debugging issues
+			//PrintToChatAll(szPropString);
+			
+			int PlayerSpawnCheck;
+			
+			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
+			{
+				if (Entity_InRange(iEntity, PlayerSpawnCheck, 400.0))
+				{
+					
+					
+				}
+			}
+			
+			
+			if (!StrEqual(szPropFrozen, "")) {
+				if (Phys_IsPhysicsObject(iEntity))
+					Phys_EnableMotion(iEntity, false);
+			}
+		} else
+			RemoveEdict(iEntity);
+	} else{
 		Build_PrintToChat(client, "Prop not found: %s", szPropName);
 	}
 	char szTemp[33], szArgs[128];
