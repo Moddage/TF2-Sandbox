@@ -104,6 +104,10 @@ Handle g_hPropNameArray;
 Handle g_hPropModelPathArray;
 Handle g_hPropTypeArray;
 Handle g_hPropStringArray;
+Handle g_hPropNameArrayDonor;
+Handle g_hPropModelPathArrayDonor;
+Handle g_hPropTypeArrayDonor;
+Handle g_hPropStringArrayDonor;
 char g_szFile[128];
 
 char g_szConnectedClient[32][MAXPLAYERS];
@@ -169,6 +173,7 @@ Handle g_hPropMenuWeapons = INVALID_HANDLE;
 Handle g_hPropMenuPickup = INVALID_HANDLE;
 Handle g_hPropMenuLead = INVALID_HANDLE;
 Handle g_hPropMenuHL2 = INVALID_HANDLE;
+Handle g_hPropMenuDonor = INVALID_HANDLE;
 
 /*char g_szFile[128];
 Handle g_hPropNameArray;
@@ -355,6 +360,12 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuHL2, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuHL2, "blank", "", ITEMDRAW_IGNORE);
 	
+	g_hPropMenuDonor = CreateMenu(PropMenuDonor);
+	SetMenuTitle(g_hPropMenuDonor, "TF2SB - Donator"); // \nSay /g in chat to move Entities!");
+	SetMenuExitBackButton(g_hPropMenuDonor, true);
+	AddMenuItem(g_hPropMenuDonor, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuDonor, "blank", "", ITEMDRAW_IGNORE);
+	
 	g_hCookieSDoorTarget = RegClientCookie("cookie_SDoorTarget", "For SDoor.", CookieAccess_Private);
 	g_hCookieSDoorModel = RegClientCookie("cookie_SDoorModel", "For SDoor.", CookieAccess_Private);
 	g_hCookieClientLang = RegClientCookie("cookie_BuildModClientLang", "TF2SB client Language.", CookieAccess_Private);
@@ -362,8 +373,13 @@ public void OnPluginStart()
 	g_hPropModelPathArray = CreateArray(128, 2048); // Max Prop List is 1024-->2048
 	g_hPropTypeArray = CreateArray(33, 2048); // Max Prop List is 1024-->2048
 	g_hPropStringArray = CreateArray(256, 2048);
-	
+	g_hPropNameArrayDonor = CreateArray(33, 2048); // Max Prop List is 1024-->2048
+	g_hPropModelPathArrayDonor = CreateArray(128, 2048); // Max Prop List is 1024-->2048
+	g_hPropTypeArrayDonor = CreateArray(33, 2048); // Max Prop List is 1024-->2048
+	g_hPropStringArrayDonor = CreateArray(256, 2048);
+
 	ReadProps();
+	ReadPropsDonor();
 	
 	// Reload Plugin If You Want
 	RegAdminCmd("sm_reload_tf2sb", Command_ReloadAIOPlugin, ADMFLAG_ROOT, "Reload the AIO Plugin of TF2 Sandbox");
@@ -516,9 +532,10 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenu, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
 	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
-	AddMenuItem(g_hPropMenu, "pickupprops", "Item Props");
-	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
+	AddMenuItem(g_hPropMenu, "pickupprops", "Item/Weapon Props");
+	// AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
 	AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
+	AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
 	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
 
 	// Lead's Specialty Menu
@@ -563,39 +580,39 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuPickup, "plate_robo_sandwich", "Sandvich Robo Plate");
 	
 	// Prop Menu Weapons
-	g_hPropMenuWeapons = CreateMenu(PropMenuWeapons);
-	SetMenuTitle(g_hPropMenuWeapons, "TF2SB - Weapon Props"); // \nSay /g in chat to move Entities!");
-	SetMenuExitBackButton(g_hPropMenuWeapons, true);
-	AddMenuItem(g_hPropMenuWeapons, "removeprops", "| Remove");
-	AddMenuItem(g_hPropMenuWeapons, "emptyspace", "", ITEMDRAW_IGNORE);
-	AddMenuItem(g_hPropMenuWeapons, "w_baseball", "Baseball");
-	AddMenuItem(g_hPropMenuWeapons, "w_bat", "Bat");
-	AddMenuItem(g_hPropMenuWeapons, "w_cigarette_case", "Cigarette Case");
-	AddMenuItem(g_hPropMenuWeapons, "w_fireaxe", "Fire Axe");
-	AddMenuItem(g_hPropMenuWeapons, "w_frontierjustice", "Frontier Justice");
-	AddMenuItem(g_hPropMenuWeapons, "w_grenade_grenadelauncher", "Grenade");
-	AddMenuItem(g_hPropMenuWeapons, "w_grenadelauncher", "Grenade Launcher");
-	AddMenuItem(g_hPropMenuWeapons, "w_knife", "Knife");
-	AddMenuItem(g_hPropMenuWeapons, "w_medigun", "Medi Gun");
-	AddMenuItem(g_hPropMenuWeapons, "w_minigun", "MiniGun");
-	AddMenuItem(g_hPropMenuWeapons, "w_builder", "PDA Build");
-	AddMenuItem(g_hPropMenuWeapons, "w_pda_engineer", "PDA Destroy");
-	AddMenuItem(g_hPropMenuWeapons, "w_pistol", "Pistol");
-	AddMenuItem(g_hPropMenuWeapons, "w_revolver", "Revolver");
-	AddMenuItem(g_hPropMenuWeapons, "w_rocket", "Rocket");
-	AddMenuItem(g_hPropMenuWeapons, "w_rocketlauncher", "Rocket Launcher");
-	AddMenuItem(g_hPropMenuWeapons, "w_sapper", "Sapper");
-	AddMenuItem(g_hPropMenuWeapons, "w_scattergun", "Scatter Gun");
-	AddMenuItem(g_hPropMenuWeapons, "w_shotgun", "Shotgun");
-	AddMenuItem(g_hPropMenuWeapons, "w_shovel", "Shovel");
-	AddMenuItem(g_hPropMenuWeapons, "w_smg", "SMG");
-	AddMenuItem(g_hPropMenuWeapons, "w_sniperrifle", "Sniper Rifle");
-	AddMenuItem(g_hPropMenuWeapons, "w_stickybomb_launcher", "Sticky Bomb Launcher");
-	AddMenuItem(g_hPropMenuWeapons, "w_syringegun", "Syringe Gun");
-	AddMenuItem(g_hPropMenuWeapons, "w_wrangler", "The Wrangler");
-	AddMenuItem(g_hPropMenuWeapons, "w_toolbox", "Toolbox");
-	AddMenuItem(g_hPropMenuWeapons, "w_ttg_max_gun", "TTG Max Gun");
-	AddMenuItem(g_hPropMenuWeapons, "w_wrench", "Wrench");
+	// g_hPropMenuWeapons = CreateMenu(PropMenuWeapons);
+	// SetMenuTitle(g_hPropMenuWeapons, "TF2SB - Weapon Props"); // \nSay /g in chat to move Entities!");
+	// SetMenuExitBackButton(g_hPropMenuWeapons, true);
+	AddMenuItem(g_hPropMenuPickup, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuPickup, "emptyspace", "", ITEMDRAW_IGNORE);
+	AddMenuItem(g_hPropMenuPickup, "w_baseball", "Baseball");
+	AddMenuItem(g_hPropMenuPickup, "w_bat", "Bat");
+	AddMenuItem(g_hPropMenuPickup, "w_cigarette_case", "Cigarette Case");
+	AddMenuItem(g_hPropMenuPickup, "w_fireaxe", "Fire Axe");
+	AddMenuItem(g_hPropMenuPickup, "w_frontierjustice", "Frontier Justice");
+	AddMenuItem(g_hPropMenuPickup, "w_grenade_grenadelauncher", "Grenade");
+	AddMenuItem(g_hPropMenuPickup, "w_grenadelauncher", "Grenade Launcher");
+	AddMenuItem(g_hPropMenuPickup, "w_knife", "Knife");
+	AddMenuItem(g_hPropMenuPickup, "w_medigun", "Medi Gun");
+	AddMenuItem(g_hPropMenuPickup, "w_minigun", "MiniGun");
+	AddMenuItem(g_hPropMenuPickup, "w_builder", "PDA Build");
+	AddMenuItem(g_hPropMenuPickup, "w_pda_engineer", "PDA Destroy");
+	AddMenuItem(g_hPropMenuPickup, "w_pistol", "Pistol");
+	AddMenuItem(g_hPropMenuPickup, "w_revolver", "Revolver");
+	AddMenuItem(g_hPropMenuPickup, "w_rocket", "Rocket");
+	AddMenuItem(g_hPropMenuPickup, "w_rocketlauncher", "Rocket Launcher");
+	AddMenuItem(g_hPropMenuPickup, "w_sapper", "Sapper");
+	AddMenuItem(g_hPropMenuPickup, "w_scattergun", "Scatter Gun");
+	AddMenuItem(g_hPropMenuPickup, "w_shotgun", "Shotgun");
+	AddMenuItem(g_hPropMenuPickup, "w_shovel", "Shovel");
+	AddMenuItem(g_hPropMenuPickup, "w_smg", "SMG");
+	AddMenuItem(g_hPropMenuPickup, "w_sniperrifle", "Sniper Rifle");
+	AddMenuItem(g_hPropMenuPickup, "w_stickybomb_launcher", "Sticky Bomb Launcher");
+	AddMenuItem(g_hPropMenuPickup, "w_syringegun", "Syringe Gun");
+	AddMenuItem(g_hPropMenuPickup, "w_wrangler", "The Wrangler");
+	AddMenuItem(g_hPropMenuPickup, "w_toolbox", "Toolbox");
+	AddMenuItem(g_hPropMenuPickup, "w_ttg_max_gun", "TTG Max Gun");
+	AddMenuItem(g_hPropMenuPickup, "w_wrench", "Wrench");
 	
 	// Prop Menu Comics Prop
 	g_hPropMenuComic = CreateMenu(PropMenuComics);
@@ -2180,6 +2197,7 @@ public Action Command_SpawnProp(int client, int args)
 	GetCmdArg(2, szPropFrozen, sizeof(szPropFrozen));
 	
 	int IndexInArray = FindStringInArray(g_hPropNameArray, szPropName);
+	int IndexInArray2 = FindStringInArray(g_hPropNameArrayDonor, szPropName);
 	
 	if (StrEqual(szPropName, "explosivecan") && !Build_IsAdmin(client, true)) {
 		Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to spawn this prop!");
@@ -2196,7 +2214,7 @@ public Action Command_SpawnProp(int client, int args)
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
 	
-	if (IndexInArray != -1) {
+	if (IndexInArray != -1 || (IndexInArray2 != -1 && CheckCommandAccess(client, "sm_footsteps", ADMFLAG_GENERIC))) {
 		bool bIsDoll = false;
 		char szEntType[33];
 		GetArrayString(g_hPropTypeArray, IndexInArray, szEntType, sizeof(szEntType));
@@ -2372,6 +2390,72 @@ void ReadPropsLine(const char[] szLine, int iCountProps)
 	AddMenuItem(g_hPropMenuHL2, szPropInfo[0], szPropInfo[3]);
 }
 
+void ReadPropsDonor()
+{
+	BuildPath(Path_SM, g_szFile, sizeof(g_szFile), "configs/buildmod/props-extended.ini");
+	
+	Handle iFile = OpenFile(g_szFile, "rt");
+	if (iFile == INVALID_HANDLE)
+		return;
+	
+	int iCountProps = 0;
+	while (!IsEndOfFile(iFile))
+	{
+		char szLine[255];
+		if (!ReadFileLine(iFile, szLine, sizeof(szLine)))
+			break;
+		
+		/* 略過註解 */
+		int iLen = strlen(szLine);
+		bool bIgnore = false;
+		
+		for (int i = 0; i < iLen; i++) {
+			if (bIgnore) {
+				if (szLine[i] == '"')
+					bIgnore = false;
+			} else {
+				if (szLine[i] == '"')
+					bIgnore = true;
+				else if (szLine[i] == ';') {
+					szLine[i] = '\0';
+					break;
+				} else if (szLine[i] == '/' && i != iLen - 1 && szLine[i + 1] == '/') {
+					szLine[i] = '\0';
+					break;
+				}
+			}
+		}
+		
+		TrimString(szLine);
+		
+		if ((szLine[0] == '/' && szLine[1] == '/') || (szLine[0] == ';' || szLine[0] == '\0'))
+			continue;
+		
+		ReadPropsLineDonor(szLine, iCountProps++);
+	}
+	CloseHandle(iFile);
+}
+
+void ReadPropsLineDonor(const char[] szLine, int iCountProps)
+{
+	char szPropInfo[4][128];
+	ExplodeString(szLine, ", ", szPropInfo, sizeof(szPropInfo), sizeof(szPropInfo[]));
+	
+	StripQuotes(szPropInfo[0]);
+	SetArrayString(g_hPropNameArrayDonor, iCountProps, szPropInfo[0]);
+	
+	StripQuotes(szPropInfo[1]);
+	SetArrayString(g_hPropModelPathArrayDonor, iCountProps, szPropInfo[1]);
+	
+	StripQuotes(szPropInfo[2]);
+	SetArrayString(g_hPropTypeArrayDonor, iCountProps, szPropInfo[2]);
+	
+	StripQuotes(szPropInfo[3]);
+	SetArrayString(g_hPropStringArrayDonor, iCountProps, szPropInfo[3]);
+	
+	AddMenuItem(g_hPropMenuDonor, szPropInfo[0], szPropInfo[3]);
+}
+
 public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -2381,6 +2465,7 @@ public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
 	{
 		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
 	}
+
 	else if(g_bBuddha[client])
 	{
 		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
@@ -2425,7 +2510,7 @@ public Action Command_ChangeBuddha(int client, int args)
 	{
 		Build_PrintToChat(client, "Buddha ON");
 		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
-		
+		g_bBuddha[client] = true;
 		g_bGodmode[client] = false;
 	}
 	else
@@ -3649,6 +3734,17 @@ public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			DisplayMenu(g_hPropMenuHL2, param1, MENU_TIME_FOREVER);
 		}
+		else if (StrEqual(info, "donatorprops"))
+		{
+			if (CheckCommandAccess(param1, "sm_footsteps", ADMFLAG_GENERIC))
+			{
+				DisplayMenu(g_hPropMenuDonor, param1, MENU_TIME_FOREVER);
+			}
+			else
+			{
+				FakeClientCommand(param1, "say !donate");
+			}
+		}
 		else
 		{
 			FakeClientCommand(param1, "sm_prop %s", info);
@@ -4049,6 +4145,32 @@ public int PropMenuHL2(Handle menu, MenuAction action, int param1, int param2)
 	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuHL2, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
+		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
+		char info[255];
+		
+		GetMenuItem(menu, param2, info, sizeof(info));
+		
+		if (StrEqual(info, "removeprops"))
+		{
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
+		}
+		else
+		{
+			FakeClientCommand(param1, "sm_prop %s", info);
+		}
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
+	}
+}
+
+public int PropMenuDonor(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	{
+		DisplayMenuAtItem(g_hPropMenuDonor, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
 		char info[255];
 		
