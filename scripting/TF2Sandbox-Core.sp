@@ -82,14 +82,14 @@ static const char tips[12][] =
 	"Type /g to get the Physics Gun and move props around.", 
 	"You can rotate a prop by holding down the Reload button.", 
 	"If you want to delete everything you own, type !delall", 
-	"Type /del to delete the prop you are looking at.", 
+	"Type !del to delete the prop you are looking at.", 
 	"This server is running \x04TF2:Sandbox\x01 by \x05Danct12\x01 and \x05DaRkWoRlD\x01. Type !tf2sb for more info.", 
 	"This mod is a work in progress.", 
-	"Type /build to begin building.", 
-	"TF2SB Source Code: https://github.com/Danct12/TF2SB", 
-	"TF2SB official group: http://steamcommunity.com/groups/TF2Sandbox", 
-	"Tired to be in Godmode? Why not turn it off? Say !god",
-	"If you want to rocket jump while in GodMode, say !buddha",
+	"Type !build to begin building.", 
+	"TF2SB's Github: https://github.com/Danct12/TF2SB", 
+	"TF2SB's Group: http://steamcommunity.com/groups/TF2Sandbox", 
+	"Type !god to turn off godmode",
+	"If you want to rocket jump while in godmode, say !buddha",
 	"Ever wanted to know what changed in each versions? Say !changelog"
 };
 
@@ -199,7 +199,7 @@ public void OnPluginStart()
 	g_hBlackListArray = CreateArray(33, 128); // 33 arrays, every array size is 128
 	ReadBlackList();
 	PrintToServer("[TF2SB] Plugin successfully started!");
-	PrintToServer("This plugin is a work in progress thing, if you have any issues about it, please contact Huong Tram Singer.");
+	PrintToServer("[TF2SB] Team Fortress 2 Sandbox is a Work In Progress gamemode. If you have any issues with it, message the developers on the Discord or Steam Group.");
 	CreateTimer(120.0, HandleTips, 0, 1);	
 }
 
