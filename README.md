@@ -1,31 +1,25 @@
-# TF2: Sandbox, the gamemode that releashes player's creative head.
+# Team Fortress 2 Sandbox
+### Description
+Team Fortress 2 Sandbox is a custom gamemode made for the video game [Team Fortress 2](https://store.steampowered.com/app/440/Team_Fortress_2/) that allows players to create things in a similar fashion as [BuildMod](https://sourceforge.net/projects/smbuildmod) and [Garrys Mod](https://store.steampowered.com/app/4000/Garrys_Mod/). It is based on a older yet similar idea by the Team Fortress 2 Server Community [MSTR](https://www.youtube.com/watch?v=jKcXxTijKxk).
 
-This is a fork mod of the original BuildMod for HL2DM (https://sourceforge.net/projects/smbuildmod)
+With Team Fortress 2 Sandbox, you can build bases, roleplay in a resturant, invent custom gamemodes, make rocket jump courses, design map layouts, produce machinimas, mess around, and more! The only limit is your own imagination!
 
-TF2: Sandbox is a open-source gamemode for Team Fortress 2 that introduces PhysGun, ability to build.
+[Steam Group](http://steamcommunity.com/groups/TF2Sandbox)  
+[Discord](http://discord.gg/7t2DRAQ)
+### Hosting Instructions
+You will need to install:
+ - [vPhysics](https://forums.alliedmods.net/showthread.php?t=136350)
+ - [TF2Items](https://forums.alliedmods.net/showthread.php?t=115100)
+ - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217)
+ - [TF2Attributes](https://forums.alliedmods.net/showthread.php?t=210221)
+ - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
 
-In this game, players can releash their creative head and build things they love, you can roleplay, can build, can do many things like building a parkour, building a house, and many more.
-
-General Sandbox Features:
-- Spawn Props - Spawn any props in order to build something.
-- Physics Gun - This gun lets you to pick up any props, just like in Garry's Mod.
-- Tool Gun - Allow you to customize the prop.
-- Noclip - Let you to fly around the map (!fly)
-- Addcond - Gives you things in addcond, like full crits.
-- Set Health (not done yet)
-- Set Speed (not done yet)
-- Set Model (not done yet)
-- Set Pitch (not done yet)
-
-To Do:
-- Please refer to #todo on Moddage Discord.
-
-Main Steam Group:
-http://steamcommunity.com/groups/TF2Sandbox
-
-Official Sandbox server group:
-http://steamcommunity.com/groups/Moddage
-
-Pull requests are welcome!
-
-The code is very crap but it works, feel free to help me tidy it!
+You can also find additional addons for Team Fortress 2 Sandbox by the [TF2SB Studio](https://github.com/tf2-sandbox-studio) such as Physgun, Toolgun, Undo, Save System, and more.
+### Build Instructions
+You will need the following external includes:
+ - [MoreColors](https://forums.alliedmods.net/showthread.php?t=185016)
+ - [TF2Attributes](https://forums.alliedmods.net/showthread.php?t=210221)
+ - [TF2Items](https://forums.alliedmods.net/showthread.php?t=115100)
+ - [vPhysics](https://forums.alliedmods.net/showthread.php?t=136350)
+ - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
+ - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217) (Optional)

@@ -24,15 +24,15 @@
 #include <build>
 #include <build_stocks>
 #include <vphysics>
-#include <smlib>
+//#include <smlib>
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
 #include <entity_prop_stocks>
 #include <tf2items>
-#include <advancedinfiniteammo>
+#tryinclude <advancedinfiniteammo>
 //#include <stocklib>
-#include <matrixmath>
+//#include <matrixmath>
 
 // Toolgun is gay
 #define EF_BONEMERGE			(1 << 0)
@@ -115,6 +115,7 @@ Handle g_hPlayerStuff = INVALID_HANDLE;
 Handle g_hCondMenu = INVALID_HANDLE;
 Handle g_hModelMenu = INVALID_HANDLE;
 Handle g_hDSPMenu = INVALID_HANDLE;
+Handle g_hSizeMenu = INVALID_HANDLE;
 // Handle g_hRemoveMenu = INVALID_HANDLE;
 Handle g_hBuildHelperMenu = INVALID_HANDLE;
 Handle g_hPropMenuComic = INVALID_HANDLE;
@@ -224,11 +225,11 @@ float nextactivetime[MAXPLAYERS + 1];
 
 public Plugin myinfo = 
 {
-	name = "TF2 Sandbox All In One Module", 
-	author = "Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, hjkwe654, BattlefieldDuck, LeadKiller", 
+	name = "TF2 Sandbox", 
+	author = "LeadKiller, BattlefieldDuck, Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, and hjkwe654", 
 	description = "Everything in one module, isn't that cool? Yes", 
 	version = BUILDMOD_VER, 
-	url = "http://dtf2server.ddns.net"
+	url = "https://www.moddage.site/"
 };
 
 public void OnPluginStart()
@@ -346,10 +347,10 @@ public void OnPluginStart()
 	AddMenuItem(g_hPlayerStuff, "cond", "Conditions...");
 	AddMenuItem(g_hPlayerStuff, "sizes", "Sizes...");
 	AddMenuItem(g_hPlayerStuff, "poser", "Player Poser...");
-	AddMenuItem(g_hPlayerStuff, "health", "Health");
-	AddMenuItem(g_hPlayerStuff, "speed", "Speed");
+	// AddMenuItem(g_hPlayerStuff, "health", "Health");
+	// AddMenuItem(g_hPlayerStuff, "speed", "Speed");
 	AddMenuItem(g_hPlayerStuff, "model", "Model");
-	AddMenuItem(g_hPlayerStuff, "pitch", "Pitch");
+	AddMenuItem(g_hPlayerStuff, "pitch", "Voice");
 	SetMenuExitBackButton(g_hPlayerStuff, true);
 	
 	// Init thing for commands!
@@ -387,7 +388,9 @@ public void OnPluginStart()
 	AddMenuItem(g_hCondMenu, "godmode", "Godmode");
 	AddMenuItem(g_hCondMenu, "crits", "Crits");
 	AddMenuItem(g_hCondMenu, "noclip", "Noclip");
-	AddMenuItem(g_hCondMenu, "infammo", "Inf. Ammo");
+	#if defined _AdvancedInfiniteAmmo_included
+		AddMenuItem(g_hCondMenu, "infammo", "Inf. Ammo");
+	#endif
 	AddMenuItem(g_hCondMenu, "speedboost", "Speed Boost");
 	AddMenuItem(g_hCondMenu, "resupply", "Resupply");
 	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
@@ -399,15 +402,20 @@ public void OnPluginStart()
 	SetMenuExitBackButton(g_hCondMenu, true);
 
 	//model
-	g_hModelMenu = CreateMenu(DSPMenu);
+	g_hModelMenu = CreateMenu(ModelMenu);
 	SetMenuTitle(g_hModelMenu, "TF2SB - Set Model...");
 	AddMenuItem(g_hModelMenu, "0", "None");
-	AddMenuItem(g_hModelMenu, "20", "Echo");
-	AddMenuItem(g_hModelMenu, "23", "Blur");
-	AddMenuItem(g_hModelMenu, "30", "Quiet");
-	AddMenuItem(g_hModelMenu, "134", "Fly");
-	AddMenuItem(g_hModelMenu, "135", "Demon");
-	AddMenuItem(g_hModelMenu, "116", "Micspam");
+	AddMenuItem(g_hModelMenu, "models/player/scout.mdl", "Scout");
+	AddMenuItem(g_hModelMenu, "models/player/soldier.mdl", "Soldier");
+	AddMenuItem(g_hModelMenu, "models/player/pyro.mdl", "Pyro");
+	AddMenuItem(g_hModelMenu, "models/player/engineer.mdl", "Engineer");
+	AddMenuItem(g_hModelMenu, "models/player/heavy.mdl", "Heavy");
+	AddMenuItem(g_hModelMenu, "models/player/demo.mdl", "Demoman");
+	AddMenuItem(g_hModelMenu, "models/player/medic.mdl", "Medic");
+	AddMenuItem(g_hModelMenu, "models/player/sniper.mdl", "Sniper");
+	AddMenuItem(g_hModelMenu, "models/player/spy.mdl", "Spy");
+	AddMenuItem(g_hModelMenu, "models/bots/headless_hatman.mdl", "HHH");
+	AddMenuItem(g_hModelMenu, "models/bots/skeleton_sniper/skeleton_sniper.mdl", "Skeleton");
 	SetMenuExitBackButton(g_hModelMenu, true);
 
 	//voice fx
@@ -448,6 +456,19 @@ public void OnPluginStart()
 	AddMenuItem(g_hPoseMenu, "6", "1x - Normal");
 	AddMenuItem(g_hPoseMenu, "7", "Untaunt");
 	SetMenuExitBackButton(g_hPoseMenu, true);
+
+	// Sizes Menu
+	g_hSizeMenu = CreateMenu(TF2SBSizeMenu);
+	SetMenuTitle(g_hSizeMenu, "TF2SB - Player Sizes...");
+	AddMenuItem(g_hSizeMenu, "0.25", "0.25x");
+	AddMenuItem(g_hSizeMenu, "0.50", "0.50x");
+	AddMenuItem(g_hSizeMenu, "0.75", "0.75x");
+	AddMenuItem(g_hSizeMenu, "1.0", "1.0x");
+	AddMenuItem(g_hSizeMenu, "1.25", "1.25x");
+	AddMenuItem(g_hSizeMenu, "1.5", "1.5x");
+	AddMenuItem(g_hSizeMenu, "1.75", "1.75x");
+	AddMenuItem(g_hSizeMenu, "2.0", "2.0x");
+	SetMenuExitBackButton(g_hSizeMenu, true);
 	
 	/* This goes for something called prop menu, i can't figure out how to make a config spawn list */
 	
@@ -1285,17 +1306,6 @@ public Action Command_OpenableDoorProp(int client, int args)
 		
 		TeleportEntity(iDoor, fOriginAim, NULL_VECTOR, NULL_VECTOR);
 		
-		int PlayerSpawnCheck;
-		
-		while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
-		{
-			if (Entity_InRange(iDoor, PlayerSpawnCheck, 400.0))
-			{
-				
-				
-			}
-		}
-		
 		Format(szNamePropDoor, sizeof(szNamePropDoor), "TF2SB_Door%i", GetRandomInt(1000, 5000));
 		DispatchKeyValue(iDoor, "targetname", szNamePropDoor);
 		SetVariantString(szNamePropDoor);
@@ -1830,17 +1840,7 @@ public Action Command_LightDynamic(int client, int args)
 		TeleportEntity(Obj_LightDMelon, fOriginAim, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(Obj_LightDynamic);
 		TeleportEntity(Obj_LightDynamic, fOriginAim, NULL_VECTOR, NULL_VECTOR);
-		
-		int PlayerSpawnCheck;
-		
-		while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
-		{
-			if (Entity_InRange(Obj_LightDMelon, PlayerSpawnCheck, 400.0))
-			{
-				
-			}
-		}
-		
+
 		Format(szNameMelon, sizeof(szNameMelon), "Obj_LightDMelon%i", GetRandomInt(1000, 5000));
 		DispatchKeyValue(Obj_LightDMelon, "targetname", szNameMelon);
 		SetVariantString(szNameMelon);
@@ -1907,17 +1907,6 @@ public Action Command_SpawnDoor(int client, int args)
 		if (Build_RegisterEntityOwner(Obj_Door, client)) {
 			TeleportEntity(Obj_Door, iAim, NULL_VECTOR, NULL_VECTOR);
 			DispatchSpawn(Obj_Door);
-			
-			int PlayerSpawnCheck;
-			
-			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
-			{
-				if (Entity_InRange(Obj_Door, PlayerSpawnCheck, 400.0))
-				{
-					
-					
-				}
-			}
 		}
 	} else if (StrEqual(szType[0], "a") || StrEqual(szType[0], "b") || StrEqual(szType[0], "c")) {
 		
@@ -2222,18 +2211,6 @@ public Action Command_SpawnProp(int client, int args)
 			// Debugging issues
 			//PrintToChatAll(szPropString);
 			
-			int PlayerSpawnCheck;
-			
-			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
-			{
-				if (Entity_InRange(iEntity, PlayerSpawnCheck, 400.0))
-				{
-					
-					
-				}
-			}
-			
-			
 			if (!StrEqual(szPropFrozen, "")) {
 				if (Phys_IsPhysicsObject(iEntity))
 					Phys_EnableMotion(iEntity, false);
@@ -2322,19 +2299,7 @@ public Action Command_SpawnProp(int client, int args)
 			
 			// Debugging issues
 			//PrintToChatAll(szPropString);
-			
-			int PlayerSpawnCheck;
-			
-			while ((PlayerSpawnCheck = FindEntityByClassname(PlayerSpawnCheck, "info_player_teamspawn")) != INVALID_ENT_REFERENCE)
-			{
-				if (Entity_InRange(iEntity, PlayerSpawnCheck, 400.0))
-				{
-					
-					
-				}
-			}
-			
-			
+
 			if (!StrEqual(szPropFrozen, "")) {
 				if (Phys_IsPhysicsObject(iEntity))
 					Phys_EnableMotion(iEntity, false);
@@ -3556,7 +3521,7 @@ public Action Command_Resupply(int client, int args)
 
 public int MainMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		char item[64];
 		GetMenuItem(menu, param2, item, sizeof(item));
@@ -3590,7 +3555,7 @@ public int MainMenu(Handle menu, MenuAction action, int param1, int param2)
 
 public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenu, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
@@ -3647,7 +3612,7 @@ public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hMainMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -3655,7 +3620,7 @@ public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 
 public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hCondMenu, param1, MENU_TIME_FOREVER);
 		char item[64];
@@ -3674,22 +3639,24 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 				TF2_AddCondition(param1, TFCond_CritCanteen, TFCondDuration_Infinite, 0);
 			}
 		}
-		
-		if (StrEqual(item, "infammo"))
-		{
-			if (AIA_HasAIA(param1))
+
+		#if defined _AdvancedInfiniteAmmo_included
+			if (StrEqual(item, "infammo"))
 			{
-				Build_PrintToChat(param1, "Infinite Ammo OFF");
-				AIA_SetAIA(param1, false);
+				if (AIA_HasAIA(param1))
+				{
+					Build_PrintToChat(param1, "Infinite Ammo OFF");
+					AIA_SetAIA(param1, false);
+				}
+				else
+				{
+					Build_PrintToChat(param1, "Infinite Ammo ON");
+					AIA_SetAIA(param1, true);
+				}
+				// Build_PrintToChat(param1, "Learn more at !aiamenu");
 			}
-			else
-			{
-				Build_PrintToChat(param1, "Infinite Ammo ON");
-				AIA_SetAIA(param1, true);
-			}
-			// Build_PrintToChat(param1, "Learn more at !aiamenu");
-		}
-		
+		#endif
+
 		/*if (StrEqual(item, "infclip"))
 		{
 			Build_PrintToChat(param1, "Learn more at !aiamenu");
@@ -3784,16 +3751,45 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			TF2_RemoveAllWeapons(param1);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
 	}
 	return 0;
 }
 
+public int ModelMenu(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		DisplayMenuAtItem(g_hModelMenu, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
+		//DisplayMenu(g_hPropMenuWeapons, param1, MENU_TIME_FOREVER);
+		char info[255];
+		
+		GetMenuItem(menu, param2, info, sizeof(info));
+		
+		if (StrEqual(info, "0"))
+		{
+			SetVariantString("");
+			AcceptEntityInput(param1, "SetCustomModel");
+			SetEntProp(param1, Prop_Send, "m_bUseClassAnimations", 0.0);
+		}
+		else
+		{
+			SetVariantString(info);
+ 			AcceptEntityInput(param1, "SetCustomModel");
+			SetEntProp(param1, Prop_Send, "m_bUseClassAnimations", 1.0);
+		}
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
+	}
+}
+
 public int DSPMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hDSPMenu, param1, MENU_TIME_FOREVER);
 		char item[64];
@@ -3802,7 +3798,7 @@ public int DSPMenu(Handle menu, MenuAction action, int param1, int param2)
 		TF2Attrib_RemoveByName(param1, "SET BONUS: special dsp");
 		TF2Attrib_SetByName(param1, "SET BONUS: special dsp", itemf);
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
 	}
@@ -3812,7 +3808,7 @@ public int DSPMenu(Handle menu, MenuAction action, int param1, int param2)
 
 public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		char item[64];
 		GetMenuItem(menu, param2, item, sizeof(item));
@@ -3824,8 +3820,7 @@ public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "sizes"))
 		{
-			Build_PrintToChat(param1, "Not yet implemented");
-			DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
+			DisplayMenu(g_hSizeMenu, param1, MENU_TIME_FOREVER);
 		}
 		
 		if (StrEqual(item, "poser"))
@@ -3847,7 +3842,7 @@ public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "model"))
 		{
-			FakeClientCommand(param1, "sm_bonemerge");
+			DisplayMenu(g_hModelMenu, param1, MENU_TIME_FOREVER);
 		}
 		
 		if (StrEqual(item, "pitch"))
@@ -3855,7 +3850,7 @@ public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 			DisplayMenu(g_hDSPMenu, param1, MENU_TIME_FOREVER);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hMainMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -3863,7 +3858,7 @@ public int PlayerStuff(Handle menu, MenuAction action, int param1, int param2)
 
 public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hEquipMenu, param1, MENU_TIME_FOREVER);
 		char item[64];
@@ -3894,7 +3889,7 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 				FakeClientCommand(param1, "sm_portalgun");
 		}*/
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hMainMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -3902,7 +3897,7 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 
 public int RemoveMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
 		//FakeClientCommand(param1, "sm_del");
@@ -3914,7 +3909,7 @@ public int RemoveMenu(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_del");
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -3922,7 +3917,7 @@ public int RemoveMenu(Handle menu, MenuAction action, int param1, int param2)
 
 public int BuildHelperMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hBuildHelperMenu, param1, MENU_TIME_FOREVER);
 		char item[64];
@@ -3961,7 +3956,7 @@ public int BuildHelperMenu(Handle menu, MenuAction action, int param1, int param
 			FakeClientCommand(param1, "sm_propdoor");
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hMainMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -3969,7 +3964,7 @@ public int BuildHelperMenu(Handle menu, MenuAction action, int param1, int param
 
 public int TF2SBPoseMenu(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		switch (param2)
 		{
@@ -4031,15 +4026,32 @@ public int TF2SBPoseMenu(Handle menu, MenuAction action, int param1, int param2)
 			}
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
 	}
 }
 
+public int TF2SBSizeMenu(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hSizeMenu, param1, MENU_TIME_FOREVER);
+		char item[64];
+		GetMenuItem(menu, param2, item, sizeof(item));
+		float itemf = StringToFloat(item);
+		SetEntPropFloat(param1, Prop_Send, "m_flModelScale", itemf);
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hPlayerStuff, param1, MENU_TIME_FOREVER);
+	}
+	return 0;
+}
+
 public int PropMenuHL2(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuHL2, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
@@ -4057,7 +4069,7 @@ public int PropMenuHL2(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -4065,7 +4077,7 @@ public int PropMenuHL2(Handle menu, MenuAction action, int param1, int param2)
 
 public int PropMenuDonor(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuDonor, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
@@ -4083,7 +4095,7 @@ public int PropMenuDonor(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -4091,7 +4103,7 @@ public int PropMenuDonor(Handle menu, MenuAction action, int param1, int param2)
 
 public int PropMenuConstructions(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuConstructions, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuConstructions, param1, MENU_TIME_FOREVER);
@@ -4109,7 +4121,7 @@ public int PropMenuConstructions(Handle menu, MenuAction action, int param1, int
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -4117,7 +4129,7 @@ public int PropMenuConstructions(Handle menu, MenuAction action, int param1, int
 
 public int PropMenuComics(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuComic, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuComic, param1, MENU_TIME_FOREVER);
@@ -4135,7 +4147,7 @@ public int PropMenuComics(Handle menu, MenuAction action, int param1, int param2
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -4143,7 +4155,7 @@ public int PropMenuComics(Handle menu, MenuAction action, int param1, int param2
 
 public int PropMenuWeapons(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuWeapons, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuWeapons, param1, MENU_TIME_FOREVER);
@@ -4161,7 +4173,7 @@ public int PropMenuWeapons(Handle menu, MenuAction action, int param1, int param
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -4169,7 +4181,7 @@ public int PropMenuWeapons(Handle menu, MenuAction action, int param1, int param
 
 public int PropMenuPickup(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuPickup, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
@@ -4187,7 +4199,7 @@ public int PropMenuPickup(Handle menu, MenuAction action, int param1, int param2
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -4195,7 +4207,7 @@ public int PropMenuPickup(Handle menu, MenuAction action, int param1, int param2
 
 public int PropMenuRequested(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuRequested, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
@@ -4213,7 +4225,7 @@ public int PropMenuRequested(Handle menu, MenuAction action, int param1, int par
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}
@@ -4221,7 +4233,7 @@ public int PropMenuRequested(Handle menu, MenuAction action, int param1, int par
 
 public int PropMenuLead(Handle menu, MenuAction action, int param1, int param2)
 {
-	if (action == MenuAction_Select && IsValidClient(param1) && IsClientInGame(param1))
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenuAtItem(g_hPropMenuLead, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuPickup, param1, MENU_TIME_FOREVER);
@@ -4274,7 +4286,7 @@ public int PropMenuLead(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_prop %s", info);
 		}
 	}
-	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && IsValidClient(param1) && IsClientInGame(param1))
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
 		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
 	}

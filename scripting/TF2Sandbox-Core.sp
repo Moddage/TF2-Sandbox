@@ -40,8 +40,8 @@
 
 public Plugin myinfo =  
 {
-	name = "[TF2] Sandbox - Core", 
-	author = "Danct12, DaRkWoRlD, greenteaf0718, hjkwe654, BattlefieldDuck", 
+	name = "TF2 Sandbox Core", 
+	author = "LeadKiller, BattlefieldDuck, Danct12, DaRkWoRlD, greenteaf0718, and hjkwe654", 
 	description = "TF2SB Controller Core", 
 	version = BUILDMOD_VER, 
 	url = "http://dtf2server.ddns.net"
