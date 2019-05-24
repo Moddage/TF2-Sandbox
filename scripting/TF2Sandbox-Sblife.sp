@@ -2,7 +2,7 @@
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "Hương Tràm Singer"
+#define PLUGIN_AUTHOR "Danct12"
 #define PLUGIN_VERSION "0.0"
 
 #include <sourcemod>
@@ -15,9 +15,9 @@ int g_sblife[MAXPLAYERS];
 
 public Plugin myinfo = 
 {
-	name = "TF2 Sandbox - Em Gái Mưa",
+	name = "TF2 Sandbox - Teleport to Real Life",
 	author = PLUGIN_AUTHOR,
-	description = "",
+	description = "April fools!",
 	version = PLUGIN_VERSION,
 	url = ""
 };
