@@ -680,7 +680,8 @@ public Action TF2SB_DelayedStuff(Handle useless)
 	Format(buffer, sizeof(buffer), "Credits\n\n\n");
 	StrCat(buffer, sizeof(buffer), " Coders:\n");
 	StrCat(buffer, sizeof(buffer), "   LeadKiller\n");
-	StrCat(buffer, sizeof(buffer), "   BattlefieldDuck\n");
+	StrCat(buffer, sizeof(buffer), "   ✔BattlefieldDuck\n");
+	StrCat(buffer, sizeof(buffer), "   _diamonedburned_\n");
 	StrCat(buffer, sizeof(buffer), "   Danct12\n");
 	StrCat(buffer, sizeof(buffer), "   DaRkWoRlD\n");
 
@@ -1651,6 +1652,8 @@ public Action Command_LightDynamic(int client, int args)
 		//DispatchKeyValue(Obj_LightDMelon, "renderamt", "150");
 		//DispatchKeyValue(Obj_LightDMelon, "renderfx", "15");
 		DispatchKeyValue(Obj_LightDMelon, "rendercolor", szColor);
+
+		AcceptEntityInput(Obj_LightDMelon, "skin", Obj_LightDMelon, client, StringToInt(szBrightness));
 		
 		int Obj_LightDynamic = CreateEntityByName("light_dynamic");
 		
