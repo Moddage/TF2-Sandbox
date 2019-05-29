@@ -2055,7 +2055,7 @@ public Action Command_SpawnProp(int client, int args)
 			}
 		} else
 			RemoveEdict(iEntity);
-	} else if (IndexInArray2 != -1 && CheckCommandAccess(client, "sm_footsteps", ADMFLAG_GENERIC)) {
+	} else if (IndexInArray2 != -1 && CheckCommandAccess(client, "sm_tf2sb_donor", 0)) {
 		bool bIsDoll = false;
 		char szEntType[33];
 		GetArrayString(g_hPropTypeArrayDonor, IndexInArray2, szEntType, sizeof(szEntType));
@@ -2835,7 +2835,7 @@ public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 		}
 		else if (StrEqual(info, "donatorprops"))
 		{
-			if (CheckCommandAccess(param1, "sm_footsteps", ADMFLAG_GENERIC))
+			if (CheckCommandAccess(param1, "sm_tf2sb_donor", 0))
 			{
 				DisplayMenu(g_hPropMenuDonor, param1, MENU_TIME_FOREVER);
 			}
