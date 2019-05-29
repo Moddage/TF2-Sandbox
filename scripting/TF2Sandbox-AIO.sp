@@ -652,18 +652,22 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuConstructions, "barrel03", "Yellow Barrel 2");
 
 	// updater
+	#if defined _updater_included
     if (LibraryExists("updater"))
     {
         Updater_AddPlugin(UPDATE_URL)
     }
+	#endif
 }
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
+	#if defined _updater_included
     if (StrEqual(name, "updater"))
     {
         Updater_AddPlugin(UPDATE_URL)
     }
+	#endif
 }
 
 public Action TF2SB_DelayedStuff(Handle useless)

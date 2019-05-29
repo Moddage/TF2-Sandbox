@@ -124,10 +124,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnLibraryAdded(const char[] name)
 {
+	#if defined _updater_included
     if (StrEqual(name, "updater"))
     {
         Updater_AddPlugin(UPDATE_URL)
     }
+	#endif
 
 	#if defined _SteamWorks_Included
 		steamworks = true;
@@ -155,17 +157,19 @@ public void OnConfigsExecuted()
 public void OnPluginStart() 
 {
 	// Check for update status:
+	#if defined _updater_included
     if (LibraryExists("updater"))
     {
         Updater_AddPlugin(UPDATE_URL)
     }
+	#endif
 
 	g_hCvarSwitch = CreateConVar("sbox_enable", "2", "Turn on, off TF2SB, or admins only.\n0 = Off\n1 = Admins Only\n2 = Enabled for everyone", 0, true, 0.0, true, 2.0);
-	g_hCvarNonOwner = CreateConVar("sbox_nonowner", "0", "Switch non-admin player can control non-owner props or not", 0, true, 0.0, true, 1.0);
-	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly to noclip or not?", 0, true, 0.0, true, 1.0);
+	g_hCvarNonOwner = CreateConVar("sbox_nonowner", "0", "Disable anti-grief", 0, true, 0.0, true, 1.0);
+	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly or noclip to noclip or not?", 0, true, 0.0, true, 1.0);
 	g_hCvarClPropLimit = CreateConVar("sbox_maxpropsperplayer", "120", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("sbox_maxragdolls", "10", "Player doll spawn limit.", 0, true, 0.0);
-	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit.\nDO NOT CHANGE THIS UNLESS YOU KNOW WHAT ARE YOU DOING.\nIf you're looking for changing props limit for player, check out 'sbox_maxpropsperplayer'.'", 0, true, 0.0);
+	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit", 0, true, 0.0);
 	g_hCvarServerTag = CreateConVar("sbox_tag", "1", "Enable 'tf2sb' tag", 0, true, 1.0);
 	g_hCvarGameDesc = CreateConVar("sbox_gamedesc", "1", "Change game name to 'TF2 Sandbox Version'?", 0, true, 1.0);
 	RegAdminCmd("sm_version", Command_Version, 0, "Show TF2SB Core version");
@@ -224,7 +228,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 		else
 		{
-			if (!g_bIN_SCORE[client])
+			if (!g_bIN_SCORE[client] && GetClientMenu(client, INVALID_HANDLE) == MenuSource_None)
 			{
 				FakeClientCommand(client, "sm_build");
 				g_bIN_SCORE[client] = true;
@@ -249,7 +253,7 @@ public Action DisplayHud(Handle timer)
 			
 		if (!g_bIN_SCORE[i])
 		{
-			ShowHudText(i, -1, "\nPress TAB or say !build. \nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
+			ShowHudText(i, -1, "\nPress TAB or say !build\nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
 		}
 		
 		//}
