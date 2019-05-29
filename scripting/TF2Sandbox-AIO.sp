@@ -1652,8 +1652,7 @@ public Action Command_LightDynamic(int client, int args)
 		//DispatchKeyValue(Obj_LightDMelon, "renderamt", "150");
 		//DispatchKeyValue(Obj_LightDMelon, "renderfx", "15");
 		DispatchKeyValue(Obj_LightDMelon, "rendercolor", szColor);
-
-		AcceptEntityInput(Obj_LightDMelon, "skin", Obj_LightDMelon, client, StringToInt(szBrightness));
+		DispatchKeyValue(Obj_LightDMelon, "skin", StringToInt(szBrightness));
 		
 		int Obj_LightDynamic = CreateEntityByName("light_dynamic");
 		
