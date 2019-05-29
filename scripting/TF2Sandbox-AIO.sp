@@ -24,15 +24,21 @@
 #include <build>
 #include <build_stocks>
 #include <vphysics>
-//#include <smlib>
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
 #include <entity_prop_stocks>
 #include <tf2items>
+#undef REQUIRE_PLUGIN
+//#include <updater>
+#define REQUIRE_PLUGIN
 #tryinclude <advancedinfiniteammo>
-//#include <stocklib>
-//#include <matrixmath>
+
+#define UPDATE_URL "https://sandbox.moddage.site/plugin/updater.txt"
+
+#if BUILDMODAPI_VER < 3
+#error "build.inc is outdated. please update before compiling"
+#endif
 
 // Toolgun is gay
 #define EF_BONEMERGE			(1 << 0)
@@ -41,9 +47,6 @@
 #pragma newdecls required
 
 int LastUsed[MAXPLAYERS + 1];
-
-bool g_bClientLang[MAXPLAYERS];
-Handle g_hCookieClientLang;
 
 Handle g_hMenuCredits;
 
@@ -64,48 +67,17 @@ char g_szConnectedClient[32][MAXPLAYERS];
 //char g_szDisconnectClient[32][MAXPLAYERS];
 int g_iTempOwner[MAX_HOOK_ENTITIES] =  { -1, ... };
 
-float g_fDelRangePoint1[MAXPLAYERS][3];
-float g_fDelRangePoint2[MAXPLAYERS][3];
-float g_fDelRangePoint3[MAXPLAYERS][3];
-char g_szDelRangeStatus[MAXPLAYERS][8];
-bool g_szDelRangeCancel[MAXPLAYERS] =  { false, ... };
-
 bool g_bGodmode[MAXPLAYERS];
 bool g_bBuddha[MAXPLAYERS];
 
-int ColorBlue[4] =  {
-	50, 
-	50, 
-	255, 
-	255 };
-int ColorWhite[4] =  {
-	255, 
-	255, 
-	255, 
-	255 };
-int ColorRed[4] =  {
-	255, 
-	50, 
-	50, 
-	255 };
-int ColorGreen[4] =  {
-	50, 
-	255, 
-	50, 
-	255 };
-
 #define EFL_NO_PHYSCANNON_INTERACTION (1<<30)
 
-int g_Halo;
-int g_PBeam;
-
-bool g_bBuffer[MAXPLAYERS + 1];
 
 int g_iCopyTarget[MAXPLAYERS];
 float g_fCopyPlayerOrigin[MAXPLAYERS][3];
 bool g_bCopyIsRunning[MAXPLAYERS] = false;
 
-int g_Beam;
+bool g_bBuffer[MAXPLAYERS + 1];
 
 Handle g_hMainMenu = INVALID_HANDLE;
 Handle g_hPropMenu = INVALID_HANDLE;
@@ -127,12 +99,6 @@ Handle g_hPropMenuHL2 = INVALID_HANDLE;
 Handle g_hPropMenuDonor = INVALID_HANDLE;
 Handle g_hPropMenuRequested = INVALID_HANDLE;
 
-/*char g_szFile[128];
-Handle g_hPropNameArray;
-Handle g_hPropModelPathArray;
-Handle g_hPropTypeArray;
-Handle g_hPropStringArray;*/
-
 char CopyableProps[][] =  {
 	"prop_dynamic", 
 	"prop_dynamic_override", 
@@ -143,59 +109,6 @@ char CopyableProps[][] =  {
 	"5", 
 	"func_physbox", 
 	"player"
-};
-
-char EntityType[][] =  {
-	"player", 
-	"func_physbox", 
-	"prop_door_rotating", 
-	"prop_dynamic", 
-	"prop_dynamic_ornament", 
-	"prop_dynamic_override", 
-	"prop_physics", 
-	"prop_physics_multiplayer", 
-	"prop_physics_override", 
-	"prop_physics_respawnable", 
-	"5", 
-	"item_ammo_357", 
-	"item_ammo_357_large", 
-	"item_ammo_ar2", 
-	"item_ammo_ar2_altfire", 
-	"item_ammo_ar2_large", 
-	"item_ammo_crate", 
-	"item_ammo_crossbow", 
-	"item_ammo_pistol", 
-	"item_ammo_pistol_large", 
-	"item_ammo_smg1", 
-	"item_ammo_smg1_grenade", 
-	"item_ammo_smg1_large", 
-	"item_battery", 
-	"item_box_buckshot", 
-	"item_dynamic_resupply", 
-	"item_healthcharger", 
-	"item_healthkit", 
-	"item_healthvial", 
-	"item_item_crate", 
-	"item_rpg_round", 
-	"item_suit", 
-	"item_suitcharger", 
-	"weapon_357", 
-	"weapon_alyxgun", 
-	"weapon_ar2", 
-	"weapon_bugbait", 
-	"weapon_crossbow", 
-	"weapon_crowbar", 
-	"weapon_frag", 
-	"weapon_physcannon", 
-	"weapon_pistol", 
-	"weapon_rpg", 
-	"weapon_shotgun", 
-	"weapon_smg1", 
-	"weapon_stunstick", 
-	"weapon_slam", 
-	"tf_viewmodel", 
-	"tf_", 
-	"gib"
 };
 
 char DelClass[][] =  {
@@ -225,73 +138,86 @@ float nextactivetime[MAXPLAYERS + 1];
 
 public Plugin myinfo = 
 {
-	name = "TF2 Sandbox", 
+	name = "Team Fortress 2 Sandbox", 
 	author = "LeadKiller, BattlefieldDuck, Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, and hjkwe654", 
-	description = "Everything in one module, isn't that cool? Yes", 
+	description = "The base gamemode plugin of Team Fortress 2 Sandbox. Includes all base Sandbox modules in one plugin.", 
 	version = BUILDMOD_VER, 
-	url = "https://www.moddage.site/"
+	url = "https://sandbox.moddage.site/"
 };
 
 public void OnPluginStart()
 {
-	// client Language Base
-	g_hCookieClientLang = RegClientCookie("cookie_BuildModClientLang", "TF2SB client Language.", CookieAccess_Private);
-
-	// disable waiting for players
+	// disable waiting for players, as props disappear after wait time
 	ServerCommand("sm_cvar mp_waitingforplayers_time 0");
+
+	// blacklist
+	RegAdminCmd("sm_bl", Command_AddBL, ADMFLAG_CONVARS, "Add clients to the blacklist");
+	RegAdminCmd("sm_unbl", Command_RemoveBL, ADMFLAG_CONVARS, "Remove clients from the blacklist");
 	
-	RegAdminCmd("sm_bl", Command_AddBL, ADMFLAG_CONVARS, "Add clients to TF2SB Blacklist");
-	RegAdminCmd("sm_unbl", Command_RemoveBL, ADMFLAG_CONVARS, "Remove clients from TF2SB Blacklist");
-	
-	// Creator
-	// For better compatibility
-	//RegConsoleCmd("kill", Command_kill, "");
+	// disable cheat flags
+	SetCommandFlags("noclip", GetCommandFlags("kill"));
+	SetCommandFlags("god", GetCommandFlags("kill"));
+
+	// add command hooks, as god mode disallows kill and explode, resulting in crashes.
+	RegConsoleCmd("kill", Command_kill, "");
+	RegConsoleCmd("explode", Command_kill, "");
 	RegConsoleCmd("noclip", Command_Fly, "");
-	//RegConsoleCmd("say", Command_Say, "");
+	RegConsoleCmd("god", Command_ChangeGodMode, "");
 	
-	// Basic Spawn Commands
+	// spawn props
 	RegAdminCmd("sm_spawnprop", Command_SpawnProp, 0, "Spawn a prop in command list!");
 	RegAdminCmd("sm_prop", Command_SpawnProp, 0, "Spawn props in command list, too!");
 	
-	// More building useful stuffs
-	RegAdminCmd("sm_skin", Command_Skin, 0, "Color a prop.");
-	
-	// Coloring Props and more
+	// coloring, skins, scale
 	RegAdminCmd("sm_color", Command_Color, 0, "Color a prop.");
 	RegAdminCmd("sm_render", Command_Render, 0, "Render an entity.");
+	RegAdminCmd("sm_skin", Command_Skin, 0, "Color a prop.");
+	RegAdminCmd("sm_propscale", Command_PropScale, 0, "Prop Scale");
 	
-	// Rotating stuffs
+	// building
+	RegAdminCmd("sm_build", Command_BuildMenu, 0);
+	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
+	RegAdminCmd("sm_delall", Command_DeleteAll, 0, "Delete all of your spawned entitys.");
+	RegAdminCmd("sm_del", Command_Delete, 0, "Delete an entity.");
+	RegAdminCmd("sm_setname", Command_SetName, 0, "Set the name of a prop");
+	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Scripted Door");
+	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light");
+	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, 0, "Half-Life 2 Door");
 	RegAdminCmd("sm_rotate", Command_Rotate, 0, "Rotate an entity.");
 	RegAdminCmd("sm_r", Command_Rotate, 0, "Rotate an entity.");
 	RegAdminCmd("sm_accuraterotate", Command_AccurateRotate, 0, "Accurate rotate a prop.");
 	RegAdminCmd("sm_ar", Command_AccurateRotate, 0, "Accurate rotate a prop.");
 	RegAdminCmd("sm_move", Command_Move, 0, "Move a prop to a position.");
+	RegAdminCmd("+copy", Command_Copy, 0, "Copy a prop");
+	RegAdminCmd("-copy", Command_Paste, 0, "Stop Copying a Prop");
 	
-	// Misc stuffs
-	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Doors creator.");
-	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light.");
-	RegAdminCmd("sm_fly", Command_Fly, 0, "I BELIEVE I CAN FLYYYYYYY, I BELIEVE THAT I CAN TOUCH DE SKY");
-	RegAdminCmd("sm_setname", Command_SetName, 0, "Set name of a prop!");
-	RegAdminCmd("sm_simplelight", Command_SimpleLight, 0, "Spawn a Light, in a very simple way.");
-	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, 0, "Making a door, in prop_door way.");
-	RegAdminCmd("sm_propscale", Command_PropScale, ADMFLAG_SLAY, "Resizing a prop");
-	
-	// HL2 Props
+	// player commands
+	RegAdminCmd("sm_god", Command_ChangeGodMode, 0, "Turn Godmode On/Off");
+	RegAdminCmd("sm_buddha", Command_ChangeBuddha, 0, "Turn Buddha On/Off");
+	RegAdminCmd("sm_addhealth", Command_Health, 0, "Add onto your max health");
+	RegAdminCmd("sm_resupply", Command_Resupply, 0);
+	RegAdminCmd("sm_fly", Command_Fly, 0, "Noclip");
+
+	// admin commands
+	RegAdminCmd("sm_fda", ClientRemoveAll, ADMFLAG_SLAY);
+
+	// Half-life 2 default props
 	g_hPropMenuHL2 = CreateMenu(PropMenuHL2);
 	SetMenuTitle(g_hPropMenuHL2, "TF2SB - Miscellaneous"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuHL2, true);
 	AddMenuItem(g_hPropMenuHL2, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuHL2, "blank", "", ITEMDRAW_IGNORE);
-	
+
+	// props-extended.ini
 	g_hPropMenuDonor = CreateMenu(PropMenuDonor);
 	SetMenuTitle(g_hPropMenuDonor, "TF2SB - Donator \nKeep in mind some of these props may not be removable!");
 	SetMenuExitBackButton(g_hPropMenuDonor, true);
 	AddMenuItem(g_hPropMenuDonor, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuDonor, "blank", "", ITEMDRAW_IGNORE);
 	
+	// arrays, cookies 😂
 	g_hCookieSDoorTarget = RegClientCookie("cookie_SDoorTarget", "For SDoor.", CookieAccess_Private);
 	g_hCookieSDoorModel = RegClientCookie("cookie_SDoorModel", "For SDoor.", CookieAccess_Private);
-	g_hCookieClientLang = RegClientCookie("cookie_BuildModClientLang", "TF2SB client Language.", CookieAccess_Private);
 	g_hPropNameArray = CreateArray(33, 2048); // Max Prop List is 1024-->2048
 	g_hPropModelPathArray = CreateArray(128, 2048); // Max Prop List is 1024-->2048
 	g_hPropTypeArray = CreateArray(33, 2048); // Max Prop List is 1024-->2048
@@ -301,90 +227,56 @@ public void OnPluginStart()
 	g_hPropTypeArrayDonor = CreateArray(33, 2048); // Max Prop List is 1024-->2048
 	g_hPropStringArrayDonor = CreateArray(256, 2048);
 
+	// read props.ini and props-extended.ini
 	ReadProps();
 	ReadPropsDonor();
 	
-	// Reload Plugin If You Want
-	RegAdminCmd("sm_reload_tf2sb", Command_ReloadAIOPlugin, ADMFLAG_ROOT, "Reload the AIO Plugin of TF2 Sandbox");
-	
-	// Godmode Spawn
+	// godmode on spawn
 	HookEvent("player_spawn", Event_Spawn);
-	RegAdminCmd("sm_god", Command_ChangeGodMode, 0, "Turn Godmode On/Off");
-	RegAdminCmd("sm_buddha", Command_ChangeBuddha, 0, "Turn Buddha On/Off");
 
-	// Health
-	RegAdminCmd("sm_addhealth", Command_Health, 0, "Add onto your health.");
-	
-	// Messages
+	// TODO: translations
 	LoadTranslations("common.phrases");
 	CreateTimer(0.1, Display_Msgs, 0, TIMER_REPEAT);
-	
-	// Remover
-	RegAdminCmd("sm_delall", Command_DeleteAll, 0, "Delete all of your spawned entitys.");
-	RegAdminCmd("sm_del", Command_Delete, 0, "Delete an entity.");
-	
+
+	// disallow breaking props
 	HookEntityOutput("prop_physics_respawnable", "OnBreak", OnPropBreak);
 	
-	// g_CollisionOffset = FindSendPropInfo("CBaseEntity", "m_CollisionGroup");
-	
-	// Buildings Belong To Us
+	// tf2 buildables
 	HookEvent("player_builtobject", Event_player_builtobject);
 	
-	// Simple Menu
+	// main menu
 	g_hMainMenu = CreateMenu(MainMenu);
-	// SetMenuTitle(g_hMainMenu, "TF2SB - Spawnlist v2");
-	SetMenuTitle(g_hMainMenu, "TF2SB - Spawnlist");
-	AddMenuItem(g_hMainMenu, "spawnlist", "Spawn...");
-	AddMenuItem(g_hMainMenu, "equipmenu", "Equip...");
-	AddMenuItem(g_hMainMenu, "playerstuff", "Player...");
-	// AddMenuItem(g_hMainMenu, "entities", "~Entities~", ITEMDRAW_DISABLED);
-	// AddMenuItem(g_hMainMenu, "door", "Door");
-	// AddMenuItem(g_hMainMenu, "buildhelper", "Build Helper...");
+	SetMenuTitle(g_hMainMenu, "TF2SB");
+	AddMenuItem(g_hMainMenu, "spawnlist", "Spawn");
+	AddMenuItem(g_hMainMenu, "equipmenu", "Equip");
+	AddMenuItem(g_hMainMenu, "playerstuff", "Player");
 	
-	// Player Stuff for now
+	// player menu
 	g_hPlayerStuff = CreateMenu(PlayerStuff);
-	SetMenuTitle(g_hPlayerStuff, "TF2SB - Player...");
-	AddMenuItem(g_hPlayerStuff, "cond", "Conditions...");
-	AddMenuItem(g_hPlayerStuff, "sizes", "Sizes...");
-	AddMenuItem(g_hPlayerStuff, "poser", "Player Poser...");
+	SetMenuTitle(g_hPlayerStuff, "TF2SB - Player");
+	AddMenuItem(g_hPlayerStuff, "cond", "Conditions");
+	AddMenuItem(g_hPlayerStuff, "sizes", "Sizes");
+	AddMenuItem(g_hPlayerStuff, "poser", "Player Poser");
 	// AddMenuItem(g_hPlayerStuff, "health", "Health");
-	// AddMenuItem(g_hPlayerStuff, "speed", "Speed");
 	AddMenuItem(g_hPlayerStuff, "model", "Model");
 	AddMenuItem(g_hPlayerStuff, "pitch", "Voice");
 	SetMenuExitBackButton(g_hPlayerStuff, true);
 	
-	// Init thing for commands!
-	RegAdminCmd("sm_build", Command_BuildMenu, 0);
-	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
-	RegAdminCmd("sm_resupply", Command_Resupply, 0);
-
-	// RegAdminCmd("sm_test", Command_Test, 0);
-	
-	// Build Helper (placeholder)
+	// build helper
 	g_hBuildHelperMenu = CreateMenu(BuildHelperMenu);
 	SetMenuTitle(g_hBuildHelperMenu, "TF2SB - Build Helper"); // \nType /toolgun for toolgun\nThis menu was here because not all features are in ToolGun.");
-	
 	AddMenuItem(g_hBuildHelperMenu, "delprop", "| Delete");
 	AddMenuItem(g_hBuildHelperMenu, "colors", "Color (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "effects", "Effects (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "skin", "Skin (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "rotate", "Rotate (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "accuraterotate", "Accurate Rotate (see chat)");
-	// AddMenuItem(g_hBuildHelperMenu, "doors", "Doors (see chat)");
+	AddMenuItem(g_hBuildHelperMenu, "doors", "Doors (see chat)");
 	AddMenuItem(g_hBuildHelperMenu, "lights", "Lights (see chat)");
-	// SetMenuExitBackButton(g_hBuildHelperMenu, true);
 	
-	// Remove Command
-	// g_hRemoveMenu = CreateMenu(RemoveMenu);
-	// SetMenuTitle(g_hRemoveMenu, "TF2SB - Remove");
-	// AddMenuItem(g_hRemoveMenu, "remove", "Remove that prop");
-	// AddMenuItem(g_hRemoveMenu, "delallfail", "To delete all, type !delall (there is no comeback)");
-	
-	// SetMenuExitBackButton(g_hRemoveMenu, true);
-	
-	//Addcond Menu
+	// conditions
 	g_hCondMenu = CreateMenu(CondMenu);
-	SetMenuTitle(g_hCondMenu, "TF2SB - Conditions...");
+	SetMenuTitle(g_hCondMenu, "TF2SB - Conditions");
 	AddMenuItem(g_hCondMenu, "godmode", "Godmode");
 	AddMenuItem(g_hCondMenu, "crits", "Crits");
 	AddMenuItem(g_hCondMenu, "noclip", "Noclip");
@@ -394,16 +286,13 @@ public void OnPluginStart()
 	AddMenuItem(g_hCondMenu, "speedboost", "Speed Boost");
 	AddMenuItem(g_hCondMenu, "resupply", "Resupply");
 	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
-	// AddMenuItem(g_hCondMenu, "minicrits", "Mini-Crits");
-	// AddMenuItem(g_hCondMenu, "fly", "Fly");
-	//	AddMenuItem(g_hCondMenu, "infclip", "Inf. Clip");
-	// AddMenuItem(g_hCondMenu, "damagereduce", "Damage Reduction");
 	AddMenuItem(g_hCondMenu, "removeweps", "Remove Weapons");
+	AddMenuItem(g_hCondMenu, "minicrits", "Mini-Crits");
 	SetMenuExitBackButton(g_hCondMenu, true);
 
-	//model
+	// model
 	g_hModelMenu = CreateMenu(ModelMenu);
-	SetMenuTitle(g_hModelMenu, "TF2SB - Set Model...");
+	SetMenuTitle(g_hModelMenu, "TF2SB - Set Model");
 	AddMenuItem(g_hModelMenu, "0", "None");
 	AddMenuItem(g_hModelMenu, "models/player/scout.mdl", "Scout");
 	AddMenuItem(g_hModelMenu, "models/player/soldier.mdl", "Soldier");
@@ -418,9 +307,9 @@ public void OnPluginStart()
 	AddMenuItem(g_hModelMenu, "models/bots/skeleton_sniper/skeleton_sniper.mdl", "Skeleton");
 	SetMenuExitBackButton(g_hModelMenu, true);
 
-	//voice fx
+	// voice fx
 	g_hDSPMenu = CreateMenu(DSPMenu);
-	SetMenuTitle(g_hDSPMenu, "TF2SB - Voice Effects...");
+	SetMenuTitle(g_hDSPMenu, "TF2SB - Voice Effects");
 	AddMenuItem(g_hDSPMenu, "0", "None");
 	AddMenuItem(g_hDSPMenu, "20", "Echo");
 	AddMenuItem(g_hDSPMenu, "23", "Blur");
@@ -430,24 +319,15 @@ public void OnPluginStart()
 	AddMenuItem(g_hDSPMenu, "116", "Micspam");
 	SetMenuExitBackButton(g_hDSPMenu, true);
 	
-	// Equip Menu
+	// equip menu
 	g_hEquipMenu = CreateMenu(EquipMenu);
-	SetMenuTitle(g_hEquipMenu, "TF2SB - Equip...");
-	CreateTimer(2.0, TF2SB_DelayedStuff); // what the fuck is this hack holy shit
-
-	// AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
-	// AddMenuItem(g_hEquipMenu, "blankspacec101", "");
-	// AddMenuItem(g_hEquipMenu, "blankspacec101", "");
-	// AddMenuItem(g_hEquipMenu, "blankspacec101", "");
-	// AddMenuItem(g_hEquipMenu, "blankspacec106", "// STOP USE PHYSGUN 1.0!!");
-	// AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
-	//	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
-	
+	SetMenuTitle(g_hEquipMenu, "TF2SB - Equip");
+	CreateTimer(2.0, TF2SB_DelayedStuff);
 	SetMenuExitBackButton(g_hEquipMenu, true);
 	
-	// Poser Menu
+	// poser menu
 	g_hPoseMenu = CreateMenu(TF2SBPoseMenu);
-	SetMenuTitle(g_hPoseMenu, "TF2SB - Player Poser...");
+	SetMenuTitle(g_hPoseMenu, "TF2SB - Player Poser");
 	AddMenuItem(g_hPoseMenu, "1", "-1x - Reversed");
 	AddMenuItem(g_hPoseMenu, "2", "0x - Frozen");
 	AddMenuItem(g_hPoseMenu, "3", "0.1x");
@@ -457,9 +337,9 @@ public void OnPluginStart()
 	AddMenuItem(g_hPoseMenu, "7", "Untaunt");
 	SetMenuExitBackButton(g_hPoseMenu, true);
 
-	// Sizes Menu
+	// size menu
 	g_hSizeMenu = CreateMenu(TF2SBSizeMenu);
-	SetMenuTitle(g_hSizeMenu, "TF2SB - Player Sizes...");
+	SetMenuTitle(g_hSizeMenu, "TF2SB - Player Sizes");
 	AddMenuItem(g_hSizeMenu, "0.25", "0.25x");
 	AddMenuItem(g_hSizeMenu, "0.50", "0.50x");
 	AddMenuItem(g_hSizeMenu, "0.75", "0.75x");
@@ -470,18 +350,22 @@ public void OnPluginStart()
 	AddMenuItem(g_hSizeMenu, "2.0", "2.0x");
 	SetMenuExitBackButton(g_hSizeMenu, true);
 	
-	/* This goes for something called prop menu, i can't figure out how to make a config spawn list */
-	
+	/*								 *\
+	  ///					      \\\
+	  ///    SPAWNLISTS BELOW!!   \\\
+	  ///					      \\\
+	\*								 */
+
 	// Prop Menu INIT
 	g_hPropMenu = CreateMenu(PropMenu);
-	SetMenuTitle(g_hPropMenu, "TF2SB - Spawn..."); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenu, "TF2SB - Spawn"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenu, true);
 	AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenu, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
 	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
 	AddMenuItem(g_hPropMenu, "pickupprops", "Item/Weapon Props");
-	// AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
+	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
 	AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
 	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
 	AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
@@ -489,7 +373,7 @@ public void OnPluginStart()
 
 	// Requested
 	g_hPropMenuRequested = CreateMenu(PropMenuRequested);
-	SetMenuTitle(g_hPropMenuRequested, "TF2SB - Requested Props..."); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuRequested, "TF2SB - Requested Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuRequested, true);
 	AddMenuItem(g_hPropMenuRequested, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuRequested, "emptyspace", "", ITEMDRAW_IGNORE);
@@ -498,11 +382,10 @@ public void OnPluginStart()
 
 	// Lead's Specialty Menu
 	g_hPropMenuLead = CreateMenu(PropMenuLead);
-	SetMenuTitle(g_hPropMenuLead, "TF2SB - Specialty Props..."); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuLead, "TF2SB - Specialty Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuLead, true);
 	AddMenuItem(g_hPropMenuLead, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuLead, "emptyspace", "", ITEMDRAW_IGNORE);
-	// AddMenuItem(g_hPropMenuLead, "tv001", "Television");
 	AddMenuItem(g_hPropMenuLead, "light", "Light");
 	AddMenuItem(g_hPropMenuLead, "sign", "Sign");
 	AddMenuItem(g_hPropMenuLead, "door", "Door");
@@ -534,43 +417,43 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuPickup, "medkit_small", "Medkit Small");
 	AddMenuItem(g_hPropMenuPickup, "medkit_small_bday", "Medkit Small Bday");
 	AddMenuItem(g_hPropMenuPickup, "platesandvich", "Sandvich Plate");
-	// AddMenuItem(g_hPropMenuPickup, "platesteak", "Steak Plate");
+	AddMenuItem(g_hPropMenuPickup, "platesteak", "Steak Plate");
 	AddMenuItem(g_hPropMenuPickup, "plate_robo_sandwich", "Sandvich Robo Plate");
 	
 	// Prop Menu Weapons
-	// g_hPropMenuWeapons = CreateMenu(PropMenuWeapons);
-	// SetMenuTitle(g_hPropMenuWeapons, "TF2SB - Weapon Props"); // \nSay /g in chat to move Entities!");
-	// SetMenuExitBackButton(g_hPropMenuWeapons, true);
-	AddMenuItem(g_hPropMenuPickup, "removeprops", "| Remove");
-	AddMenuItem(g_hPropMenuPickup, "emptyspace", "", ITEMDRAW_IGNORE);
-	AddMenuItem(g_hPropMenuPickup, "w_baseball", "Baseball");
-	AddMenuItem(g_hPropMenuPickup, "w_bat", "Bat");
-	AddMenuItem(g_hPropMenuPickup, "w_cigarette_case", "Cigarette Case");
-	AddMenuItem(g_hPropMenuPickup, "w_fireaxe", "Fire Axe");
-	AddMenuItem(g_hPropMenuPickup, "w_frontierjustice", "Frontier Justice");
-	AddMenuItem(g_hPropMenuPickup, "w_grenade_grenadelauncher", "Grenade");
-	AddMenuItem(g_hPropMenuPickup, "w_grenadelauncher", "Grenade Launcher");
-	AddMenuItem(g_hPropMenuPickup, "w_knife", "Knife");
-	AddMenuItem(g_hPropMenuPickup, "w_medigun", "Medi Gun");
-	AddMenuItem(g_hPropMenuPickup, "w_minigun", "MiniGun");
-	AddMenuItem(g_hPropMenuPickup, "w_builder", "PDA Build");
-	AddMenuItem(g_hPropMenuPickup, "w_pda_engineer", "PDA Destroy");
-	AddMenuItem(g_hPropMenuPickup, "w_pistol", "Pistol");
-	AddMenuItem(g_hPropMenuPickup, "w_revolver", "Revolver");
-	AddMenuItem(g_hPropMenuPickup, "w_rocket", "Rocket");
-	AddMenuItem(g_hPropMenuPickup, "w_rocketlauncher", "Rocket Launcher");
-	AddMenuItem(g_hPropMenuPickup, "w_sapper", "Sapper");
-	AddMenuItem(g_hPropMenuPickup, "w_scattergun", "Scatter Gun");
-	AddMenuItem(g_hPropMenuPickup, "w_shotgun", "Shotgun");
-	AddMenuItem(g_hPropMenuPickup, "w_shovel", "Shovel");
-	AddMenuItem(g_hPropMenuPickup, "w_smg", "SMG");
-	AddMenuItem(g_hPropMenuPickup, "w_sniperrifle", "Sniper Rifle");
-	AddMenuItem(g_hPropMenuPickup, "w_stickybomb_launcher", "Sticky Bomb Launcher");
-	AddMenuItem(g_hPropMenuPickup, "w_syringegun", "Syringe Gun");
-	AddMenuItem(g_hPropMenuPickup, "w_wrangler", "The Wrangler");
-	AddMenuItem(g_hPropMenuPickup, "w_toolbox", "Toolbox");
-	AddMenuItem(g_hPropMenuPickup, "w_ttg_max_gun", "TTG Max Gun");
-	AddMenuItem(g_hPropMenuPickup, "w_wrench", "Wrench");
+	g_hPropMenuWeapons = CreateMenu(PropMenuWeapons);
+	SetMenuTitle(g_hPropMenuWeapons, "TF2SB - Weapon Props"); // \nSay /g in chat to move Entities!");
+	SetMenuExitBackButton(g_hPropMenuWeapons, true);
+	AddMenuItem(g_hPropMenuWeapons, "removeprops", "| Remove");
+	// AddMenuItem(g_hPropMenuPickup, "emptyspace", "", ITEMDRAW_IGNORE);
+	AddMenuItem(g_hPropMenuWeapons, "w_baseball", "Baseball");
+	AddMenuItem(g_hPropMenuWeapons, "w_bat", "Bat");
+	AddMenuItem(g_hPropMenuWeapons, "w_cigarette_case", "Cigarette Case");
+	AddMenuItem(g_hPropMenuWeapons, "w_fireaxe", "Fire Axe");
+	AddMenuItem(g_hPropMenuWeapons, "w_frontierjustice", "Frontier Justice");
+	AddMenuItem(g_hPropMenuWeapons, "w_grenade_grenadelauncher", "Grenade");
+	AddMenuItem(g_hPropMenuWeapons, "w_grenadelauncher", "Grenade Launcher");
+	AddMenuItem(g_hPropMenuWeapons, "w_knife", "Knife");
+	AddMenuItem(g_hPropMenuWeapons, "w_medigun", "Medi Gun");
+	AddMenuItem(g_hPropMenuWeapons, "w_minigun", "MiniGun");
+	AddMenuItem(g_hPropMenuWeapons, "w_builder", "PDA Build");
+	AddMenuItem(g_hPropMenuWeapons, "w_pda_engineer", "PDA Destroy");
+	AddMenuItem(g_hPropMenuWeapons, "w_pistol", "Pistol");
+	AddMenuItem(g_hPropMenuWeapons, "w_revolver", "Revolver");
+	AddMenuItem(g_hPropMenuWeapons, "w_rocket", "Rocket");
+	AddMenuItem(g_hPropMenuWeapons, "w_rocketlauncher", "Rocket Launcher");
+	AddMenuItem(g_hPropMenuWeapons, "w_sapper", "Sapper");
+	AddMenuItem(g_hPropMenuWeapons, "w_scattergun", "Scatter Gun");
+	AddMenuItem(g_hPropMenuWeapons, "w_shotgun", "Shotgun");
+	AddMenuItem(g_hPropMenuWeapons, "w_shovel", "Shovel");
+	AddMenuItem(g_hPropMenuWeapons, "w_smg", "SMG");
+	AddMenuItem(g_hPropMenuWeapons, "w_sniperrifle", "Sniper Rifle");
+	AddMenuItem(g_hPropMenuWeapons, "w_stickybomb_launcher", "Sticky Bomb Launcher");
+	AddMenuItem(g_hPropMenuWeapons, "w_syringegun", "Syringe Gun");
+	AddMenuItem(g_hPropMenuWeapons, "w_wrangler", "The Wrangler");
+	AddMenuItem(g_hPropMenuWeapons, "w_toolbox", "Toolbox");
+	AddMenuItem(g_hPropMenuWeapons, "w_ttg_max_gun", "TTG Max Gun");
+	AddMenuItem(g_hPropMenuWeapons, "w_wrench", "Wrench");
 	
 	// Prop Menu Comics Prop
 	g_hPropMenuComic = CreateMenu(PropMenuComics);
@@ -767,48 +650,20 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuConstructions, "work_table001", "Work Table");
 	AddMenuItem(g_hPropMenuConstructions, "barrel01", "Yellow Barrel");
 	AddMenuItem(g_hPropMenuConstructions, "barrel03", "Yellow Barrel 2");
-	
-	
-	/*	g_hPropNameArray = CreateArray(33, 2048);		// Max Prop List is 1024-->2048
-	g_hPropModelPathArray = CreateArray(128, 2048);	// Max Prop List is 1024-->2048
-	g_hPropTypeArray = CreateArray(33, 2048);		// Max Prop List is 1024-->2048
-	g_hPropStringArray = CreateArray(256, 2048);
-	
-	ReadProps();
-	
-	char szPropName[32], char szPropFrozen[32], char szPropString[256], char szModelPath[128];
-	
-	int PropName = FindStringInArray(g_hPropNameArray, szPropName);
-	int PropString = FindStringInArray(g_hPropNameArray, szPropString);*/
-	
-	/*creategravityguncvar();
-	for (int i = 0; i <= MaxClients; i++)
-	{
-		g_bIsWeaponGrabber[i] = false;
-		
-		grabbedentref[i] = INVALID_ENT_REFERENCE;
-		if (IsValidClient(i) && IsClientInGame(i))
-		{
-			SDKHook(i, SDKHook_PreThink, PreThinkHook);
-			SDKHook(i, SDKHook_WeaponSwitch, WeaponSwitchHook);
-			SDKHook(i, SDKHook_WeaponSwitchPost, WeaponSwitchHookPost);
-		}
-	}*/
-	
-	RegAdminCmd("sm_fda", ClientRemoveAll, ADMFLAG_SLAY);
-	
-	// StrCat(buffer, sizeof(buffer), "FlaminSarge and javalia for the GravityGun Mod (which helped with Physgun v1)\n");
-	// StrCat(buffer, sizeof(buffer), "Pelipoika for the Tool Gun\n");
-	// StrCat(buffer, sizeof(buffer), "TESTBOT#7 for making the official group\n");
-	/*StrCat(buffer, sizeof(buffer), "BattlefieldDuck for updating, tweaking, and making addons for TF2SB\n");
-	StrCat(buffer, sizeof(buffer), "LeadKiller for updating TF2SB to be more modern\n");*/
 
-	//StrCat(buffer, sizeof(buffer), "The Moddage community for hosting the server\n");
-	// kind of shameless advertisement, even if it's official it's not just a tf2sandbox community!
-	// StrCat(buffer, sizeof(buffer), "And every players who have joined to test it out!\n \n");
+	// updater
+    if (LibraryExists("updater"))
+    {
+        Updater_AddPlugin(UPDATE_URL)
+    }
+}
 
-	// RegAdminCmd("sm_hidehud", Command_TF2SBHideHud, 0);
-	
+public OnLibraryAdded(const String:name[])
+{
+    if (StrEqual(name, "updater"))
+    {
+        Updater_AddPlugin(UPDATE_URL)
+    }
 }
 
 public Action TF2SB_DelayedStuff(Handle useless)
@@ -853,6 +708,11 @@ public Action TF2SB_DelayedStuff(Handle useless)
     	AddMenuItem(g_hEquipMenu, "physgunnew", "Physics Gun V4");
 	}  
 
+	if(GetCommandFlags("sm_portalgun") != INVALID_FCVAR_FLAGS) // https://forums.alliedmods.net/showthread.php?t=237940
+	{
+    	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
+	} 
+
 	/*if(GetCommandFlags("sm_physgun") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_pg") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_sbpg") == INVALID_FCVAR_FLAGS)
 	{
 		AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
@@ -890,24 +750,7 @@ public Action Command_TF2SBCred(int client, int args)
 
 public int TF2SBCred1(Handle menu, MenuAction action, int param1, int param2)
 {
-	/*if (action == MenuAction_Select)
-	{
-		switch (param2)
-		{
-			case 0:DisplayMenu(g_hMenuCredits2, param1, MENU_TIME_FOREVER);
-		}
-	}*/
-}
-
-public int TF2SBCred2(Handle menu, MenuAction action, int param1, int param2)
-{
-	if (action == MenuAction_Select)
-	{
-		switch (param2)
-		{
-			case 0:DisplayMenu(g_hMenuCredits, param1, MENU_TIME_FOREVER);
-		}
-	}
+	// ???
 }
 
 stock float GetEntitiesDistance(int ent1, int ent2)
@@ -923,15 +766,10 @@ stock float GetEntitiesDistance(int ent1, int ent2)
 
 public void OnMapStart()
 {
-	g_Halo = PrecacheModel("materials/sprites/halo01.vmt");
-	g_Beam = PrecacheModel("materials/sprites/lgtning.vmt");
-	g_PBeam = PrecacheModel("materials/sprites/physbeam.vmt");
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot1.wav", true);
 	PrecacheSound("buttons/button3.wav", true);
 	PrecacheSound("ui/panel_close.wav", true);
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav", true);
-	PrecacheSound("npc/strider/charging.wav", true);
-	PrecacheSound("npc/strider/fire.wav", true);
 	for (int i = 1; i < MaxClients; i++)
 	{
 		g_szConnectedClient[i] = "";
@@ -1002,19 +840,6 @@ public Action Timer_Disconnect(Handle timer, Handle hPack)
 		}
 	}
 	return;
-}
-
-public Action OnClientCommand(int client, int args)
-{
-	if (Build_IsClientValid(client, client) && client > 0)
-	{
-		char Lang[8];
-		GetClientCookie(client, g_hCookieClientLang, Lang, sizeof(Lang));
-		if (StrEqual(Lang, "1"))
-			g_bClientLang[client] = true;
-		else
-			g_bClientLang[client] = false;
-	}
 }
 
 public Action Command_Copy(int client, int args)
@@ -1177,8 +1002,8 @@ public Action Timer_CopyBeam(Handle timer, any client)
 		iColor[2] = GetRandomInt(50, 255);
 		iColor[3] = GetRandomInt(255, 255);
 		
-		TE_SetupBeamPoints(fOriginEntity, fOriginPlayer, g_PBeam, g_Halo, 0, 66, 0.1, 2.0, 2.0, 0, 0.0, iColor, 20);
-		TE_SendToAll();
+		/* TE_SetupBeamPoints(fOriginEntity, fOriginPlayer, g_PBeam, g_Halo, 0, 66, 0.1, 2.0, 2.0, 0, 0.0, iColor, 20);
+		TE_SendToAll(); */
 		
 		if (g_bCopyIsRunning[client])
 			CreateTimer(0.01, Timer_CopyBeam, client);
@@ -1199,10 +1024,10 @@ public Action Timer_CopyRing(Handle timer, any client)
 		iColor[2] = GetRandomInt(254, 255);
 		iColor[3] = GetRandomInt(250, 255);
 		
-		TE_SetupBeamRingPoint(fOriginEntity, 10.0, 15.0, g_Beam, g_Halo, 0, 10, 0.6, 3.0, 0.5, iColor, 5, 0);
+		/*TE_SetupBeamRingPoint(fOriginEntity, 10.0, 15.0, g_Beam, g_Halo, 0, 10, 0.6, 3.0, 0.5, iColor, 5, 0);
 		TE_SendToAll();
 		TE_SetupBeamRingPoint(fOriginEntity, 80.0, 100.0, g_Beam, g_Halo, 0, 10, 0.6, 3.0, 0.5, iColor, 5, 0);
-		TE_SendToAll();
+		TE_SendToAll();*/
 		
 		if (g_bCopyIsRunning[client])
 			CreateTimer(0.3, Timer_CopyRing, client);
@@ -1321,7 +1146,7 @@ public Action Command_OpenableDoorProp(int client, int args)
 	return Plugin_Handled;
 }
 
-/*public Action Command_kill(int client, int args)
+public Action Command_kill(int client, int args)
 {
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
@@ -1332,7 +1157,7 @@ public Action Command_OpenableDoorProp(int client, int args)
 	//	Build_PrintToChat(client, "Don't use unneeded args in kill");
 	
 	return Plugin_Handled;
-}*/
+}
 
 public Action Command_ReloadAIOPlugin(int client, int args)
 {
@@ -1388,7 +1213,7 @@ public Action Command_Render(int client, int args)
 		DispatchKeyValue(iEntity, "renderfx", szRenderFX);
 		DispatchKeyValue(iEntity, "rendercolor", szColors);
 		
-		float vOriginPlayer[3], vOriginAim[3];
+		/*float vOriginPlayer[3], vOriginAim[3];
 		
 		Build_ClientAimOrigin(client, vOriginAim);
 		GetClientAbsOrigin(client, vOriginPlayer);
@@ -1404,7 +1229,7 @@ public Action Command_Render(int client, int args)
 		} else {
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-		}
+		}*/
 	}
 	
 	char szTemp[33], szArgs[128];
@@ -1456,7 +1281,7 @@ public Action Command_Color(int client, int args)
 		GetClientAbsOrigin(client, vOriginPlayer);
 		vOriginPlayer[2] = vOriginPlayer[2] + 50;
 		
-		TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
+		/*TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
 		TE_SendToAll();
 		
 		int random = GetRandomInt(0, 1);
@@ -1466,7 +1291,7 @@ public Action Command_Color(int client, int args)
 		} else {
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-		}
+		}*/
 	}
 	
 	char szTemp[33], szArgs[128];
@@ -1492,7 +1317,6 @@ public Action Command_PropScale(int client, int args)
 	
 	if (args < 1) {
 		Build_PrintToChat(client, "Usage: !propscale <number>");
-		Build_PrintToChat(client, "Notice: Physics are non-scaled.");
 		return Plugin_Handled;
 	}
 	
@@ -1501,17 +1325,26 @@ public Action Command_PropScale(int client, int args)
 		return Plugin_Handled;
 	
 	if (Build_IsEntityOwner(client, iEntity)) {
-		
 		//float Scale2  = GetEntPropFloat(iEntity, Prop_Send, "m_flModelScale");
 		char szPropScale[33];
 		GetCmdArg(1, szPropScale, sizeof(szPropScale));
 		
+		if (StringToInt(szPropScale) > 3) {
+			Build_PrintToChat(client, "Max scale is 3!");
+			return Plugin_Handled;
+		}
+
+		if (StringToInt(szPropScale) < 1) {
+			Build_PrintToChat(client, "Scale must be equal to or higher than 1!");
+			return Plugin_Handled;
+		}
+
 		float Scale = StringToFloat(szPropScale);
 		
 		SetVariantString(szPropScale);
 		SetEntPropFloat(iEntity, Prop_Send, "m_flModelScale", Scale);
 		
-		float vOriginPlayer[3], vOriginAim[3];
+		/*float vOriginPlayer[3], vOriginAim[3];
 		
 		Build_ClientAimOrigin(client, vOriginAim);
 		GetClientAbsOrigin(client, vOriginPlayer);
@@ -1527,7 +1360,7 @@ public Action Command_PropScale(int client, int args)
 		} else {
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-		}
+		}*/
 	}
 	
 	char szTemp[33], szArgs[128];
@@ -1561,7 +1394,7 @@ public Action Command_Skin(int client, int args)
 		SetVariantString(szSkin);
 		AcceptEntityInput(iEntity, "skin", iEntity, client, 0);
 		
-		float vOriginPlayer[3], vOriginAim[3];
+		/*float vOriginPlayer[3], vOriginAim[3];
 		
 		Build_ClientAimOrigin(client, vOriginAim);
 		GetClientAbsOrigin(client, vOriginPlayer);
@@ -1577,7 +1410,7 @@ public Action Command_Skin(int client, int args)
 		} else {
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-		}
+		}*/
 	}
 	
 	char szTemp[33], szArgs[128];
@@ -1626,7 +1459,7 @@ public Action Command_Rotate(int client, int args)
 		
 		TeleportEntity(iEntity, fEntityOrigin, fEntityAngle, NULL_VECTOR);
 		
-		float vOriginPlayer[3], vOriginAim[3];
+		/*float vOriginPlayer[3], vOriginAim[3];
 		
 		Build_ClientAimOrigin(client, vOriginAim);
 		GetClientAbsOrigin(client, vOriginPlayer);
@@ -1642,7 +1475,7 @@ public Action Command_Rotate(int client, int args)
 		} else {
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-		}
+		}*/
 	}
 	
 	char szTemp[33], szArgs[128];
@@ -1733,7 +1566,7 @@ public Action Command_AccurateRotate(int client, int args)
 		
 		TeleportEntity(iEntity, fEntityOrigin, fEntityAngle, NULL_VECTOR);
 		
-		float vOriginPlayer[3], vOriginAim[3];
+		/*float vOriginPlayer[3], vOriginAim[3];
 		
 		Build_ClientAimOrigin(client, vOriginAim);
 		GetClientAbsOrigin(client, vOriginPlayer);
@@ -1749,7 +1582,7 @@ public Action Command_AccurateRotate(int client, int args)
 		} else {
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-		}
+		}*/
 	}
 	
 	char szTemp[33], szArgs[128];
@@ -1767,7 +1600,8 @@ public Action Command_LightDynamic(int client, int args)
 		return Plugin_Handled;
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !ld <brightness> <R> <G> <B>");
+		FakeClientCommand(client, "sm_ld 7 255 255 255");
+		// Build_PrintToChat(client, "Usage: !ld <brightness> <R> <G> <B>");
 		return Plugin_Handled;
 	}
 	
@@ -1817,11 +1651,7 @@ public Action Command_LightDynamic(int client, int args)
 		int Obj_LightDynamic = CreateEntityByName("light_dynamic");
 		
 		if (StringToInt(szBrightness) > 7) {
-			if (g_bClientLang[client])
-				Build_PrintToChat(client, "亮度上限是 7!");
-			else
-				Build_PrintToChat(client, "Max brightness is 7!");
-			
+			Build_PrintToChat(client, "Max brightness is 7!");
 			Build_SetLimit(client, -1);
 			return Plugin_Handled;
 		}
@@ -2028,7 +1858,7 @@ public Action Command_Move(int client, int args)
 		
 		TeleportEntity(iEntity, fEntityOrigin, fEntityAngle, NULL_VECTOR);
 		
-		float vOriginPlayer[3], vOriginAim[3];
+		/*float vOriginPlayer[3], vOriginAim[3];
 		
 		Build_ClientAimOrigin(client, vOriginAim);
 		GetClientAbsOrigin(client, vOriginPlayer);
@@ -2044,7 +1874,7 @@ public Action Command_Move(int client, int args)
 		} else {
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
 			EmitAmbientSound("weapons/airboat/airboat_gun_lastshot2.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, 100);
-		}
+		}*/
 	}
 	
 	char szTemp[33], szArgs[128];
@@ -2204,9 +2034,11 @@ public Action Command_SpawnProp(int client, int args)
 			}*/
 			
 			SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
-			SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
+
+			/* SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
 			SetEntityRenderColor(iEntity, 255, 255, 255, 0);
-			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST);
+			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST); */
+			// WIP FADE EFFECT
 			
 			// Debugging issues
 			//PrintToChatAll(szPropString);
@@ -2293,9 +2125,10 @@ public Action Command_SpawnProp(int client, int args)
 			}*/
 			
 			SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
-			SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
+			/* SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
 			SetEntityRenderColor(iEntity, 255, 255, 255, 0);
-			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST);
+			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST); */
+			// WIP FADE EFFECT
 			
 			// Debugging issues
 			//PrintToChatAll(szPropString);
@@ -2555,7 +2388,7 @@ public void EntityInfo(int client, int iTarget)
 	if (IsFunc(iTarget))
 		return;
 	
-	if (IsWorldEnt(iTarget)) {
+	/* if (IsWorldEnt(iTarget)) {
 		if (Build_IsAdmin(client)) {
 			char szSteamId[32], szIP[16];
 			GetClientAuthId(iTarget, AuthId_Steam2, szSteamId, sizeof(szSteamId));
@@ -2563,7 +2396,7 @@ public void EntityInfo(int client, int iTarget)
 			ShowHudText(client, -1, "%s\nIs a World Entity.", iTarget);
 		} else {
 		}
-	}
+	} */
 	
 	SetHudTextParams(0.015, 0.08, 0.01, 255, 255, 255, 255, 0, 6.0, 0.1, 0.2);
 	if (IsPlayer(iTarget)) {
@@ -2605,26 +2438,14 @@ public void EntityInfo(int client, int iTarget)
 		szOwner = "*World";
 	}
 	
-	if (Phys_IsPhysicsObject(iTarget)) {
-		SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
-		if (StrContains(szClass, "prop_door_", false) == 0) {
-			ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
-		}
-		else {
-			ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
-		}
-		//if (g_bClientLang[client])
-		
-		//ShowHudText(client, -1, "類型: %s\n編號: %i\n模組: %s\n擁有者: %s\n重量:%f", szClass, iTarget, szModel, szOwner, Phys_GetMass(iTarget));
-		//else
-		//ShowHudText(client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s\nMass:%f", szClass, iTarget, szModel, szOwner, Phys_GetMass(iTarget));
-	} else {
-		if (g_bClientLang[client])
-			ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
-		//ShowHudText(client, -1, "類型: %s\n編號: %i\n模組: %s\n擁有者: %s", szClass, iTarget, szModel, szOwner);
-		//else
-		//ShowHudText(client, -1, "Classname: %s\nIndex: %i\nModel: %s\nOwner: %s", szClass, iTarget, szModel, szOwner);
+	SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
+	if (StrContains(szClass, "prop_door_", false) == 0) {
+		ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 	}
+	else {
+		ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
+	}
+
 	return;
 }
 
@@ -2646,7 +2467,7 @@ bool IsNpc(int iEntity)
 	return false;
 }
 
-bool IsWorldEnt(int iEntity)
+/*bool IsWorldEnt(int iEntity)
 {
 	int szOwner = -1;
 	if (IsValidEntity(iEntity))
@@ -2655,7 +2476,7 @@ bool IsWorldEnt(int iEntity)
 	if (szOwner == 0)
 		return true;
 	return false;
-}
+}*/
 
 bool IsPlayer(int iEntity)
 {
@@ -2802,586 +2623,6 @@ public Action Command_Delete(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_DelRange(int client, int args)
-{
-	if (!Build_IsClientValid(client, client))
-		return Plugin_Handled;
-	
-	char szCancel[32];
-	GetCmdArg(1, szCancel, sizeof(szCancel));
-	if (!StrEqual(szCancel, "") && (!StrEqual(g_szDelRangeStatus[client], "off") || !StrEqual(g_szDelRangeStatus[client], ""))) {
-		Build_PrintToChat(client, "Canceled DelRange");
-		g_szDelRangeCancel[client] = true;
-		return Plugin_Handled;
-	}
-	
-	if (StrEqual(g_szDelRangeStatus[client], "x"))
-		g_szDelRangeStatus[client] = "y";
-	else if (StrEqual(g_szDelRangeStatus[client], "y"))
-		g_szDelRangeStatus[client] = "z";
-	else if (StrEqual(g_szDelRangeStatus[client], "z"))
-		g_szDelRangeStatus[client] = "off";
-	else {
-		Build_ClientAimOrigin(client, g_fDelRangePoint1[client]);
-		g_szDelRangeStatus[client] = "x";
-		CreateTimer(0.05, Timer_DR, client);
-	}
-	return Plugin_Handled;
-}
-
-public Action Command_DelStrider(int client, int args)
-{
-	if (!Build_IsClientValid(client, client))
-		return Plugin_Handled;
-	
-	float fRange;
-	char szRange[5];
-	float vOriginAim[3];
-	GetCmdArg(1, szRange, sizeof(szRange));
-	
-	fRange = StringToFloat(szRange);
-	if (fRange < 1)
-		fRange = 300.0;
-	if (fRange > 5000)
-		fRange = 5000.0;
-	
-	Build_ClientAimOrigin(client, vOriginAim);
-	
-	Handle hDataPack;
-	CreateDataTimer(0.01, Timer_DScharge, hDataPack);
-	WritePackCell(hDataPack, client);
-	WritePackFloat(hDataPack, fRange);
-	WritePackFloat(hDataPack, vOriginAim[0]);
-	WritePackFloat(hDataPack, vOriginAim[1]);
-	WritePackFloat(hDataPack, vOriginAim[2]);
-	return Plugin_Handled;
-}
-
-public Action Command_DelStrider2(int client, int args)
-{
-	if (!Build_IsClientValid(client, client))
-		return Plugin_Handled;
-	
-	float fRange;
-	char szRange[5];
-	float vOriginAim[3];
-	GetCmdArg(1, szRange, sizeof(szRange));
-	
-	fRange = StringToFloat(szRange);
-	if (fRange < 1)
-		fRange = 300.0;
-	if (fRange > 5000)
-		fRange = 5000.0;
-	
-	Build_ClientAimOrigin(client, vOriginAim);
-	
-	Handle hDataPack;
-	CreateDataTimer(0.01, Timer_DScharge2, hDataPack);
-	WritePackCell(hDataPack, client);
-	WritePackFloat(hDataPack, fRange);
-	WritePackFloat(hDataPack, vOriginAim[0]);
-	WritePackFloat(hDataPack, vOriginAim[1]);
-	WritePackFloat(hDataPack, vOriginAim[2]);
-	return Plugin_Handled;
-}
-
-public Action Timer_DR(Handle timer, any client)
-{
-	if (!Build_IsClientValid(client, client))
-		return;
-	if (g_szDelRangeCancel[client]) {
-		g_szDelRangeCancel[client] = false;
-		g_szDelRangeStatus[client] = "off";
-		return;
-	}
-	
-	float vPoint2[3], vPoint3[3], vPoint4[3];
-	float vClonePoint1[3], vClonePoint2[3], vClonePoint3[3], vClonePoint4[3];
-	float vOriginAim[3], vOriginPlayer[3];
-	
-	if (StrEqual(g_szDelRangeStatus[client], "x")) {
-		Build_ClientAimOrigin(client, vOriginAim);
-		vPoint2[0] = vOriginAim[0];
-		vPoint2[1] = vOriginAim[1];
-		vPoint2[2] = g_fDelRangePoint1[client][2];
-		vClonePoint1[0] = g_fDelRangePoint1[client][0];
-		vClonePoint1[1] = vPoint2[1];
-		vClonePoint1[2] = ((g_fDelRangePoint1[client][2] + vPoint2[2]) / 2);
-		vClonePoint2[0] = vPoint2[0];
-		vClonePoint2[1] = g_fDelRangePoint1[client][1];
-		vClonePoint2[2] = ((g_fDelRangePoint1[client][2] + vPoint2[2]) / 2);
-		
-		GetClientAbsOrigin(client, vOriginPlayer);
-		vOriginPlayer[2] = (vOriginPlayer[2] + 50);
-		
-		DrowLine(vClonePoint1, g_fDelRangePoint1[client], ColorRed);
-		DrowLine(vClonePoint2, g_fDelRangePoint1[client], ColorRed);
-		DrowLine(vPoint2, vClonePoint1, ColorRed);
-		DrowLine(vPoint2, vClonePoint2, ColorRed);
-		DrowLine(vPoint2, vOriginAim, ColorBlue);
-		DrowLine(vOriginAim, vOriginPlayer, ColorBlue);
-		
-		g_fDelRangePoint2[client] = vPoint2;
-		CreateTimer(0.001, Timer_DR, client);
-	} else if (StrEqual(g_szDelRangeStatus[client], "y")) {
-		Build_ClientAimOrigin(client, vOriginAim);
-		vPoint2[0] = g_fDelRangePoint2[client][0];
-		vPoint2[1] = g_fDelRangePoint2[client][1];
-		vPoint2[2] = g_fDelRangePoint1[client][2];
-		vClonePoint1[0] = g_fDelRangePoint1[client][0];
-		vClonePoint1[1] = vPoint2[1];
-		vClonePoint1[2] = ((g_fDelRangePoint1[client][2] + vPoint2[2]) / 2);
-		vClonePoint2[0] = vPoint2[0];
-		vClonePoint2[1] = g_fDelRangePoint1[client][1];
-		vClonePoint2[2] = ((g_fDelRangePoint1[client][2] + vPoint2[2]) / 2);
-		
-		vPoint3[0] = g_fDelRangePoint1[client][0];
-		vPoint3[1] = g_fDelRangePoint1[client][1];
-		vPoint3[2] = vOriginAim[2];
-		vPoint4[0] = vPoint2[0];
-		vPoint4[1] = vPoint2[1];
-		vPoint4[2] = vOriginAim[2];
-		vClonePoint3[0] = vClonePoint1[0];
-		vClonePoint3[1] = vClonePoint1[1];
-		vClonePoint3[2] = vOriginAim[2];
-		vClonePoint4[0] = vClonePoint2[0];
-		vClonePoint4[1] = vClonePoint2[1];
-		vClonePoint4[2] = vOriginAim[2];
-		
-		GetClientAbsOrigin(client, vOriginPlayer);
-		vOriginPlayer[2] = (vOriginPlayer[2] + 50);
-		
-		DrowLine(vClonePoint1, g_fDelRangePoint1[client], ColorRed);
-		DrowLine(vClonePoint2, g_fDelRangePoint1[client], ColorRed);
-		DrowLine(vPoint2, vClonePoint1, ColorRed);
-		DrowLine(vPoint2, vClonePoint2, ColorRed);
-		DrowLine(vPoint3, vClonePoint3, ColorRed);
-		DrowLine(vPoint3, vClonePoint4, ColorRed);
-		DrowLine(vPoint4, vClonePoint3, ColorRed);
-		DrowLine(vPoint4, vClonePoint4, ColorRed);
-		DrowLine(vPoint3, g_fDelRangePoint1[client], ColorRed);
-		DrowLine(vPoint4, vPoint2, ColorRed);
-		DrowLine(vClonePoint1, vClonePoint3, ColorRed);
-		DrowLine(vClonePoint2, vClonePoint4, ColorRed);
-		DrowLine(vPoint4, vOriginAim, ColorBlue);
-		DrowLine(vOriginAim, vOriginPlayer, ColorBlue);
-		
-		g_fDelRangePoint3[client] = vPoint4;
-		CreateTimer(0.001, Timer_DR, client);
-	} else if (StrEqual(g_szDelRangeStatus[client], "z")) {
-		vPoint2[0] = g_fDelRangePoint2[client][0];
-		vPoint2[1] = g_fDelRangePoint2[client][1];
-		vPoint2[2] = g_fDelRangePoint1[client][2];
-		vClonePoint1[0] = g_fDelRangePoint1[client][0];
-		vClonePoint1[1] = vPoint2[1];
-		vClonePoint1[2] = ((g_fDelRangePoint1[client][2] + vPoint2[2]) / 2);
-		vClonePoint2[0] = vPoint2[0];
-		vClonePoint2[1] = g_fDelRangePoint1[client][1];
-		vClonePoint2[2] = ((g_fDelRangePoint1[client][2] + vPoint2[2]) / 2);
-		
-		vPoint3[0] = g_fDelRangePoint1[client][0];
-		vPoint3[1] = g_fDelRangePoint1[client][1];
-		vPoint3[2] = g_fDelRangePoint3[client][2];
-		vClonePoint3[0] = vClonePoint1[0];
-		vClonePoint3[1] = vClonePoint1[1];
-		vClonePoint3[2] = g_fDelRangePoint3[client][2];
-		vClonePoint4[0] = vClonePoint2[0];
-		vClonePoint4[1] = vClonePoint2[1];
-		vClonePoint4[2] = g_fDelRangePoint3[client][2];
-		
-		DrowLine(g_fDelRangePoint1[client], vClonePoint1, ColorGreen);
-		DrowLine(g_fDelRangePoint1[client], vClonePoint2, ColorGreen);
-		DrowLine(vPoint2, vClonePoint1, ColorGreen);
-		DrowLine(vPoint2, vClonePoint2, ColorGreen);
-		DrowLine(vPoint3, vClonePoint3, ColorGreen);
-		DrowLine(vPoint3, vClonePoint4, ColorGreen);
-		DrowLine(g_fDelRangePoint3[client], vClonePoint3, ColorGreen);
-		DrowLine(g_fDelRangePoint3[client], vClonePoint4, ColorGreen);
-		DrowLine(vPoint3, g_fDelRangePoint1[client], ColorGreen);
-		DrowLine(vPoint2, g_fDelRangePoint3[client], ColorGreen);
-		DrowLine(vPoint2, vClonePoint1, ColorGreen);
-		DrowLine(vPoint2, vClonePoint1, ColorGreen);
-		TE_SetupBeamPoints(vPoint3, g_fDelRangePoint1[client], g_Beam, g_Halo, 0, 66, 0.15, 7.0, 7.0, 0, 0.0, ColorGreen, 20);
-		TE_SendToAll();
-		TE_SetupBeamPoints(g_fDelRangePoint3[client], vPoint2, g_Beam, g_Halo, 0, 66, 0.15, 7.0, 7.0, 0, 0.0, ColorGreen, 20);
-		TE_SendToAll();
-		TE_SetupBeamPoints(vClonePoint3, vClonePoint1, g_Beam, g_Halo, 0, 66, 0.15, 7.0, 7.0, 0, 0.0, ColorGreen, 20);
-		TE_SendToAll();
-		TE_SetupBeamPoints(vClonePoint4, vClonePoint2, g_Beam, g_Halo, 0, 66, 0.15, 7.0, 7.0, 0, 0.0, ColorGreen, 20);
-		TE_SendToAll();
-		
-		CreateTimer(0.001, Timer_DR, client);
-	} else {
-		vPoint2[0] = g_fDelRangePoint2[client][0];
-		vPoint2[1] = g_fDelRangePoint2[client][1];
-		vPoint2[2] = g_fDelRangePoint1[client][2];
-		vPoint3[0] = g_fDelRangePoint1[client][0];
-		vPoint3[1] = g_fDelRangePoint1[client][1];
-		vPoint3[2] = g_fDelRangePoint3[client][2];
-		
-		vClonePoint1[0] = g_fDelRangePoint1[client][0];
-		vClonePoint1[1] = vPoint2[1];
-		vClonePoint1[2] = g_fDelRangePoint1[client][2];
-		vClonePoint2[0] = vPoint2[0];
-		vClonePoint2[1] = g_fDelRangePoint1[client][1];
-		vClonePoint2[2] = vPoint2[2];
-		vClonePoint3[0] = vClonePoint1[0];
-		vClonePoint3[1] = vClonePoint1[1];
-		vClonePoint3[2] = g_fDelRangePoint3[client][2];
-		vClonePoint4[0] = vClonePoint2[0];
-		vClonePoint4[1] = vClonePoint2[1];
-		vClonePoint4[2] = g_fDelRangePoint3[client][2];
-		
-		DrowLine(vClonePoint1, g_fDelRangePoint1[client], ColorWhite, true);
-		DrowLine(vClonePoint2, g_fDelRangePoint1[client], ColorWhite, true);
-		DrowLine(vClonePoint3, g_fDelRangePoint3[client], ColorWhite, true);
-		DrowLine(vClonePoint4, g_fDelRangePoint3[client], ColorWhite, true);
-		DrowLine(vPoint2, vClonePoint1, ColorWhite, true);
-		DrowLine(vPoint2, vClonePoint2, ColorWhite, true);
-		DrowLine(vPoint3, vClonePoint3, ColorWhite, true);
-		DrowLine(vPoint3, vClonePoint4, ColorWhite, true);
-		DrowLine(vPoint2, g_fDelRangePoint3[client], ColorWhite, true);
-		DrowLine(vPoint3, g_fDelRangePoint1[client], ColorWhite, true);
-		DrowLine(vClonePoint1, vClonePoint3, ColorWhite, true);
-		DrowLine(vClonePoint2, vClonePoint4, ColorWhite, true);
-		
-		int Obj_Dissolver = CreateEntityByName("env_entity_dissolver");
-		DispatchKeyValue(Obj_Dissolver, "dissolvetype", "3");
-		DispatchKeyValue(Obj_Dissolver, "targetname", "Del_Dissolver");
-		DispatchSpawn(Obj_Dissolver);
-		ActivateEntity(Obj_Dissolver);
-		
-		float vOriginEntity[3];
-		char szClass[32];
-		int iCount = 0;
-		int iEntity = -1;
-		for (int i = 0; i < sizeof(EntityType); i++) {
-			while ((iEntity = FindEntityByClassname(iEntity, EntityType[i])) != -1) {
-				GetEntPropVector(iEntity, Prop_Data, "m_vecOrigin", vOriginEntity);
-				vOriginEntity[2] += 1;
-				if (vOriginEntity[0] != 0 && vOriginEntity[1] != 1 && vOriginEntity[2] != 0 && Build_IsInSquare(vOriginEntity, g_fDelRangePoint1[client], g_fDelRangePoint3[client])) {
-					GetEdictClassname(iEntity, szClass, sizeof(szClass));
-					if (StrEqual(szClass, "func_physbox"))
-						AcceptEntityInput(iEntity, "kill", -1);
-					else {
-						DispatchKeyValue(iEntity, "targetname", "Del_Target");
-						SetVariantString("Del_Target");
-						AcceptEntityInput(Obj_Dissolver, "dissolve", iEntity, Obj_Dissolver, 0);
-						DispatchKeyValue(iEntity, "targetname", "Del_Drop");
-					}
-					
-					int iOwner = Build_ReturnEntityOwner(iEntity);
-					if (iOwner != -1) {
-						if (StrEqual(szClass, "5"))
-							Build_SetLimit(iOwner, -1, true);
-						else
-							Build_SetLimit(iOwner, -1);
-						
-						Build_RegisterEntityOwner(iEntity, -1);
-					}
-				}
-			}
-		}
-		AcceptEntityInput(Obj_Dissolver, "kill", -1);
-		
-		if (iCount > 0)
-			Build_PrintToChat(client, "Deleted %i props.", iCount);
-	}
-}
-
-public Action Timer_DScharge(Handle timer, Handle hDataPack)
-{
-	float vOriginAim[3], vOriginPlayer[3];
-	ResetPack(hDataPack);
-	int client = ReadPackCell(hDataPack);
-	float fRange = ReadPackFloat(hDataPack);
-	vOriginAim[0] = ReadPackFloat(hDataPack);
-	vOriginAim[1] = ReadPackFloat(hDataPack);
-	vOriginAim[2] = ReadPackFloat(hDataPack);
-	
-	GetClientAbsOrigin(client, vOriginPlayer);
-	vOriginPlayer[2] = (vOriginPlayer[2] + 50);
-	
-	EmitAmbientSound("npc/strider/charging.wav", vOriginAim, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.5);
-	EmitAmbientSound("npc/strider/charging.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.3);
-	
-	int Obj_Push = CreatePush(vOriginAim, -1000.0, fRange, "20");
-	AcceptEntityInput(Obj_Push, "enable", -1);
-	
-	int Obj_Core = CreateCore(vOriginAim, 5.0, "1");
-	AcceptEntityInput(Obj_Core, "startdischarge", -1);
-	/*
-	char szPointTeslaName[128], char szThickMin[64], char szThickMax[64], char szOnUser[128], char szKill[64];
-	int Obj_PointTesla = CreateEntityByName("point_tesla");
-	TeleportEntity(Obj_PointTesla, vOriginAim, NULL_VECTOR, NULL_VECTOR);
-	Format(szPointTeslaName, sizeof(szPointTeslaName), "szTesla%i", GetRandomInt(1000, 5000));
-	float fThickMin = StringToFloat(szRange) / 40;
-	float iThickMax = StringToFloat(szRange) / 30;
-	Format(szThickMin, sizeof(szThickMin), "%i", RoundToFloor(fThickMin));
-	Format(szThickMax, sizeof(szThickMax), "%i", RoundToFloor(iThickMax));
-	
-	DispatchKeyValue(Obj_PointTesla, "targetname", szPointTeslaName);
-	DispatchKeyValue(Obj_PointTesla, "sprite", "sprites/physbeam.vmt");
-	DispatchKeyValue(Obj_PointTesla, "m_color", "255 255 255");
-	DispatchKeyValue(Obj_PointTesla, "m_flradius", szRange);
-	DispatchKeyValue(Obj_PointTesla, "beamcount_min", "100");
-	DispatchKeyValue(Obj_PointTesla, "beamcount_max", "500");
-	DispatchKeyValue(Obj_PointTesla, "thick_min", szThickMin);
-	DispatchKeyValue(Obj_PointTesla, "thick_max", szThickMax);
-	DispatchKeyValue(Obj_PointTesla, "lifetime_min", "0.1");
-	DispatchKeyValue(Obj_PointTesla, "lifetime_max", "0.1");
-	
-	float f;
-	for (f = 0.0; f < 1.3; f=f+0.05) {
-		Format(szOnUser, sizeof(szOnUser), "%s,dospark,,%f", szPointTeslaName, f);
-		DispatchKeyValue(Obj_PointTesla, "onuser1", szOnUser);
-	}
-	Format(szKill, sizeof(szKill), "%s,kill,,1.3", szPointTeslaName);
-	DispatchSpawn(Obj_PointTesla);
-	DispatchKeyValue(Obj_PointTesla, "onuser1", szKill);
-	AcceptEntityInput(Obj_PointTesla, "fireuser1", -1);
-	*/
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 1.3, 15.0, 15.0, 0, 0.0, ColorBlue, 20);
-	TE_SendToAll();
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 1.3, 20.0, 20.0, 0, 0.0, ColorWhite, 20);
-	TE_SendToAll();
-	
-	Handle hNewPack;
-	CreateDataTimer(1.3, Timer_DSfire, hNewPack);
-	WritePackCell(hNewPack, client);
-	WritePackCell(hNewPack, Obj_Push);
-	WritePackCell(hNewPack, Obj_Core);
-	WritePackFloat(hNewPack, fRange);
-	WritePackFloat(hNewPack, vOriginAim[0]);
-	WritePackFloat(hNewPack, vOriginAim[1]);
-	WritePackFloat(hNewPack, vOriginAim[2]);
-	WritePackFloat(hNewPack, vOriginPlayer[0]);
-	WritePackFloat(hNewPack, vOriginPlayer[1]);
-	WritePackFloat(hNewPack, vOriginPlayer[2]);
-}
-
-public Action Timer_DSfire(Handle timer, Handle hDataPack)
-{
-	float vOriginAim[3], vOriginPlayer[3];
-	ResetPack(hDataPack);
-	int client = ReadPackCell(hDataPack);
-	int Obj_Push = ReadPackCell(hDataPack);
-	int Obj_Core = ReadPackCell(hDataPack);
-	float fRange = ReadPackFloat(hDataPack);
-	vOriginAim[0] = ReadPackFloat(hDataPack);
-	vOriginAim[1] = ReadPackFloat(hDataPack);
-	vOriginAim[2] = ReadPackFloat(hDataPack);
-	vOriginPlayer[0] = ReadPackFloat(hDataPack);
-	vOriginPlayer[1] = ReadPackFloat(hDataPack);
-	vOriginPlayer[2] = ReadPackFloat(hDataPack);
-	
-	if (IsValidEntity(Obj_Push))
-		AcceptEntityInput(Obj_Push, "kill", -1);
-	if (IsValidEntity(Obj_Core))
-		AcceptEntityInput(Obj_Core, "kill", -1);
-	
-	EmitAmbientSound("npc/strider/fire.wav", vOriginAim, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.5);
-	EmitAmbientSound("npc/strider/fire.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.5);
-	
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 0.2, 15.0, 15.0, 0, 0.0, ColorRed, 20);
-	TE_SendToAll();
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 0.2, 20.0, 20.0, 0, 0.0, ColorWhite, 20);
-	TE_SendToAll();
-	
-	int Obj_Dissolver = CreateDissolver("3");
-	float vOriginEntity[3];
-	int iCount = 0;
-	int iEntity = -1;
-	for (int i = 0; i < sizeof(EntityType); i++) {
-		while ((iEntity = FindEntityByClassname(iEntity, EntityType[i])) != -1) {
-			GetEntPropVector(iEntity, Prop_Data, "m_vecOrigin", vOriginEntity);
-			vOriginEntity[2] += 1;
-			char szClass[33];
-			GetEdictClassname(iEntity, szClass, sizeof(szClass));
-			if (vOriginEntity[0] != 0 && vOriginEntity[1] != 1 && vOriginEntity[2] != 0 && !StrEqual(szClass, "player") && Build_IsInRange(vOriginEntity, vOriginAim, fRange)) {
-				if (StrEqual(szClass, "func_physbox"))
-					AcceptEntityInput(iEntity, "kill", -1);
-				else {
-					DispatchKeyValue(iEntity, "targetname", "Del_Target");
-					SetVariantString("Del_Target");
-					AcceptEntityInput(Obj_Dissolver, "dissolve", iEntity, Obj_Dissolver, 0);
-					DispatchKeyValue(iEntity, "targetname", "Del_Drop");
-				}
-				
-				int iOwner = Build_ReturnEntityOwner(iEntity);
-				if (iOwner != -1) {
-					if (StrEqual(szClass, "5"))
-						Build_SetLimit(iOwner, -1, true);
-					else
-						Build_SetLimit(iOwner, -1);
-					
-					Build_RegisterEntityOwner(iEntity, -1);
-				}
-				iCount++;
-			}
-		}
-	}
-	AcceptEntityInput(Obj_Dissolver, "kill", -1);
-	if (iCount > 0 && Build_IsClientValid(client, client))
-		Build_PrintToChat(client, "Deleted %i props.", iCount);
-}
-
-public Action Timer_DScharge2(Handle timer, Handle hDataPack)
-{
-	float vOriginAim[3], vOriginPlayer[3];
-	ResetPack(hDataPack);
-	int client = ReadPackCell(hDataPack);
-	float fRange = ReadPackFloat(hDataPack);
-	vOriginAim[0] = ReadPackFloat(hDataPack);
-	vOriginAim[1] = ReadPackFloat(hDataPack);
-	vOriginAim[2] = ReadPackFloat(hDataPack);
-	
-	GetClientAbsOrigin(client, vOriginPlayer);
-	vOriginPlayer[2] = (vOriginPlayer[2] + 50);
-	
-	EmitAmbientSound("npc/strider/charging.wav", vOriginAim, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.5);
-	EmitAmbientSound("npc/strider/charging.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.3);
-	
-	int Obj_Push = CreatePush(vOriginAim, -1000.0, fRange, "28");
-	AcceptEntityInput(Obj_Push, "enable", -1);
-	
-	int Obj_Core = CreateCore(vOriginAim, 5.0, "1");
-	AcceptEntityInput(Obj_Core, "startdischarge", -1);
-	
-	float vOriginEntity[3];
-	char szClass[32];
-	int iEntity = -1;
-	for (int i = 0; i < sizeof(EntityType); i++) {
-		while ((iEntity = FindEntityByClassname(iEntity, EntityType[i])) != -1) {
-			GetEntPropVector(iEntity, Prop_Data, "m_vecOrigin", vOriginEntity);
-			vOriginEntity[2] = (vOriginEntity[2] + 1);
-			if (Phys_IsPhysicsObject(iEntity)) {
-				GetEdictClassname(iEntity, szClass, sizeof(szClass));
-				if (Build_IsInRange(vOriginEntity, vOriginAim, fRange)) {
-					Phys_EnableMotion(iEntity, true);
-					if (StrEqual(szClass, "player"))
-						SetEntityMoveType(iEntity, MOVETYPE_WALK);
-					else
-						SetEntityMoveType(iEntity, MOVETYPE_VPHYSICS);
-				}
-			}
-		}
-	}
-	/*
-	char szPointTeslaName[128], char szThickMin[64], char szThickMax[64], char szOnUser[128], char szKill[64];
-	int Obj_PointTesla = CreateEntityByName("point_tesla");
-	TeleportEntity(Obj_PointTesla, vOriginAim, NULL_VECTOR, NULL_VECTOR);
-	Format(szPointTeslaName, sizeof(szPointTeslaName), "szTesla%i", GetRandomInt(1000, 5000));
-	float fThickMin = StringToFloat(szRange) / 40;
-	float iThickMax = StringToFloat(szRange) / 30;
-	Format(szThickMin, sizeof(szThickMin), "%i", RoundToFloor(fThickMin));
-	Format(szThickMax, sizeof(szThickMax), "%i", RoundToFloor(iThickMax));
-	
-	DispatchKeyValue(Obj_PointTesla, "targetname", szPointTeslaName);
-	DispatchKeyValue(Obj_PointTesla, "sprite", "sprites/physbeam.vmt");
-	DispatchKeyValue(Obj_PointTesla, "m_color", "255 255 255");
-	DispatchKeyValue(Obj_PointTesla, "m_flradius", szRange);
-	DispatchKeyValue(Obj_PointTesla, "beamcount_min", "100");
-	DispatchKeyValue(Obj_PointTesla, "beamcount_max", "500");
-	DispatchKeyValue(Obj_PointTesla, "thick_min", szThickMin);
-	DispatchKeyValue(Obj_PointTesla, "thick_max", szThickMax);
-	DispatchKeyValue(Obj_PointTesla, "lifetime_min", "0.1");
-	DispatchKeyValue(Obj_PointTesla, "lifetime_max", "0.1");
-	
-	float f;
-	for (f = 0.0; f < 1.3; f=f+0.05) {
-		Format(szOnUser, sizeof(szOnUser), "%s,dospark,,%f", szPointTeslaName, f);
-		DispatchKeyValue(Obj_PointTesla, "onuser1", szOnUser);
-	}
-	Format(szKill, sizeof(szKill), "%s,kill,,1.3", szPointTeslaName);
-	DispatchSpawn(Obj_PointTesla);
-	DispatchKeyValue(Obj_PointTesla, "onuser1", szKill);
-	AcceptEntityInput(Obj_PointTesla, "fireuser1", -1);
-	*/
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 1.3, 15.0, 15.0, 0, 0.0, ColorBlue, 20);
-	TE_SendToAll();
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 1.3, 20.0, 20.0, 0, 0.0, ColorWhite, 20);
-	TE_SendToAll();
-	
-	Handle hNewPack;
-	CreateDataTimer(1.3, Timer_DSfire2, hNewPack);
-	WritePackCell(hNewPack, client);
-	WritePackCell(hNewPack, Obj_Push);
-	WritePackCell(hNewPack, Obj_Core);
-	WritePackFloat(hNewPack, fRange);
-	WritePackFloat(hNewPack, vOriginAim[0]);
-	WritePackFloat(hNewPack, vOriginAim[1]);
-	WritePackFloat(hNewPack, vOriginAim[2]);
-	WritePackFloat(hNewPack, vOriginPlayer[0]);
-	WritePackFloat(hNewPack, vOriginPlayer[1]);
-	WritePackFloat(hNewPack, vOriginPlayer[2]);
-}
-
-public Action Timer_DSfire2(Handle timer, Handle hDataPack)
-{
-	float vOriginAim[3], vOriginPlayer[3];
-	ResetPack(hDataPack);
-	int client = ReadPackCell(hDataPack);
-	int Obj_Push = ReadPackCell(hDataPack);
-	int Obj_Core = ReadPackCell(hDataPack);
-	float fRange = ReadPackFloat(hDataPack);
-	vOriginAim[0] = ReadPackFloat(hDataPack);
-	vOriginAim[1] = ReadPackFloat(hDataPack);
-	vOriginAim[2] = ReadPackFloat(hDataPack);
-	vOriginPlayer[0] = ReadPackFloat(hDataPack);
-	vOriginPlayer[1] = ReadPackFloat(hDataPack);
-	vOriginPlayer[2] = ReadPackFloat(hDataPack);
-	
-	if (IsValidEntity(Obj_Push))
-		AcceptEntityInput(Obj_Push, "kill", -1);
-	if (IsValidEntity(Obj_Core))
-		AcceptEntityInput(Obj_Core, "kill", -1);
-	
-	EmitAmbientSound("npc/strider/fire.wav", vOriginAim, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.5);
-	EmitAmbientSound("npc/strider/fire.wav", vOriginPlayer, client, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.5);
-	
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 0.2, 15.0, 15.0, 0, 0.0, ColorRed, 20);
-	TE_SendToAll();
-	TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_Beam, g_Halo, 0, 66, 0.2, 20.0, 20.0, 0, 0.0, ColorWhite, 20);
-	TE_SendToAll();
-	
-	int Obj_Dissolver = CreateDissolver("3");
-	float vOriginEntity[3];
-	int iCount = 0;
-	int iEntity = -1;
-	for (int i = 0; i < sizeof(EntityType); i++) {
-		while ((iEntity = FindEntityByClassname(iEntity, EntityType[i])) != -1) {
-			GetEntPropVector(iEntity, Prop_Data, "m_vecOrigin", vOriginEntity);
-			vOriginEntity[2] += 1;
-			char szClass[33];
-			GetEdictClassname(iEntity, szClass, sizeof(szClass));
-			if (vOriginEntity[0] != 0 && vOriginEntity[1] != 1 && vOriginEntity[2] != 0 && Build_IsInRange(vOriginEntity, vOriginAim, fRange)) {
-				if (StrEqual(szClass, "func_physbox"))
-					AcceptEntityInput(iEntity, "kill", -1);
-				else {
-					DispatchKeyValue(iEntity, "targetname", "Del_Target");
-					SetVariantString("Del_Target");
-					AcceptEntityInput(Obj_Dissolver, "dissolve", iEntity, Obj_Dissolver, 0);
-					DispatchKeyValue(iEntity, "targetname", "Del_Drop");
-				}
-				int iOwner = Build_ReturnEntityOwner(iEntity);
-				if (iOwner != -1) {
-					if (StrEqual(szClass, "5"))
-						Build_SetLimit(iOwner, -1, true);
-					else
-						Build_SetLimit(iOwner, -1);
-					
-					Build_RegisterEntityOwner(iEntity, -1);
-				}
-				iCount++;
-			}
-		}
-	}
-	AcceptEntityInput(Obj_Dissolver, "kill", -1);
-	if (iCount > 0 && Build_IsClientValid(client, client))
-		Build_PrintToChat(client, "Deleted %i props.", iCount);
-}
-
 public void OnPropBreak(const char[] output, int iEntity, int iActivator, float delay)
 {
 	if (IsValidEntity(iEntity))
@@ -3419,16 +2660,6 @@ stock int CreatePush(float vOrigin[3], float fMagnitude, float fRange, char szSp
 	DispatchKeyValue(Push_Index, "spawnflags", szSpawnFlags);
 	DispatchSpawn(Push_Index);
 	return Push_Index;
-}
-
-stock int CreateCore(float vOrigin[3], float fScale, char szSpawnFlags[8])
-{
-	int Core_Index = CreateEntityByName("env_citadel_energy_core");
-	TeleportEntity(Core_Index, vOrigin, NULL_VECTOR, NULL_VECTOR);
-	DispatchKeyValueFloat(Core_Index, "scale", fScale);
-	DispatchKeyValue(Core_Index, "spawnflags", szSpawnFlags);
-	DispatchSpawn(Core_Index);
-	return Core_Index;
 }
 
 stock int CreateDissolver(char szDissolveType[4])
@@ -4409,10 +3640,7 @@ public Action Command_AddBL(int client, int args)
 	
 	for (int i = 0; i < MaxClients; i++) {
 		if (Build_IsClientValid(i, i)) {
-			if (g_bClientLang[i])
-				Build_PrintToChat(i, "%N 將 %s 加入到黑名單 :(", client, target_name);
-			else
-				Build_PrintToChat(i, "%N added %s to this server blacklist :(", client, target_name);
+				Build_PrintToChat(i, "%N added %s to this server blacklist!", client, target_name);
 		}
 	}
 	return Plugin_Handled;
@@ -4449,19 +3677,13 @@ public Action Command_RemoveBL(int client, int args)
 	if (tn_is_ml) {
 		for (int i = 0; i < MaxClients; i++) {
 			if (Build_IsClientValid(i, i)) {
-				if (g_bClientLang[i])
-					Build_PrintToChat(i, "%N 將 %s 從黑名單移除 :)", client, target_name);
-				else
-					Build_PrintToChat(i, "%N removed %s from this server blacklist :)", client, target_name);
+				Build_PrintToChat(i, "%N removed %s from this server blacklist!", client, target_name);
 			}
 		}
 	} else {
 		for (int i = 0; i < MaxClients; i++) {
 			if (Build_IsClientValid(i, i)) {
-				if (g_bClientLang[i])
-					Build_PrintToChat(i, "%N 將 %s 從黑名單移除 :)", client, target_name);
-				else
-					Build_PrintToChat(i, "%N removed %s from this server blacklist :)", client, target_name);
+				Build_PrintToChat(i, "%N removed %s from this server blacklist!", client, target_name);
 			}
 		}
 	}

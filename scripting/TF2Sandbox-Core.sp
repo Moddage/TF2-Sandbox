@@ -24,11 +24,12 @@
 #include <build_stocks>
 #undef REQUIRE_PLUGIN
 //#include <updater>
-#include <steamworks>
+#define REQUIRE_PLUGIN
+#tryinclude <steamworks>
 
 #define DEBUG 
 
-#define UPDATE_URL    ""
+#define UPDATE_URL "https://sandbox.moddage.site/plugin/updater.txt"
 
 #if BUILDMODAPI_VER < 3
 #error "build.inc is outdated. please update before compiling"
@@ -40,15 +41,18 @@
 
 public Plugin myinfo =  
 {
-	name = "TF2 Sandbox Core", 
+	name = "Team Fortress 2 Sandbox - Core", 
 	author = "LeadKiller, BattlefieldDuck, Danct12, DaRkWoRlD, greenteaf0718, and hjkwe654", 
-	description = "TF2SB Controller Core", 
+	description = "Build Protocols for Team Fortress 2 Sandbox", 
 	version = BUILDMOD_VER, 
-	url = "http://dtf2server.ddns.net"
+	url = "https://sandbox.moddage.site/"
 };
 
 //bool
+#if defined _SteamWorks_Included
 bool steamworks = false;
+#endif
+
 bool g_bclientLang[MAXPLAYERS];
 bool g_bIN_SCORE[MAXPLAYERS + 1];
 
@@ -77,20 +81,15 @@ int g_iServerCurrent;
 int g_iEntOwner[MAX_HOOK_ENTITIES] =  { -1, ... };
 
 //char
-static const char tips[12][] =  
+static const char tips[7][] =  
 {
 	"Type /g to get the Physics Gun and move props around.", 
 	"You can rotate a prop by holding down the Reload button.", 
 	"If you want to delete everything you own, type !delall", 
 	"Type !del to delete the prop you are looking at.", 
-	"This server is running \x04TF2:Sandbox\x01 by \x05Danct12\x01 and \x05DaRkWoRlD\x01. Type !tf2sb for more info.", 
-	"This mod is a work in progress.", 
-	"Type !build to begin building.", 
-	"TF2SB's Github: https://github.com/Danct12/TF2SB", 
-	"TF2SB's Group: http://steamcommunity.com/groups/TF2Sandbox", 
+	"Team Fortress 2 Sandbox's Site: https://sandbox.moddage.site/",  
 	"Type !god to turn off godmode",
 	"If you want to rocket jump while in godmode, say !buddha",
-	"Ever wanted to know what changed in each versions? Say !changelog"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) 
@@ -125,17 +124,14 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnLibraryAdded(const char[] name)
 {
-	if (StrEqual(name, "updater"))
-		//Updater_AddPlugin(UPDATE_URL);
-	
-	if (!strcmp(name, "SteamWorks", false))
-		steamworks = true;
-}
+    if (StrEqual(name, "updater"))
+    {
+        Updater_AddPlugin(UPDATE_URL)
+    }
 
-public void OnLibraryRemoved(const char[] name)
-{
-	if (!strcmp(name, "SteamWorks", false))
-		steamworks = false;
+	#if defined _SteamWorks_Included
+		steamworks = true;
+	#endif
 }
 
 public void OnConfigsExecuted() 
@@ -159,11 +155,11 @@ public void OnConfigsExecuted()
 public void OnPluginStart() 
 {
 	// Check for update status:
-	if (LibraryExists("updater"))
-	{
-		//Updater_AddPlugin(UPDATE_URL);
-	}
-	
+    if (LibraryExists("updater"))
+    {
+        Updater_AddPlugin(UPDATE_URL)
+    }
+
 	g_hCvarSwitch = CreateConVar("sbox_enable", "2", "Turn on, off TF2SB, or admins only.\n0 = Off\n1 = Admins Only\n2 = Enabled for everyone", 0, true, 0.0, true, 2.0);
 	g_hCvarNonOwner = CreateConVar("sbox_nonowner", "0", "Switch non-admin player can control non-owner props or not", 0, true, 0.0, true, 1.0);
 	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly to noclip or not?", 0, true, 0.0, true, 1.0);
@@ -194,7 +190,9 @@ public void OnPluginStart()
 	
 	g_hCookieclientLang = RegClientCookie("cookie_BuildModclientLang", "TF2SB client Language.", CookieAccess_Private);
 	
-	steamworks = LibraryExists("SteamWorks");
+	#if defined _SteamWorks_Included
+		steamworks = LibraryExists("SteamWorks");
+	#endif
 
 	g_hBlackListArray = CreateArray(33, 128); // 33 arrays, every array size is 128
 	ReadBlackList();
