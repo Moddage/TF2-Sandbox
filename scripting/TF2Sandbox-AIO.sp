@@ -24,17 +24,20 @@
 #include <build>
 #include <build_stocks>
 #include <vphysics>
+#include <smlib>
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
 #include <entity_prop_stocks>
 #include <tf2items>
 #undef REQUIRE_PLUGIN
-//#include <updater>
+#tryinclude <updater>
+#tryinclude <tf2idb>
+#tryinclude <tf2items_giveweapon>
 #define REQUIRE_PLUGIN
 #tryinclude <advancedinfiniteammo>
 
-#define UPDATE_URL "https://sandbox.moddage.site/plugin/updater.txt"
+#define UPDATE_URL ""
 
 #if BUILDMODAPI_VER < 3
 #error "build.inc is outdated. please update before compiling"
@@ -387,10 +390,6 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuLead, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuLead, "emptyspace", "", ITEMDRAW_IGNORE);
 	AddMenuItem(g_hPropMenuLead, "light", "Light");
-	AddMenuItem(g_hPropMenuLead, "sign", "Sign");
-	AddMenuItem(g_hPropMenuLead, "door", "Door");
-	AddMenuItem(g_hPropMenuLead, "sdoor", "Sliding Door");
-	AddMenuItem(g_hPropMenuLead, "sdoor2", "Blast Door");
 
 	// Prop Menu Pickup
 	g_hPropMenuPickup = CreateMenu(PropMenuPickup);
@@ -655,7 +654,7 @@ public void OnPluginStart()
 	#if defined _updater_included
     if (LibraryExists("updater"))
     {
-        Updater_AddPlugin(UPDATE_URL)
+        Updater_AddPlugin(UPDATE_URL);
     }
 	#endif
 }
@@ -665,7 +664,7 @@ public void OnLibraryAdded(const char[] name)
 	#if defined _updater_included
     if (StrEqual(name, "updater"))
     {
-        Updater_AddPlugin(UPDATE_URL)
+        Updater_AddPlugin(UPDATE_URL);
     }
 	#endif
 }
@@ -713,7 +712,7 @@ public Action TF2SB_DelayedStuff(Handle useless)
     	AddMenuItem(g_hEquipMenu, "physgunnew", "Physics Gun V4");
 	}  
 
-	if(GetCommandFlags("sm_portalgun") != INVALID_FCVAR_FLAGS) // https://forums.alliedmods.net/showthread.php?t=237940
+	if(GetCommandFlags("portalgun") != INVALID_FCVAR_FLAGS) // https://forums.alliedmods.net/showthread.php?t=237940
 	{
     	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
 	} 
@@ -725,6 +724,20 @@ public Action TF2SB_DelayedStuff(Handle useless)
 		StrCat(buffer, sizeof(buffer), "    FlaminSarge\n");
 		StrCat(buffer, sizeof(buffer), "    javalia\n\n");	
 	}*/
+
+	if(GetCommandFlags("sm_teleporter") != INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hPropMenuLead, "teleporter", "Teleporter");
+	}
+
+	if(GetCommandFlags("sm_sca") != INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hPropMenuLead, "camera", "Camera");
+	}
+
+	AddMenuItem(g_hPropMenuLead, "sdoor", "Sliding Door");
+	AddMenuItem(g_hPropMenuLead, "sdoor2", "Blast Door");
+
 
 	if(GetCommandFlags("sm_tg") != INVALID_FCVAR_FLAGS)
 	{
@@ -744,6 +757,41 @@ public Action TF2SB_DelayedStuff(Handle useless)
 	
 	RegAdminCmd("sm_tf2sb", Command_TF2SBCred, 0);
 	RegAdminCmd("sm_credits", Command_TF2SBCred, 0);
+
+	
+
+	#if defined _tf2idb_included
+		ArrayList h_idxs = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT `id` FROM tf2idb_item WHERE (slot='primary' OR slot='secondary' OR slot='melee')"));
+
+		ArrayList h_name_maxlength = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT max(length(`name`)) FROM tf2idb_item WHERE (slot='primary' OR slot='secondary' OR slot='melee')"));
+		int i_nof_items = GetArraySize(h_idxs);
+		int i_name_maxlength = GetArrayCell(h_name_maxlength, 0); CloseHandle(h_name_maxlength);
+
+		int[] i_idxs = new int[i_nof_items];
+		// h_idxs, i_idxs
+		for (int i_iter = 0; i_iter < GetArraySize(h_idxs); i_iter++)
+		{
+			i_idxs[i_iter] = GetArrayCell(h_idxs, i_iter);
+		}
+		CloseHandle(h_idxs);
+
+		char[][] s_names = new char[i_nof_items][i_name_maxlength];
+		int[] i_bfields = new int[i_nof_items];
+		
+		//for each taunt
+		for (int i_index = 0; i_index < i_nof_items; i_index++)
+		{
+			if (TF2Items_CheckWeapon(i_idxs[i_index]))
+			{
+				char szID[256];
+				i_bfields[i_index] = TF2IDB_UsedByClasses(i_idxs[i_index]);
+				TF2IDB_GetItemName(i_idxs[i_index], s_names[i_index], i_name_maxlength);
+				IntToString(i_idxs[i_index], szID, sizeof(szID));
+				if (StrContains(s_names[i_index], "Upgradeable", false) == -1 && StrContains(s_names[i_index], "Promo", false) == -1 && StrContains(s_names[i_index], "Poker Night", false) == -1 && StrContains(s_names[i_index], "Festive", false) == -1 && StrContains(s_names[i_index], "TF_WEAPON_", false) == -1)
+					AddMenuItem(g_hEquipMenu, szID, s_names[i_index]);
+			}
+		}
+	#endif
 }
 
 public Action Command_TF2SBCred(int client, int args)
@@ -1815,8 +1863,8 @@ public Action Command_SpawnDoor(int client, int args)
 			}
 		}
 	} else {
-		Build_PrintToChat(client, "Usage: !sdoor <choose>");
-		Build_PrintToChat(client, "!sdoor 1~7 = Spawn door");
+		Build_PrintToChat(client, "Usage: !sdoor <1-6>");
+		Build_PrintToChat(client, "!sdoor 1~6 = Spawn door");
 		Build_PrintToChat(client, "!sdoor a = Select door");
 		Build_PrintToChat(client, "!sdoor b = Select button (Shoot to open)");
 		Build_PrintToChat(client, "!sdoor c = Select button (Press to open)");
@@ -1910,7 +1958,7 @@ public Action Command_SetName(int client, int args)
 	
 	if (Build_IsEntityOwner(client, iEntity)) {
 		char newpropname[256];
-		GetCmdArg(args, newpropname, sizeof(newpropname));
+		GetCmdArgString(newpropname, sizeof(newpropname));
 		//Format(newpropname, sizeof(newpropname), "%s", args);
 		SetEntPropString(iEntity, Prop_Data, "m_iName", newpropname);
 	}
@@ -2445,7 +2493,7 @@ public void EntityInfo(int client, int iTarget)
 	}
 	
 	SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
-	if (StrContains(szClass, "prop_door_", false) == 0) {
+	if ((StrContains(szClass, "prop_door_", false) == 0 || StrEqual(szModel, "models/props_lab/teleplatform.mdl")) && Entity_InRange(client, iTarget, 85.0)) {
 		ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 	}
 	else {
@@ -2726,6 +2774,7 @@ public Action Command_PhysGun(int client, int args)
 		TF2Items_GiveWeapon(client, 99999);
 		int weapon = GetPlayerWeaponSlot(client, 1);
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon); */
+		// bruh moment
 		Build_PrintToChat(client, "You can use the latest physgun from:");
 		Build_PrintToChat(client, "https://github.com/tf2-sandbox-studio/Module-PhysicsGun");
 	}
@@ -3097,7 +3146,7 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
-		DisplayMenu(g_hEquipMenu, param1, MENU_TIME_FOREVER);
+		DisplayMenuAtItem(g_hEquipMenu, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		char item[64];
 		GetMenuItem(menu, param2, item, sizeof(item));
 		
@@ -3105,21 +3154,32 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			FakeClientCommand(param1, "sm_g2");
 		}
-		if (StrEqual(item, "physgun2"))
+		else if (StrEqual(item, "physgun2"))
 		{
 			FakeClientCommand(param1, "sm_sbpg");
 		}
-		if (StrEqual(item, "physgunv2"))
+		else if (StrEqual(item, "physgunv2"))
 		{
 			FakeClientCommand(param1, "sm_pg");
 		}
-		if (StrEqual(item, "physgunnew"))
+		else if (StrEqual(item, "physgunnew"))
 		{
 			FakeClientCommand(param1, "sm_physgun");
 		}
-		if (StrEqual(item, "toolgun"))
+		else if (StrEqual(item, "toolgun"))
 		{
 			FakeClientCommand(param1, "sm_toolgun");
+		}
+		else if (StrEqual(item, "portalgun"))
+		{
+			FakeClientCommand(param1, "portalgun");
+		}
+		else
+		{
+			#if defined _tf2items_giveweapon_included
+				int szWeapon = TF2Items_GiveWeapon(param1, StringToInt(item));
+				SetEntPropEnt(param1, Prop_Send, "m_hActiveWeapon", szWeapon);  
+			#endif
 		}
 		/*if (StrEqual(item, "portalgun"))
 		{

@@ -15,6 +15,7 @@ You will need to install:
  - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
  - [SteamTools](https://forums.alliedmods.net/showthread.php?t=261044)
  - [Updater](https://forums.alliedmods.net/showthread.php?t=169095)
+ - [GiveWeapon](https://forums.alliedmods.net/showthread.php?t=141962)
 
 You can also find additional addons for Team Fortress 2 Sandbox by the [TF2SB Studio](https://github.com/tf2-sandbox-studio) such as Physgun, Toolgun, Undo, Save System, and more.
 ### Build Instructions
@@ -23,7 +24,9 @@ You will need the following external includes:
  - [TF2Attributes](https://forums.alliedmods.net/showthread.php?t=210221)
  - [TF2Items](https://forums.alliedmods.net/showthread.php?t=115100)
  - [vPhysics](https://forums.alliedmods.net/showthread.php?t=136350)
+ - [SMLib](https://github.com/bcserv/smlib/)
  - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556) (Optional)
  - [SteamTools](https://forums.alliedmods.net/showthread.php?t=261044) (Optional)
  - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217) (Optional)
  - [Updater](https://forums.alliedmods.net/showpost.php?p=2483353&postcount=580) (Optional)
+ - [GiveWeapon](https://forums.alliedmods.net/showthread.php?t=141962) (Optional)

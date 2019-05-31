@@ -22,14 +22,15 @@
 #include <sdktools>
 #include <build>
 #include <build_stocks>
+#include <smlib>
 #undef REQUIRE_PLUGIN
-//#include <updater>
+#tryinclude <updater>
 #define REQUIRE_PLUGIN
 #tryinclude <steamworks>
 
 #define DEBUG 
 
-#define UPDATE_URL "https://sandbox.moddage.site/plugin/updater.txt"
+#define UPDATE_URL ""
 
 #if BUILDMODAPI_VER < 3
 #error "build.inc is outdated. please update before compiling"
@@ -127,7 +128,7 @@ public void OnLibraryAdded(const char[] name)
 	#if defined _updater_included
     if (StrEqual(name, "updater"))
     {
-        Updater_AddPlugin(UPDATE_URL)
+        Updater_AddPlugin(UPDATE_URL);
     }
 	#endif
 
@@ -160,7 +161,7 @@ public void OnPluginStart()
 	#if defined _updater_included
     if (LibraryExists("updater"))
     {
-        Updater_AddPlugin(UPDATE_URL)
+        Updater_AddPlugin(UPDATE_URL);
     }
 	#endif
 
@@ -213,27 +214,34 @@ public void OnMapStart()
 
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
-	if (buttons & IN_SCORE)
+	if (!g_bIN_SCORE[client] && (buttons & IN_SCORE))
 	{
 		// If so, add the button to use (+use)
 		int iAimTarget = Build_ClientAimEntity(client, false, true);
 		char szClass[32];
+		char szModel[42];
 		if (iAimTarget != -1 && IsValidEdict(iAimTarget))
 		{
 			GetEdictClassname(iAimTarget, szClass, sizeof(szClass));
+			GetEntPropString(iAimTarget, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
+
 			if (StrContains(szClass, "prop_door_", false) == 0)
 			{
 				buttons += IN_USE;
 			}
+			else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl") && Entity_InRange(client, iAimTarget, 60.0))
+			{
+				FakeClientCommand(client, "sm_teleporter");
+			}
 		}
 		else
 		{
-			if (!g_bIN_SCORE[client] && GetClientMenu(client, INVALID_HANDLE) == MenuSource_None)
+			if (GetClientMenu(client, INVALID_HANDLE) == MenuSource_None)
 			{
 				FakeClientCommand(client, "sm_build");
-				g_bIN_SCORE[client] = true;
 			}
 		}
+		g_bIN_SCORE[client] = true;
 	}
 	else
 	{
