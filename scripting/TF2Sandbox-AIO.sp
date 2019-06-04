@@ -103,6 +103,9 @@ Handle g_hPropMenuHL2 = INVALID_HANDLE;
 Handle g_hPropMenuDonor = INVALID_HANDLE;
 Handle g_hPropMenuRequested = INVALID_HANDLE;
 
+Handle g_hCvarMSTR = INVALID_HANDLE;
+int g_iCvarMSTR;
+
 char CopyableProps[][] =  {
 	"prop_dynamic", 
 	"prop_dynamic_override", 
@@ -231,6 +234,10 @@ public void OnPluginStart()
 	g_hPropModelPathArrayDonor = CreateArray(128, 2048); // Max Prop List is 1024-->2048
 	g_hPropTypeArrayDonor = CreateArray(33, 2048); // Max Prop List is 1024-->2048
 	g_hPropStringArrayDonor = CreateArray(256, 2048);
+
+	// convars
+	g_hCvarMSTR = CreateConVar("sbox_mstr", "0", "Old styled MSTR build menu", 0, true, 0.0, true, 1.0);
+	HookConVarChange(g_hCvarMSTR, Hook_CvarMSTR);
 
 	// read props.ini and props-extended.ini
 	ReadProps();
@@ -377,16 +384,6 @@ public void OnPluginStart()
 	g_hPropMenu = CreateMenu(PropMenu);
 	SetMenuTitle(g_hPropMenu, /*"TF2SB - */ "Spawn..."); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenu, true);
-	AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
-	AddMenuItem(g_hPropMenu, "emptyspace", "", ITEMDRAW_IGNORE);
-	AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
-	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
-	AddMenuItem(g_hPropMenu, "pickupprops", "Item/Weapon Props");
-	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
-	AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
-	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
-	AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
-	AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
 
 	// Requested
 	g_hPropMenuRequested = CreateMenu(PropMenuRequested);
@@ -711,6 +708,27 @@ public Action TF2SB_DelayedStuff(Handle useless)
 	StrCat(buffer, sizeof(buffer), "    hjkwe654\n");
 	StrCat(buffer, sizeof(buffer), "    greenteaf0718\n\n");
 
+	if (!g_iCvarMSTR == true)
+	{
+		AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
+		AddMenuItem(g_hPropMenu, "emptyspace", "", ITEMDRAW_IGNORE);
+		AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
+		AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
+		AddMenuItem(g_hPropMenu, "pickupprops", "Item/Weapon Props");
+		AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
+		AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
+		AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
+		AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
+		AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
+	}
+	else
+	{
+		AddMenuItem(g_hPropMenu, "removeprops", "Remove..."); 
+		AddMenuItem(g_hPropMenu, "search", "Search...");
+		AddMenuItem(g_hPropMenu, "donatorprops", "", ITEMDRAW_RAWLINE);
+		AddMenuItem(g_hPropMenu, "light", "Light");
+	}
+
 	AddMenuItem(g_hEquipMenu, "toolgun", "--SANDBOX WEAPONS--", ITEMDRAW_DISABLED);
 
 	if(GetCommandFlags("sm_sbpg") != INVALID_FCVAR_FLAGS)
@@ -777,9 +795,9 @@ public Action TF2SB_DelayedStuff(Handle useless)
 	#if defined _tf2idb_included && defined _tf2items_giveweapon_included // most code taken from https://forums.alliedmods.net/showthread.php?t=293722
 		AddMenuItem(g_hEquipMenu, "toolgun", "--LIVE TF2 WEAPONS--", ITEMDRAW_DISABLED);
 		
-		ArrayList h_idxs = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT `id` FROM tf2idb_item WHERE (slot='primary' OR slot='secondary' OR slot='melee') ORDER BY REPLACE(`name`, 'The ', '')"));
+		ArrayList h_idxs = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT `id` FROM tf2idb_item WHERE ((slot='primary' OR slot='secondary' OR slot='melee') AND `class` != 'tf_wearable' AND `class` != 'tf_wearable_demoshield' AND `class` != 'tf_wearable_razorback') ORDER BY REPLACE(`name`, 'The ', '')"));
 
-		ArrayList h_name_maxlength = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT max(length(`name`)) FROM tf2idb_item WHERE (slot='primary' OR slot='secondary' OR slot='melee') ORDER BY REPLACE(`name`, 'The ', '')"));
+		ArrayList h_name_maxlength = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT max(length(`name`)) FROM tf2idb_item WHERE ((slot='primary' OR slot='secondary' OR slot='melee') AND `class` != 'tf_wearable' AND `class` != 'tf_wearable_demoshield' AND `class` != 'tf_wearable_razorback') ORDER BY REPLACE(`name`, 'The ', '')"));
 		int i_nof_items = GetArraySize(h_idxs);
 		int i_name_maxlength = GetArrayCell(h_name_maxlength, 0); CloseHandle(h_name_maxlength);
 
@@ -885,6 +903,11 @@ public void OnClientDisconnect(int client)
 		WritePackCell(hPack, client);
 		WritePackCell(hPack, 0);
 	}*/
+}
+
+public void Hook_CvarMSTR(Handle convar, const char[] oldValue, const char[] newValue) 
+{
+	g_iCvarMSTR = GetConVarInt(g_hCvarMSTR);
 }
 
 public void OnClientConnected(int client)

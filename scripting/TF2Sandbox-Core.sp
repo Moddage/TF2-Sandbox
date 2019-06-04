@@ -65,6 +65,7 @@ Handle g_hBlackListArray;
 Handle g_hCvarSwitch = INVALID_HANDLE;
 Handle g_hCvarNonOwner = INVALID_HANDLE;
 Handle g_hCvarFly = INVALID_HANDLE;
+Handle g_hCvarTips = INVALID_HANDLE;
 Handle g_hCvarClPropLimit = INVALID_HANDLE;
 Handle g_hCvarClDollLimit = INVALID_HANDLE;
 Handle g_hCvarServerLimit = INVALID_HANDLE;
@@ -73,6 +74,7 @@ Handle g_hCvarServerLimit = INVALID_HANDLE;
 int g_iCvarEnabled;
 int g_iCvarNonOwner;
 int g_iCvarFly;
+int g_iCvarTips;
 int g_iCvarClPropLimit[MAXPLAYERS];
 int g_iCvarClDollLimit;
 int g_iCvarServerLimit;
@@ -82,13 +84,11 @@ int g_iServerCurrent;
 int g_iEntOwner[MAX_HOOK_ENTITIES] =  { -1, ... };
 
 //char
-static const char tips[7][] =  
+static const char tips[5][] =  
 {
-	"Type /g to get the Physics Gun and move props around.", 
-	"You can rotate a prop by holding down the Reload button.", 
 	"If you want to delete everything you own, type !delall", 
 	"Type !del to delete the prop you are looking at.", 
-	"Team Fortress 2 Sandbox's Site: https://sandbox.moddage.site/",  
+	"Press TAB to open Spawnlist!",  
 	"Type !god to turn off godmode",
 	"If you want to rocket jump while in godmode, say !buddha",
 };
@@ -168,6 +168,7 @@ public void OnPluginStart()
 	g_hCvarSwitch = CreateConVar("sbox_enable", "2", "Turn on, off TF2SB, or admins only.\n0 = Off\n1 = Admins Only\n2 = Enabled for everyone", 0, true, 0.0, true, 2.0);
 	g_hCvarNonOwner = CreateConVar("sbox_nonowner", "0", "Disable anti-grief", 0, true, 0.0, true, 1.0);
 	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly or noclip to noclip or not?", 0, true, 0.0, true, 1.0);
+	g_hCvarTips = CreateConVar("sbox_tips", "1", "Will TF2Sandbox Tips be displayed?", 0, true, 0.0, true, 1.0);
 	g_hCvarClPropLimit = CreateConVar("sbox_maxpropsperplayer", "120", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("sbox_maxragdolls", "10", "Player doll spawn limit.", 0, true, 0.0);
 	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit", 0, true, 0.0);
@@ -178,6 +179,7 @@ public void OnPluginStart()
 	SetConVarInt(FindConVar("tf_allow_player_use"), 1);
 	
 	g_iCvarEnabled = GetConVarInt(g_hCvarSwitch);
+	g_iCvarTips = GetConVarBool(g_hCvarTips);
 	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
 	g_iCvarFly = GetConVarBool(g_hCvarFly);
 	for (int i = 0; i < MAXPLAYERS; i++)
@@ -189,6 +191,7 @@ public void OnPluginStart()
 	HookConVarChange(g_hCvarSwitch, Hook_CvarEnabled);
 	HookConVarChange(g_hCvarNonOwner, Hook_CvarNonOwner);
 	HookConVarChange(g_hCvarFly, Hook_CvarFly);
+	HookConVarChange(g_hCvarTips, Hook_CvarTips);
 	HookConVarChange(g_hCvarClPropLimit, Hook_CvarClPropLimit);
 	HookConVarChange(g_hCvarClDollLimit, Hook_CvarClDollLimit);
 	HookConVarChange(g_hCvarServerLimit, Hook_CvarServerLimit);
@@ -202,8 +205,14 @@ public void OnPluginStart()
 	g_hBlackListArray = CreateArray(33, 128); // 33 arrays, every array size is 128
 	ReadBlackList();
 	PrintToServer("[TF2SB] Plugin successfully started!");
-	PrintToServer("[TF2SB] Team Fortress 2 Sandbox is a Work In Progress gamemode. If you have any issues with it, message the developers on the Discord or Steam Group.");
-	CreateTimer(120.0, HandleTips, 0, 1);	
+	PrintToServer("[TF2SB] Team Fortress 2 Sandbox is currently in beta, version PRIVATE %s. If you have any issues with it, message the developers on the Discord or Steam Group.", BUILDMOD_VER);
+	CreateTimer(2.0, TF2SB_DelayedStuff);
+}
+
+public Action TF2SB_DelayedStuff(Handle useless)
+{
+	if (!g_iCvarTips == false)
+		CreateTimer(120.0, HandleTips, 0, 1);
 }
 
 public void OnMapStart() 
@@ -318,6 +327,11 @@ public void Hook_CvarNonOwner(Handle convar, const char[] oldValue, const char[]
 public void Hook_CvarFly(Handle convar, const char[] oldValue, const char[] newValue) 
 {
 	g_iCvarFly = GetConVarBool(g_hCvarFly);
+}
+
+public void Hook_CvarTips(Handle convar, const char[] oldValue, const char[] newValue) 
+{
+	g_iCvarTips = GetConVarBool(g_hCvarTips);
 }
 
 public void Hook_CvarClPropLimit(Handle convar, const char[] oldValue, const char[] newValue) 
