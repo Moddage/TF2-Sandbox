@@ -229,7 +229,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			{
 				buttons += IN_USE;
 			}
-			else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl") && Entity_InRange(client, iAimTarget, 60.0))
+			else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl") && Entity_InRange(client, iAimTarget, 100.0))
 			{
 				FakeClientCommand(client, "sm_teleporter");
 			}
