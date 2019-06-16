@@ -858,7 +858,7 @@ public void OnMapStart()
 	PrecacheSound("buttons/button3.wav", true);
 	PrecacheSound("ui/panel_close.wav", true);
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav", true);
-	for (int i = 1; i < MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		g_szConnectedClient[i] = "";
 		if (Build_IsClientValid(i, i))
@@ -1087,7 +1087,7 @@ public Action Timer_CopyBeam(Handle timer, any client)
 		GetClientAbsOrigin(client, fOriginPlayer);
 		
 		GetEntPropVector(g_iCopyTarget[client], Prop_Data, "m_vecOrigin", fOriginEntity);
-		fOriginPlayer[2] += 50;
+		fOriginPlayer[2] += 50.0;
 		
 		int iColor[4];
 		iColor[0] = GetRandomInt(50, 255);
@@ -1168,7 +1168,7 @@ public Action Timer_CoolDown(Handle hTimer, any iBuffer)
 {
 	int iClient = GetClientFromSerial(iBuffer);
 	
-	if (g_bBuffer[iClient])g_bBuffer[iClient] = false;
+	if (g_bBuffer[iClient]) g_bBuffer[iClient] = false;
 }
 
 public Action Command_OpenableDoorProp(int client, int args)
