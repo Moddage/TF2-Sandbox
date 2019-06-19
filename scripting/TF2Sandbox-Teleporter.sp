@@ -10,13 +10,15 @@
 
 #pragma newdecls required
 
+float g_fCoolDown[MAXPLAYERS + 1];
+
 public Plugin myinfo = 
 {
 	name = "TF2 Sandbox - Teleporter", 
 	author = "LeadKiller, BattlefieldDuck", 
 	description = "Ladder on Sandbox", 
 	version = "1.0", 
-	url = "http://steamcommunity.com/id/battlefieldduck/"
+	url = "https://sandbox.moddage.site/"
 };
 
 public void OnPluginStart()
@@ -27,10 +29,23 @@ public void OnPluginStart()
 	PrecacheSound("weapons/teleporter_send.wav");
 }
 
+public void OnClientPutInServer(int client)
+{
+    g_fCoolDown[client] = 0.0;
+}
+
 public Action Command_Teleporter(int client, int args)
 {
 	if (!Build_IsClientValid(client, client))
 		return Plugin_Handled;
+
+	if (g_fCoolDown[client] >= GetGameTime())
+	{
+		Build_PrintToChat(client, "The teleporter under cooldown!");
+		return Plugin_Handled;
+	}
+
+	g_fCoolDown[client] = GetGameTime() + 3.0;
 
 	Menu menu = CreateMenu(TeleportMenu);
 	menu.SetTitle("TF2SB - Teleporters");
@@ -60,7 +75,7 @@ public Action Command_Teleporter(int client, int args)
 				{
 					menu.AddItem(szIndex, buffer);
 
-					if (Entity_InRange(client, i, 60.0))
+					if (Entity_InRange(client, i, 100.0))
 					{
 						withinRange = true;
 					}
@@ -73,8 +88,6 @@ public Action Command_Teleporter(int client, int args)
 
 	if (withinRange)
 		menu.Display(client, MENU_TIME_FOREVER);
-	else
-		Build_PrintToChat(client, "Not inside of any teleporter!");
 
 	return Plugin_Handled;
 }
