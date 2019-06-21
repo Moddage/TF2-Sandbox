@@ -107,10 +107,12 @@ public int TeleportMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			builderIndex = Build_ReturnEntityOwner(entity);
 	
-			Build_PrintToChat(param1, "Teleported to %N's teleporter!", builderIndex);
-	
 			float TeleporterPos[3];
+			char PropName[256];
 			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", TeleporterPos);
+			GetEntPropString(entity, Prop_Data, "m_iName", PropName, sizeof(PropName));
+
+			Build_PrintToChat(param1, "Teleported to %N's %s!", builderIndex, PropName);
 			
 			TeleportEntity(param1, TeleporterPos, NULL_VECTOR, NULL_VECTOR);
 			EmitSoundToClient(param1, "weapons/teleporter_send.wav");
