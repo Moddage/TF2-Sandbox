@@ -25,7 +25,10 @@ public void OnPluginStart()
 {
 	CreateConVar("sm_tf2sb_teleporter_version", "1.0", "", FCVAR_SPONLY | FCVAR_NOTIFY);
 	RegAdminCmd("sm_teleporter", Command_Teleporter, 0, "TF2SB Portable Teleporter");
+}
 
+public void OnMapStart()
+{
 	PrecacheSound("weapons/teleporter_send.wav");
 }
 
@@ -41,7 +44,6 @@ public Action Command_Teleporter(int client, int args)
 
 	if (g_fCoolDown[client] >= GetGameTime())
 	{
-		Build_PrintToChat(client, "The teleporter under cooldown!");
 		return Plugin_Handled;
 	}
 
