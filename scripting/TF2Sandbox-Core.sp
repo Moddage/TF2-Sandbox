@@ -72,9 +72,9 @@ Handle g_hCvarServerLimit = INVALID_HANDLE;
 
 //int
 int g_iCvarEnabled;
-bool g_bCvarNonOwner;
-bool g_bCvarFly;
-bool g_bCvarTips;
+int g_iCvarNonOwner;
+int g_iCvarFly;
+int g_iCvarTips;
 int g_iCvarClPropLimit[MAXPLAYERS];
 int g_iCvarClDollLimit;
 int g_iCvarServerLimit;
@@ -179,9 +179,9 @@ public void OnPluginStart()
 	SetConVarInt(FindConVar("tf_allow_player_use"), 1);
 	
 	g_iCvarEnabled = GetConVarInt(g_hCvarSwitch);
-	g_bCvarTips = GetConVarBool(g_hCvarTips);
-	g_bCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
-	g_bCvarFly = GetConVarBool(g_hCvarFly);
+	g_iCvarTips = GetConVarBool(g_hCvarTips);
+	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
+	g_iCvarFly = GetConVarBool(g_hCvarFly);
 	for (int i = 0; i < MAXPLAYERS; i++)
 		g_iCvarClPropLimit[i] = GetConVarInt(g_hCvarClPropLimit);
 	
@@ -211,8 +211,8 @@ public void OnPluginStart()
 
 public Action TF2SB_DelayedStuff(Handle useless)
 {
-	if (!g_bCvarTips == false)
-		CreateTimer(120.0, HandleTips, 0, TIMER_REPEAT);
+	if (!g_iCvarTips == false)
+		CreateTimer(120.0, HandleTips, 0, 1);
 }
 
 public void OnMapStart() 
@@ -234,9 +234,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			GetEdictClassname(iAimTarget, szClass, sizeof(szClass));
 			GetEntPropString(iAimTarget, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
 
-			if (StrContains(szClass, "prop_door_", false) != -1)
+			if (StrContains(szClass, "prop_door_", false) == 0)
 			{
-				buttons |= IN_USE;
+				buttons += IN_USE;
 			}
 			else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl") && Entity_InRange(client, iAimTarget, 100.0))
 			{
@@ -321,17 +321,17 @@ public void Hook_CvarEnabled(Handle convar, const char[] oldValue, const char[] 
 
 public void Hook_CvarNonOwner(Handle convar, const char[] oldValue, const char[] newValue) 
 {
-	g_bCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
+	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
 }
 
 public void Hook_CvarFly(Handle convar, const char[] oldValue, const char[] newValue) 
 {
-	g_bCvarFly = GetConVarBool(g_hCvarFly);
+	g_iCvarFly = GetConVarBool(g_hCvarFly);
 }
 
 public void Hook_CvarTips(Handle convar, const char[] oldValue, const char[] newValue) 
 {
-	g_bCvarTips = GetConVarBool(g_hCvarTips);
+	g_iCvarTips = GetConVarBool(g_hCvarTips);
 }
 
 public void Hook_CvarClPropLimit(Handle convar, const char[] oldValue, const char[] newValue) 
@@ -562,7 +562,7 @@ public int Native_AllowFly(Handle hPlugin, int iNumParams)
 	if (IsClientConnected(client)) 
 	{
 		//int AdminId:Aid = GetUserAdmin(client);
-		if (!g_bCvarFly == true) {
+		if (!g_iCvarFly == true) {
 			Build_PrintToChat(client, "Noclip is not available or disabled.");
 			ClientCommand(client, "playgamesound \"%s\"", "buttons/button10.wav");
 			return false;
@@ -677,37 +677,38 @@ public int Native_IsOwner(Handle hPlugin, int iNumParams)
 	if (iNumParams >= 3)
 		bIngoreCvar = GetNativeCell(3);
 	
-	if (Build_ReturnEntityOwner(iEnt) == client)
+	if (Build_ReturnEntityOwner(iEnt) != client) 
 	{
-		return true;
-	}
-	
-	if (Build_IsAdmin(client))
-	{
-		return true;
-	}
-	
-	if (GetEntityFlags(iEnt) & (FL_CLIENT | FL_FAKECLIENT))
-	{
-		if (g_bclientLang[client])
-			Build_PrintToChat(client, "你沒有權限對玩家使用此指令!");
+		if (!Build_IsAdmin(client)) 
+		{
+			if (GetEntityFlags(iEnt) & (FL_CLIENT | FL_FAKECLIENT)) 
+			{
+				if (g_bclientLang[client])
+					Build_PrintToChat(client, "你沒有權限對玩家使用此指令!");
+				else
+					Build_PrintToChat(client, "You are not allowed to do this to players!");
+				return false;
+			}
+			if (Build_ReturnEntityOwner(iEnt) == -1) 
+			{
+				if (!bIngoreCvar) 
+				{
+					if (!g_iCvarNonOwner) 
+						return false;
+					else
+						return true;
+				} 
+				else
+					return true;
+			} 
+			else 
+				return false;
+		} 
 		else
-			Build_PrintToChat(client, "You are not allowed to do this to players!");
-		
-		return false;
-	}
-	
-	if (Build_ReturnEntityOwner(iEnt) != -1)
-	{
-		return false;
-	}
-	
-	if (bIngoreCvar)
-	{
+			return true;
+	} 
+	else
 		return true;
-	}
-	
-	return g_bCvarNonOwner;
 }
 
 public int Native_LogCmds(Handle hPlugin, int iNumParams) 
@@ -790,7 +791,6 @@ public int Native_RemoveBlacklist(Handle hPlugin, int iNumParams)
 		if (StrContains(szData, szAuthid) != -1) 
 		{
 			RemoveFromArray(g_hBlackListArray, i);
-			
 			return true;
 		}
 	}
@@ -826,10 +826,8 @@ public int Native_IsBlacklisted(Handle hPlugin, int iNumParams)
 			Build_PrintToChat(client, "You're banned from TF2 Sandbox! :(");
 			Build_PrintToChat(client, "For more details, appeal ban to LeadKiller.");
 		}
-		
 		return true;
 	}
-	
 	return false;
 }
 
@@ -848,13 +846,13 @@ public int Native_IsClientValid(Handle hPlugin, int iNumParams)
 	if(!IsClientConnected(iTarget)) return false;
 	if(!IsClientInGame(iTarget)) return false;
 	
-	bool IsClientAlive, ReplyTarget;
+	bool IsAlive, ReplyTarget;
 	if (iNumParams == 3)
-		IsClientAlive = GetNativeCell(3);
+		IsAlive = GetNativeCell(3);
 	if (iNumParams == 4)
 		ReplyTarget = GetNativeCell(4);
 
-	if (IsClientAlive) 
+	if (IsAlive) 
 	{
 		if (!IsPlayerAlive(iTarget)) 
 		{
@@ -872,11 +870,9 @@ public int Native_IsClientValid(Handle hPlugin, int iNumParams)
 				else
 					Build_PrintToChat(client, "You cannot use the command if you dead.");
 			}
-			
 			return false;
 		}
 	}
-	
 	return true;
 }
 
@@ -897,7 +893,6 @@ void ReadBlackList()
 			
 			SetArrayString(g_hBlackListArray, iclients++, szLine);
 		}
-		
 		CloseHandle(hFile);
 	}
 }
@@ -914,6 +909,5 @@ stock void TagsCheck(const char[] tag)
 		Format(newTags, sizeof(newTags), "%s,%s", tags, tag);
 		SetConVarString(hTags, newTags);
 	}
-	
 	CloseHandle(hTags);
 } 

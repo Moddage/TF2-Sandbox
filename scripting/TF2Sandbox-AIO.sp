@@ -161,14 +161,17 @@ public void OnPluginStart()
 	// blacklist
 	RegAdminCmd("sm_bl", Command_AddBL, ADMFLAG_CONVARS, "Add clients to the blacklist");
 	RegAdminCmd("sm_unbl", Command_RemoveBL, ADMFLAG_CONVARS, "Remove clients from the blacklist");
+
+	// disable exploits
+	SetCommandFlags("explode", GetCommandFlags("setpos"));
 	
 	// disable cheat flags
 	SetCommandFlags("noclip", GetCommandFlags("kill"));
 	SetCommandFlags("god", GetCommandFlags("kill"));
+	SetCommandFlags("buddha", GetCommandFlags("kill"));
 
 	// command hooks
 	RegConsoleCmd("kill", Command_kill, "");
-	RegConsoleCmd("explode", Command_kill, "");
 	RegConsoleCmd("noclip", Command_Fly, "");
 	RegConsoleCmd("god", Command_ChangeGodMode, "");
 	
@@ -190,6 +193,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_setname", Command_SetName, 0, "Set the name of a prop");
 	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Scripted Door");
 	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light");
+	RegAdminCmd("sm_simplelight", Command_LightDynamic, 0, "Dynamic Light");
 	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, 0, "Half-Life 2 Door");
 	RegAdminCmd("sm_rotate", Command_Rotate, 0, "Rotate an entity.");
 	RegAdminCmd("sm_r", Command_Rotate, 0, "Rotate an entity.");
@@ -391,6 +395,19 @@ public void OnPluginStart()
 	SetMenuExitBackButton(g_hPropMenuRequested, true);
 	AddMenuItem(g_hPropMenuRequested, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuRequested, "emptyspace", "", ITEMDRAW_IGNORE);
+	AddMenuItem(g_hPropMenuRequested, "scout", "Scout");
+	AddMenuItem(g_hPropMenuRequested, "soldier", "Soldier");
+	AddMenuItem(g_hPropMenuRequested, "pyro", "Pyro");
+	AddMenuItem(g_hPropMenuRequested, "demoman", "Demoman");
+	AddMenuItem(g_hPropMenuRequested, "heavy", "Heavy");
+	AddMenuItem(g_hPropMenuRequested, "engineer", "Engineer");
+	AddMenuItem(g_hPropMenuRequested, "sniper", "Sniper");
+	AddMenuItem(g_hPropMenuRequested, "medic", "Medic");
+	AddMenuItem(g_hPropMenuRequested, "spy", "Spy");
+	AddMenuItem(g_hPropMenuRequested, "cow", "Cow");
+	AddMenuItem(g_hPropMenuRequested, "explosion", "Explosion");
+	AddMenuItem(g_hPropMenuRequested, "muzzleflash", "Muzzleflash");
+	AddMenuItem(g_hPropMenuRequested, "security_camera2", "Security Camera 2");	
 	AddMenuItem(g_hPropMenuRequested, "tank", "Tank");
 	AddMenuItem(g_hPropMenuRequested, "tank_track", "Tank Track");
 
@@ -714,7 +731,7 @@ public Action TF2SB_DelayedStuff(Handle useless)
 		AddMenuItem(g_hPropMenu, "emptyspace", "", ITEMDRAW_IGNORE);
 		AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
 		AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
-		AddMenuItem(g_hPropMenu, "pickupprops", "Item/Weapon Props");
+		AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
 		AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
 		AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
 		AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
@@ -751,6 +768,16 @@ public Action TF2SB_DelayedStuff(Handle useless)
     	AddMenuItem(g_hEquipMenu, "portalgun", "Portal Gun");
 	} 
 
+	if(GetCommandFlags("sm_ss") != INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hMainMenu, "savesys", "Save...");
+	}
+
+	if(GetCommandFlags("sm_tf2sbperms") != INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hMainMenu, "permissions", "Permissions...");
+	}
+
 	/*if(GetCommandFlags("sm_physgun") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_pg") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_sbpg") == INVALID_FCVAR_FLAGS)
 	{
 		AddMenuItem(g_hEquipMenu, "physgun", "Physics Gun V1");
@@ -767,6 +794,11 @@ public Action TF2SB_DelayedStuff(Handle useless)
 	if(GetCommandFlags("sm_cam") != INVALID_FCVAR_FLAGS)
 	{
 		AddMenuItem(g_hPropMenuLead, "camera", "Camera");
+	}
+
+	if(GetCommandFlags("sm_laser") != INVALID_FCVAR_FLAGS)
+	{
+		AddMenuItem(g_hPropMenuLead, "laser", "Laser");
 	}
 
 	AddMenuItem(g_hPropMenuLead, "sdoor", "Sliding Door");
@@ -858,7 +890,7 @@ public void OnMapStart()
 	PrecacheSound("buttons/button3.wav", true);
 	PrecacheSound("ui/panel_close.wav", true);
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav", true);
-	for (int i = 1; i <= MaxClients; i++)
+	for (int i = 1; i < MaxClients; i++)
 	{
 		g_szConnectedClient[i] = "";
 		if (Build_IsClientValid(i, i))
@@ -991,9 +1023,10 @@ public Action Command_Copy(int client, int args)
 			return Plugin_Handled;
 		}
 		
-		if (StrEqual(szClass, "prop_dynamic")) {
-			szClass = "prop_dynamic_override";
-		}
+		// Physics exploit can be introduced by copying physics objects
+		// if (StrEqual(szClass, "prop_dynamic")) {
+		szClass = "prop_dynamic_override";
+		// }
 		
 		g_iCopyTarget[client] = CreateEntityByName(szClass);
 	}
@@ -1087,7 +1120,7 @@ public Action Timer_CopyBeam(Handle timer, any client)
 		GetClientAbsOrigin(client, fOriginPlayer);
 		
 		GetEntPropVector(g_iCopyTarget[client], Prop_Data, "m_vecOrigin", fOriginEntity);
-		fOriginPlayer[2] += 50.0;
+		fOriginPlayer[2] += 50;
 		
 		int iColor[4];
 		iColor[0] = GetRandomInt(50, 255);
@@ -1168,7 +1201,7 @@ public Action Timer_CoolDown(Handle hTimer, any iBuffer)
 {
 	int iClient = GetClientFromSerial(iBuffer);
 	
-	if (g_bBuffer[iClient]) g_bBuffer[iClient] = false;
+	if (g_bBuffer[iClient])g_bBuffer[iClient] = false;
 }
 
 public Action Command_OpenableDoorProp(int client, int args)
@@ -2883,6 +2916,11 @@ public int MainMenu(Handle menu, MenuAction action, int param1, int param2)
 			DisplayMenu(g_hBuildHelperMenu, param1, MENU_TIME_FOREVER);
 		}
 
+		if (StrEqual(item, "savesys"))
+		{
+			FakeClientCommand(param1, "sm_ss");
+		}
+
 		if (StrEqual(item, "door"))
 		{
 			FakeClientCommand(param1, "sm_propdoor");
@@ -3612,11 +3650,15 @@ public int PropMenuLead(Handle menu, MenuAction action, int param1, int param2)
 		}
 		else if (StrEqual(info, "light"))
 		{
-			FakeClientCommand(param1, "sm_simplelight");
+			FakeClientCommand(param1, "sm_ld");
 		}
 		else if (StrEqual(info, "door"))
 		{
 			FakeClientCommand(param1, "sm_propdoor");
+		}
+		else if (StrEqual(info, "laser"))
+		{
+			FakeClientCommand(param1, "sm_laser");
 		}
 		else if (StrEqual(info, "camera"))
 		{
