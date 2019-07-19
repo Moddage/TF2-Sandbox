@@ -350,7 +350,7 @@ public void OnPluginStart()
 	// equip menu
 	g_hEquipMenu = CreateMenu(EquipMenu);
 	SetMenuTitle(g_hEquipMenu, /*"TF2SB - */ "Equip...");
-	CreateTimer(2.0, TF2SB_DelayedStuff);
+	// CreateTimer(2.0, TF2SB_DelayedStuff);
 	SetMenuExitBackButton(g_hEquipMenu, true);
 	
 	// poser menu
@@ -697,7 +697,8 @@ public void OnLibraryAdded(const char[] name)
 	#endif
 }
 
-public Action TF2SB_DelayedStuff(Handle useless)
+// public Action TF2SB_DelayedStuff(Handle useless) // what in the goddamn?
+public void OnAllPluginsLoaded()
 {
 	char buffer[512];
 
