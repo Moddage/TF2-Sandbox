@@ -3813,7 +3813,7 @@ public Action Command_AddBL(int client, int args)
 public Action Command_RemoveBL(int client, int args)
 {
 	if (args < 1) {
-		ReplyToCommand(client, "[SM] Usage: sm_unbl <#userid|name>");
+		ReplyToCommand(client, "[SM] %t: sm_unbl <#userid|name>", "usage");
 		return Plugin_Handled;
 	}
 	
