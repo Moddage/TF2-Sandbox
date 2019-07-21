@@ -6,9 +6,11 @@ With Team Fortress 2 Sandbox, you can build bases, roleplay in a resturant, inve
 
 [Steam Group](http://steamcommunity.com/groups/TF2Sandbox)  
 [Discord](http://discord.gg/7t2DRAQ)
+### Translating
+You may submit a Pull Request to translate Team Fortress 2 Sandbox into other languages.  
+Please do not use Google Translate or any other AI Translator.
 ### Hosting Instructions
-You will need to install:
- - [vPhysics](https://forums.alliedmods.net/showthread.php?t=136350)
+You will need to install the following plugins:
  - [TF2Items](https://forums.alliedmods.net/showthread.php?t=115100)
  - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217)
  - [TF2Attributes](https://forums.alliedmods.net/showthread.php?t=210221)
@@ -17,14 +19,14 @@ You will need to install:
  - [Updater](https://forums.alliedmods.net/showthread.php?t=169095)
  - [GiveWeapon](https://forums.alliedmods.net/showthread.php?t=141962)
 
+Be sure to place the custom folder in the root *tf* folder.  
 You can also find additional addons for Team Fortress 2 Sandbox by the [TF2SB Studio](https://github.com/tf2-sandbox-studio) such as Physgun, Toolgun, Undo, Save System, and more.
 ### Build Instructions
 You will need the following external includes:
  - [MoreColors](https://forums.alliedmods.net/showthread.php?t=185016)
  - [TF2Attributes](https://forums.alliedmods.net/showthread.php?t=210221)
  - [TF2Items](https://forums.alliedmods.net/showthread.php?t=115100)
- - [vPhysics](https://forums.alliedmods.net/showthread.php?t=136350)
- - [SMLib](https://github.com/bcserv/smlib/)
+ - [SMLib](https://github.com/bcserv/smlib/) (Optional)
  - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556) (Optional)
  - [SteamTools](https://forums.alliedmods.net/showthread.php?t=261044) (Optional)
  - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217) (Optional)
