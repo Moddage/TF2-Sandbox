@@ -1,0 +1,92 @@
+"Phrases"
+{
+    "alivetouse"
+    {
+        "en"    "You must be alive to use this command!"
+    }
+    "toofast"
+    {
+        "en"    "You're doing it too fast! Slow it down!"
+    }
+    "alreadycopy"
+    {
+        "en"    "You are already copying something!"
+    }
+    // %t: !render <fx amount> <fx> <R> <G> <B>
+    "usage"
+    {
+        "en"    "Usage"
+    }
+    "maxscale"
+    {
+        "en"    "Max scale is "
+    }
+    "higherthan"
+    {
+        "en"    "Scale must be higher than "
+    }
+    "skins"
+    {
+        "en"    "Not every model has multiple skins."
+    }
+    "sdoor"
+    {
+        "en"    "!sdoor 1~6 = Spawn door"
+    }
+    "sdoor2"
+    {
+        "en"    "!sdoor a = Select door"
+    }
+    "sdoor3"
+    {
+        "en"    "!sdoor b = Select button (Shoot to open)"
+    }
+    "sdoor4"
+    {
+        "en"    "!sdoor c = Select button (Press to open)"
+    }
+    "setname"
+    {
+        "en"    "Usage: !setname <name>"
+    }
+    "propnotfound"
+    {
+        "en"    "Prop not found: "
+    }
+    "deletedallprops"
+    {
+        "en"    "Deleted all props you owned."
+    }
+    "noprops"
+    {
+        "en"    "You have no props!"
+    }
+    "cantdelete"
+    {
+        "en"    "You cannot delete this!"
+    }
+    "resupplied"
+    {
+        "en"    "You've been resupplied."
+    }
+    "tip1"
+    {
+        "en"    "If you want to delete everything you own, say !delall"
+    }
+    "tip2"
+    {
+        "en"    "Say !del to delete the prop you are looking at."
+    }
+    "tip3"
+    {
+        "en"    "Press TAB to open Spawnlist!"
+    }
+    "tip4"
+    {
+        "en"    "Say !god to turn off godmode"
+    }
+    "tip5"
+    {
+        "en"    "If you want to rocket jump while in godmode, say !buddha"
+    }
+}
