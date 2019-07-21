@@ -23,7 +23,6 @@
 #include <sdkhooks>
 #include <build>
 #include <build_stocks>
-#include <vphysics>
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
@@ -102,16 +101,9 @@ Handle g_hPropMenuHL2 = INVALID_HANDLE;
 Handle g_hPropMenuDonor = INVALID_HANDLE;
 Handle g_hPropMenuRequested = INVALID_HANDLE;
 
-Handle g_hCvarMSTR = INVALID_HANDLE;
-int g_iCvarMSTR;
-
 char CopyableProps[][] =  {
 	"prop_dynamic", 
 	"prop_dynamic_override", 
-	"prop_physics", 
-	"prop_physics_multiplayer", 
-	"prop_physics_override", 
-	"prop_physics_respawnable", 
 	"5", 
 	"func_physbox", 
 	"player"
@@ -154,8 +146,9 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	// cvars
-	ServerCommand("sm_cvar mp_waitingforplayers_time 0");
-	ServerCommand("sm_cvar tf_avoidteammates 0");
+	SetConVarInt(FindConVar("mp_waitingforplayers_time"), 0);
+	SetConVarInt(FindConVar("tf_avoidteammates"), 0);
+	SetConVarInt(FindConVar("tf_allow_player_use"), 1);
 
 	// blacklist
 	RegAdminCmd("sm_bl", Command_AddBL, ADMFLAG_CONVARS, "Add clients to the blacklist");
@@ -165,7 +158,7 @@ public void OnPluginStart()
 	SetCommandFlags("explode", GetCommandFlags("setpos"));
 	
 	// disable cheat flags
-	SetCommandFlags("noclip", GetCommandFlags("kill"));
+	SetCommandFlags("noclip", GetCommandFlags("kill")); // TODO: Don't use kill for this
 	SetCommandFlags("god", GetCommandFlags("kill"));
 	SetCommandFlags("buddha", GetCommandFlags("kill"));
 
@@ -227,7 +220,7 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuDonor, "blank", "", ITEMDRAW_IGNORE);
 	
 	// arrays, cookies
-	g_hCookieSDoorTarget = RegClientCookie("cookie_SDoorTarget", "For SDoor.", CookieAccess_Private);
+	g_hCookieSDoorTarget = RegClientCookie("cookie_SDoorTarget", "For SDoor.", CookieAccess_Private); // TODO: Don't fucking do this dumb shit.
 	g_hCookieSDoorModel = RegClientCookie("cookie_SDoorModel", "For SDoor.", CookieAccess_Private);
 	g_hPropNameArray = CreateArray(33, 2048); // Max Prop List is 1024-->2048
 	g_hPropModelPathArray = CreateArray(128, 2048); // Max Prop List is 1024-->2048
@@ -237,10 +230,6 @@ public void OnPluginStart()
 	g_hPropModelPathArrayDonor = CreateArray(128, 2048); // Max Prop List is 1024-->2048
 	g_hPropTypeArrayDonor = CreateArray(33, 2048); // Max Prop List is 1024-->2048
 	g_hPropStringArrayDonor = CreateArray(256, 2048);
-
-	// convars
-	g_hCvarMSTR = CreateConVar("sbox_mstr", "0", "Old styled MSTR build menu", 0, true, 0.0, true, 1.0);
-	HookConVarChange(g_hCvarMSTR, Hook_CvarMSTR);
 
 	// read props.ini and props-extended.ini
 	ReadProps();
@@ -684,6 +673,9 @@ public void OnPluginStart()
         Updater_AddPlugin(UPDATE_URL);
     }
 	#endif
+
+	// config
+	AutoExecConfig();
 }
 
 public void OnLibraryAdded(const char[] name)
@@ -725,26 +717,15 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), "    hjkwe654\n");
 	StrCat(buffer, sizeof(buffer), "    greenteaf0718\n\n");
 
-	if (!g_iCvarMSTR == true)
-	{
-		AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
-		AddMenuItem(g_hPropMenu, "emptyspace", "", ITEMDRAW_IGNORE);
-		AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
-		AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
-		AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
-		AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
-		AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
-		AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
-		AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
-		AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
-	}
-	else
-	{
-		AddMenuItem(g_hPropMenu, "removeprops", "Remove..."); 
-		AddMenuItem(g_hPropMenu, "search", "Search...");
-		AddMenuItem(g_hPropMenu, "donatorprops", "", ITEMDRAW_RAWLINE);
-		AddMenuItem(g_hPropMenu, "light", "Light");
-	}
+	AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
+	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
+	AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
+	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
+	AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
+	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
+	AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
+	AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
 
 	AddMenuItem(g_hEquipMenu, "toolgun", "--SANDBOX WEAPONS--", ITEMDRAW_DISABLED);
 
@@ -859,6 +840,9 @@ public void OnAllPluginsLoaded()
 			}
 		}
 	#endif
+
+	// misc
+	LoadTranslations("tf2sandbox.phrases");
 }
 
 public Action Command_TF2SBCred(int client, int args)
@@ -937,11 +921,6 @@ public void OnClientDisconnect(int client)
 	}*/
 }
 
-public void Hook_CvarMSTR(Handle convar, const char[] oldValue, const char[] newValue) 
-{
-	g_iCvarMSTR = GetConVarInt(g_hCvarMSTR);
-}
-
 public void OnClientConnected(int client)
 {
 	g_bGodmode[client] = true;
@@ -971,7 +950,7 @@ public Action Command_Copy(int client, int args)
 {
 	if (g_bBuffer[client])
 	{
-		Build_PrintToChat(client, "You're doing it so fast! Slow it down!");
+		Build_PrintToChat(client, "%t", "toofast");
 		
 		return Plugin_Handled;
 	}
@@ -995,7 +974,7 @@ public Action Command_Copy(int client, int args)
 		return Plugin_Handled;
 	
 	if (g_bCopyIsRunning[client]) {
-		Build_PrintToChat(client, "You are already copying something!");
+		Build_PrintToChat(client, "%t", "alreadycopy");
 		return Plugin_Handled;
 	}
 	
@@ -1013,13 +992,10 @@ public Action Command_Copy(int client, int args)
 			g_iCopyTarget[client] = CreateEntityByName("5");
 			IsDoll = true;
 		} else {
-			Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to copy this prop!");
 			return Plugin_Handled;
 		}
 	} else {
 		if (StrEqual(szClass, "func_physbox") && !Build_IsAdmin(client, true)) {
-			
-			Build_PrintToChat(client, "You can't copy this prop!");
 			return Plugin_Handled;
 		}
 		
@@ -1042,16 +1018,12 @@ public Action Command_Copy(int client, int args)
 			GetEntPropVector(iEntity, Prop_Data, "m_angRotation", fEntityAngle);
 			GetEntPropString(iEntity, Prop_Data, "m_ModelName", szModelName, sizeof(szModelName));
 			GetEntPropString(iEntity, Prop_Data, "m_iName", szPropName, sizeof(szPropName));
-			if (StrEqual(szModelName, "models/props_c17/oildrum001_explosive.mdl") && !Build_IsAdmin(client, true)) {
-				Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to copy this prop!");
-				RemoveEdict(g_iCopyTarget[client]);
-				return Plugin_Handled;
-			}
+
 			DispatchKeyValue(g_iCopyTarget[client], "model", szModelName);
 			SetEntPropString(g_iCopyTarget[client], Prop_Data, "m_iName", szPropName);
 			
-			
 			GetEdictClassname(g_iCopyTarget[client], szClass, sizeof(szClass));
+
 			if (StrEqual(szClass, "prop_dynamic_override")) {
 				SetEntProp(g_iCopyTarget[client], Prop_Send, "m_nSolidType", 6);
 				SetEntProp(g_iCopyTarget[client], Prop_Data, "m_nSolidType", 6);
@@ -1065,8 +1037,8 @@ public Action Command_Copy(int client, int args)
 			DispatchSpawn(g_iCopyTarget[client]);
 			TeleportEntity(g_iCopyTarget[client], fEntityOrigin, fEntityAngle, NULL_VECTOR);
 			
-			if (Phys_IsPhysicsObject(g_iCopyTarget[client]))
-				Phys_EnableMotion(g_iCopyTarget[client], false);
+			// if (Phys_IsPhysicsObject(g_iCopyTarget[client]))
+			//	Phys_EnableMotion(g_iCopyTarget[client], false);
 			
 			GetCmdArg(1, szColorR, sizeof(szColorR));
 			GetCmdArg(2, szColorG, sizeof(szColorG));
@@ -1092,7 +1064,6 @@ public Action Command_Copy(int client, int args)
 			CreateTimer(0.02, Timer_CopyMain, client);
 			return Plugin_Handled;
 		} else {
-			Build_PrintToChat(client, "This prop was not copy able.");
 			return Plugin_Handled;
 		}
 	} else {
@@ -1173,20 +1144,20 @@ public Action Timer_CopyMain(Handle timer, any client)
 		fOriginEntity[1] += fOriginPlayer[1] - g_fCopyPlayerOrigin[client][1];
 		fOriginEntity[2] += fOriginPlayer[2] - g_fCopyPlayerOrigin[client][2];
 		
-		if (Phys_IsPhysicsObject(g_iCopyTarget[client])) {
+		/*if (Phys_IsPhysicsObject(g_iCopyTarget[client])) {
 			Phys_EnableMotion(g_iCopyTarget[client], false);
 			Phys_Sleep(g_iCopyTarget[client]);
-		}
+		}*/
 		SetEntityMoveType(g_iCopyTarget[client], MOVETYPE_NONE);
 		TeleportEntity(g_iCopyTarget[client], fOriginEntity, NULL_VECTOR, NULL_VECTOR);
 		
 		if (g_bCopyIsRunning[client])
 			CreateTimer(0.001, Timer_CopyMain, client);
 		else {
-			if (Phys_IsPhysicsObject(g_iCopyTarget[client])) {
+			/*if (Phys_IsPhysicsObject(g_iCopyTarget[client])) {
 				Phys_EnableMotion(g_iCopyTarget[client], false);
 				Phys_Sleep(g_iCopyTarget[client]);
-			}
+			}*/
 			SetEntityMoveType(g_iCopyTarget[client], MOVETYPE_VPHYSICS);
 			
 			DispatchKeyValue(g_iCopyTarget[client], "rendermode", "5");
@@ -1211,14 +1182,14 @@ public Action Command_OpenableDoorProp(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (g_bBuffer[client])
 	{
-		Build_PrintToChat(client, "You're doing it too fast! Slow it down!");
+		Build_PrintToChat(client, "%t", "toofast");
 		
 		return Plugin_Handled;
 	}
@@ -1307,15 +1278,15 @@ public Action Command_Render(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (args < 5) {
 		
-		Build_PrintToChat(client, "Usage: !render <fx amount> <fx> <R> <G> <B>");
-		Build_PrintToChat(client, "Ex. Flashing Green: !render 150 4 15 255 0");
+		Build_PrintToChat(client, "%t: !render <fx amount> <fx> <R> <G> <B>", "usage");
+		// Build_PrintToChat(client, "Ex. Flashing Green: !render 150 4 15 255 0");
 		return Plugin_Handled;
 	}
 	
@@ -1374,14 +1345,14 @@ public Action Command_Color(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (args < 3) {
-		Build_PrintToChat(client, "Usage: !color <R> <G> <B>");
-		Build_PrintToChat(client, "Ex: Green: !color 0 255 0");
+		Build_PrintToChat(client, "%t: !color <R> <G> <B>", "usage");
+		// Build_PrintToChat(client, "Ex: Green: !color 0 255 0");
 		return Plugin_Handled;
 	}
 	
@@ -1436,13 +1407,13 @@ public Action Command_PropScale(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !propscale <number>");
+		Build_PrintToChat(client, "%t: !propscale <number>", "usage");
 		return Plugin_Handled;
 	}
 	
@@ -1456,12 +1427,12 @@ public Action Command_PropScale(int client, int args)
 		GetCmdArg(1, szPropScale, sizeof(szPropScale));
 		
 		if (StringToInt(szPropScale) > 3) {
-			Build_PrintToChat(client, "Max scale is 3!");
+			Build_PrintToChat(client, "%t3", "maxscale");
 			return Plugin_Handled;
 		}
 
 		if (StringToInt(szPropScale) < 1) {
-			Build_PrintToChat(client, "Scale must be equal to or higher than 1!");
+			Build_PrintToChat(client, "%t1", "higherthan");
 			return Plugin_Handled;
 		}
 
@@ -1504,8 +1475,8 @@ public Action Command_Skin(int client, int args)
 		return Plugin_Handled;
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !skin <number>");
-		Build_PrintToChat(client, "Notice: Not every model have multiple skins.");
+		Build_PrintToChat(client, "%t: !skin <number>", "usage");
+		Build_PrintToChat(client, "%t", "skins");
 		return Plugin_Handled;
 	}
 	
@@ -1555,14 +1526,14 @@ public Action Command_Rotate(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !rotate/!r <x> <y> <z>");
-		Build_PrintToChat(client, "Ex: !rotate 0 90 0");
+		Build_PrintToChat(client, "%t: !rotate/!r <x> <y> <z>", "usage");
+		// Build_PrintToChat(client, "Ex: !rotate 0 90 0");
 		return Plugin_Handled;
 	}
 	
@@ -1638,14 +1609,14 @@ public Action Command_SimpleLight(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	/*if (g_bBuffer[client])
 	{
-		Build_PrintToChat(client, "You're doing it too fast! Slow it down!");
+		Build_PrintToChat(client, "%t", "toofast");
 		
 		return Plugin_Handled;
 	}
@@ -1664,13 +1635,13 @@ public Action Command_AccurateRotate(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !ar <x> <y> <z>");
+		Build_PrintToChat(client, "%t: !ar <x> <y> <z>", "usage");
 		return Plugin_Handled;
 	}
 	
@@ -1733,7 +1704,7 @@ public Action Command_LightDynamic(int client, int args)
 	
 	if (g_bBuffer[client])
 	{
-		Build_PrintToChat(client, "You're doing it too fast! Slow it down!");
+		Build_PrintToChat(client, "%t", "toofast");
 		
 		return Plugin_Handled;
 	}
@@ -1824,14 +1795,14 @@ public Action Command_SpawnDoor(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (g_bBuffer[client])
 	{
-		Build_PrintToChat(client, "You're doing it too fast! Slow it down!");
+		Build_PrintToChat(client, "%t", "toofast");
 		
 		return Plugin_Handled;
 	}
@@ -1936,12 +1907,12 @@ public Action Command_SpawnDoor(int client, int args)
 			}
 		}
 	} else {
-		Build_PrintToChat(client, "Usage: !sdoor <1-6>");
-		Build_PrintToChat(client, "!sdoor 1~6 = Spawn door");
-		Build_PrintToChat(client, "!sdoor a = Select door");
-		Build_PrintToChat(client, "!sdoor b = Select button (Shoot to open)");
-		Build_PrintToChat(client, "!sdoor c = Select button (Press to open)");
-		Build_PrintToChat(client, "NOTE: As for the current update, sdoors are fixed.");
+		Build_PrintToChat(client, "%t: !sdoor <1-6>", "usage");
+		Build_PrintToChat(client, "%t", "sdoor");
+		Build_PrintToChat(client, "%t", "sdoor2");
+		Build_PrintToChat(client, "%t", "sdoor3");
+		Build_PrintToChat(client, "%t", "sdoor4");
+		// Build_PrintToChat(client, "NOTE: As for the current update, sdoors are fixed.");
 	}
 	return Plugin_Handled;
 }
@@ -1954,14 +1925,14 @@ public Action Command_Move(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !move <x> <y> <z>");
-		Build_PrintToChat(client, "Ex, move up 50: !move 0 0 50");
+		Build_PrintToChat(client, "%t: !move <x> <y> <z>", "usage");
+		// Build_PrintToChat(client, "Ex, move up 50: !move 0 0 50");
 		return Plugin_Handled;
 	}
 	
@@ -2019,9 +1990,9 @@ public Action Command_SetName(int client, int args)
 		return Plugin_Handled;
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !setname <name you want it to be>");
-		Build_PrintToChat(client, "Ex: !setname \"A teddy bear\"");
-		Build_PrintToChat(client, "Ex: !setname \"Gabe Newell\"");
+		Build_PrintToChat(client, "%t", "setname");
+		// Build_PrintToChat(client, "Ex: !setname \"A teddy bear\"");
+		// Build_PrintToChat(client, "Ex: !setname \"Gabe Newell\"");
 		return Plugin_Handled;
 	}
 	
@@ -2044,6 +2015,15 @@ public Action Command_SetName(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Timer_FadeEffect(Handle timer, any iEntity)
+{
+	if (!IsValidEntity(iEntity))
+		return;
+
+	SetEntityRenderColor(iEntity, 255, 255, 255, 255);
+	SetEntityRenderFx(iEntity, RENDERFX_NONE);
+}
+
 public Action Command_SpawnProp(int client, int args)
 {
 	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true))
@@ -2051,15 +2031,15 @@ public Action Command_SpawnProp(int client, int args)
 	
 	if (!IsPlayerAlive(client))
 	{
-		Build_PrintToChat(client, "You must be alive to use this command!");
+		Build_PrintToChat(client, "%t", "alivetouse");
 		
 		return Plugin_Handled;
 	}
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !spawnprop/!s <Prop name>");
-		Build_PrintToChat(client, "Ex: !spawnprop goldbar");
-		Build_PrintToChat(client, "Ex: !spawnprop alyx");
+		Build_PrintToChat(client, "%t: !spawnprop/!s <Prop>", "usage");
+		// Build_PrintToChat(client, "Ex: !spawnprop goldbar");
+		// Build_PrintToChat(client, "Ex: !spawnprop alyx");
 		return Plugin_Handled;
 	}
 	
@@ -2070,32 +2050,21 @@ public Action Command_SpawnProp(int client, int args)
 	int IndexInArray = FindStringInArray(g_hPropNameArray, szPropName);
 	int IndexInArray2 = FindStringInArray(g_hPropNameArrayDonor, szPropName);
 	
-	if (StrEqual(szPropName, "explosivecan") && !Build_IsAdmin(client, true)) {
-		Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to spawn this prop!");
-		return Plugin_Handled;
-	}
-	
 	if (g_bBuffer[client])
 	{
-		Build_PrintToChat(client, "You're doing it too fast! Slow it down!");
+		Build_PrintToChat(client, "%t", "toofast");
 		
 		return Plugin_Handled;
 	}
 	
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
-	
+	// TODO: JUST CHECK IF ITS A DONOR PROP OR NOT FOR VALUES AND DO REST ONLY ONCE
 	if (IndexInArray != -1) {
 		bool bIsDoll = false;
 		char szEntType[33];
 		GetArrayString(g_hPropTypeArray, IndexInArray, szEntType, sizeof(szEntType));
 		
-		if (!Build_IsAdmin(client, true)) {
-			if (StrEqual(szPropName, "explosivecan") || StrEqual(szEntType, "5")) {
-				Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to spawn this prop!");
-				return Plugin_Handled;
-			}
-		}
 		if (StrEqual(szEntType, "5"))
 			bIsDoll = true;
 		
@@ -2162,18 +2131,21 @@ public Action Command_SpawnProp(int client, int args)
 			
 			SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
 
-			/* SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
+			SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
 			SetEntityRenderColor(iEntity, 255, 255, 255, 0);
-			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST); */
+			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST);
+
+			CreateTimer(0.4, Timer_FadeEffect, iEntity);
+
 			// WIP FADE EFFECT
 			
 			// Debugging issues
 			//PrintToChatAll(szPropString);
 			
-			if (!StrEqual(szPropFrozen, "")) {
+			/*if (!StrEqual(szPropFrozen, "")) {
 				if (Phys_IsPhysicsObject(iEntity))
 					Phys_EnableMotion(iEntity, false);
-			}
+			}*/
 		} else
 			RemoveEdict(iEntity);
 	} else if (IndexInArray2 != -1 && CheckCommandAccess(client, "sm_tf2sb_donor", 0)) {
@@ -2181,12 +2153,6 @@ public Action Command_SpawnProp(int client, int args)
 		char szEntType[33];
 		GetArrayString(g_hPropTypeArrayDonor, IndexInArray2, szEntType, sizeof(szEntType));
 		
-		if (!Build_IsAdmin(client, true)) {
-			if (StrEqual(szPropName, "explosivecan") || StrEqual(szEntType, "5")) {
-				Build_PrintToChat(client, "You need \x04L2 Build Access\x01 to spawn this prop!");
-				return Plugin_Handled;
-			}
-		}
 		if (StrEqual(szEntType, "5"))
 			bIsDoll = true;
 		
@@ -2252,22 +2218,26 @@ public Action Command_SpawnProp(int client, int args)
 			}*/
 			
 			SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
-			/* SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
+
+			SetEntityRenderMode(iEntity, RENDER_TRANSALPHA);
 			SetEntityRenderColor(iEntity, 255, 255, 255, 0);
-			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST); */
+			SetEntityRenderFx(iEntity, RENDERFX_SOLID_FAST);
+
+			CreateTimer(0.4, Timer_FadeEffect, iEntity);
+
 			// WIP FADE EFFECT
 			
 			// Debugging issues
 			//PrintToChatAll(szPropString);
 
-			if (!StrEqual(szPropFrozen, "")) {
+			/*if (!StrEqual(szPropFrozen, "")) {
 				if (Phys_IsPhysicsObject(iEntity))
 					Phys_EnableMotion(iEntity, false);
-			}
+			}*/
 		} else
 			RemoveEdict(iEntity);
 	} else{
-		Build_PrintToChat(client, "Prop not found: %s", szPropName);
+		Build_PrintToChat(client, "%t%s", "propnotfound", szPropName);
 	}
 	char szTemp[33], szArgs[128];
 	for (int i = 1; i <= GetCmdArgs(); i++) {
@@ -2489,13 +2459,13 @@ public Action Command_Health(int client, int args)
 		return Plugin_Handled;
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "Usage: !addhealth <number>");
+		Build_PrintToChat(client, "%t: !addhealth <number>", "usage");
 		return Plugin_Handled;
 	}
 	
 	char szHealth[128];
 	GetCmdArg(1, szHealth, sizeof(szHealth));
-	Build_PrintToChat(client, "Added %s onto your health", szHealth);
+	// Build_PrintToChat(client, "Added %s onto your health", szHealth);
 	TF2Attrib_RemoveByName(client, "max health additive bonus");
 	TF2Attrib_SetByName(client, "max health additive bonus", StringToFloat(szHealth));
 	TF2_RegeneratePlayer(client);
@@ -2648,9 +2618,9 @@ public Action Command_DeleteAll(int client, int args)
 		iCheck += 1;
 	}
 	if (iCount > 0) {
-		Build_PrintToChat(client, "Deleted all props you owns.");
+		Build_PrintToChat(client, "%t", "deletedallprops");
 	} else {
-		Build_PrintToChat(client, "You don't have any props.");
+		Build_PrintToChat(client, "%t", "noprops");
 	}
 	
 	Build_SetLimit(client, 0);
@@ -2681,7 +2651,7 @@ public Action Command_Delete(int client, int args)
 		
 		if (!Build_IsAdmin(client)) {
 			if (StrEqual(szClass, "prop_vehicle_driveable") || StrEqual(szClass, "prop_vehicle") || StrEqual(szClass, "prop_vehicle_airboat") || StrEqual(szClass, "prop_vehicle_prisoner_pod")) {
-				Build_PrintToChat(client, "You can't delete this prop!");
+				Build_PrintToChat(client, "%t", "cantdelete");
 				return Plugin_Handled;
 			}
 		}
@@ -2885,8 +2855,18 @@ public Action Command_PhysGunNew(int client, int args)
 
 public Action Command_Resupply(int client, int args)
 {
-	Build_PrintToChat(client, "You're now resupplied.");
-	TF2_RegeneratePlayer(client);
+	if (g_bBuffer[client])
+	{
+		Build_PrintToChat(client, "%t", "toofast");
+	}
+	else
+	{
+		g_bBuffer[client] = true;
+		CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
+
+		Build_PrintToChat(client, "%t", "resupplied");
+		TF2_RegeneratePlayer(client);
+	}
 }
 
 public int MainMenu(Handle menu, MenuAction action, int param1, int param2)
@@ -3039,7 +3019,7 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "resupply"))
 		{
-			TF2_RegeneratePlayer(param1);
+			FakeClientCommand(param1, "sm_resupply");
 		}
 		
 		if (StrEqual(item, "noclip"))
@@ -3711,7 +3691,7 @@ public Action ClientRemoveAll(int client, int args)
 {
 	if (args < 1)
 	{
-		ReplyToCommand(client, "[SM] Usage: sm_fda <#userid|name>");
+		ReplyToCommand(client, "[SM] %t: sm_fda <#userid|name>", "usage");
 		return Plugin_Handled;
 	}
 	
@@ -3796,7 +3776,7 @@ stock bool GetAimOrigin(int client, float hOrigin[3])
 public Action Command_AddBL(int client, int args)
 {
 	if (args < 1) {
-		ReplyToCommand(client, "[SM] Usage: sm_bl <#userid|name>");
+		ReplyToCommand(client, "[SM] %t: sm_bl <#userid|name>", "usage");
 		return Plugin_Handled;
 	}
 	

@@ -16,8 +16,7 @@
 */
 
 #pragma semicolon 1
- 
-#include <clientprefs>
+
 #include <sourcemod>
 #include <sdktools>
 #include <build>
@@ -41,7 +40,7 @@
 
 public Plugin myinfo =  
 {
-	name = "Team Fortress 2 Sandbox - Core", 
+	name = "Team Fortress 2 Sandbox - Protocols", 
 	author = "LeadKiller, BattlefieldDuck, Danct12, DaRkWoRlD, greenteaf0718, and hjkwe654", 
 	description = "Build Protocols for Team Fortress 2 Sandbox", 
 	version = BUILDMOD_VER, 
@@ -53,11 +52,9 @@ public Plugin myinfo =
 bool steamworks = false;
 #endif
 
-bool g_bclientLang[MAXPLAYERS];
 bool g_bIN_SCORE[MAXPLAYERS + 1];
 
 //Handle
-Handle g_hCookieclientLang;
 Handle g_hCvarServerTag = INVALID_HANDLE;
 Handle g_hCvarGameDesc = INVALID_HANDLE;
 Handle g_hBlackListArray;
@@ -85,11 +82,11 @@ int g_iEntOwner[MAX_HOOK_ENTITIES] =  { -1, ... };
 //char
 static const char tips[5][] =  
 {
-	"If you want to delete everything you own, type !delall", 
-	"Type !del to delete the prop you are looking at.", 
-	"Press TAB to open Spawnlist!",  
-	"Type !god to turn off godmode",
-	"If you want to rocket jump while in godmode, say !buddha",
+	"tip1",
+	"tip2",
+	"tip3",
+	"tip4",
+	"tip5"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) 
@@ -175,7 +172,6 @@ public void OnPluginStart()
 	g_hCvarGameDesc = CreateConVar("sbox_gamedesc", "1", "Change game name to 'TF2 Sandbox Version'?", 0, true, 1.0);
 	RegAdminCmd("sm_version", Command_Version, 0, "Show TF2SB Core version");
 	RegAdminCmd("sm_my", Command_SpawnCount, 0, "Show how many entities are you spawned.");
-	SetConVarInt(FindConVar("tf_allow_player_use"), 1);
 	
 	g_iCvarEnabled = GetConVarInt(g_hCvarSwitch);
 	g_iCvarTips = GetConVarBool(g_hCvarTips);
@@ -195,23 +191,19 @@ public void OnPluginStart()
 	HookConVarChange(g_hCvarClDollLimit, Hook_CvarClDollLimit);
 	HookConVarChange(g_hCvarServerLimit, Hook_CvarServerLimit);
 	
-	g_hCookieclientLang = RegClientCookie("cookie_BuildModclientLang", "TF2SB client Language.", CookieAccess_Private);
-	
 	#if defined _SteamWorks_Included
 		steamworks = LibraryExists("SteamWorks");
 	#endif
 
 	g_hBlackListArray = CreateArray(33, 128); // 33 arrays, every array size is 128
 	ReadBlackList();
+
 	PrintToServer("[TF2SB] Plugin successfully started!");
 	PrintToServer("[TF2SB] Team Fortress 2 Sandbox is currently in beta, version PRIVATE %s. If you have any issues with it, message the developers on the Discord or Steam Group.", BUILDMOD_VER);
-	CreateTimer(2.0, TF2SB_DelayedStuff);
-}
+	CreateTimer(15.0, HandleTips, 0, 1);
 
-public Action TF2SB_DelayedStuff(Handle useless)
-{
-	if (!g_iCvarTips == false)
-		CreateTimer(120.0, HandleTips, 0, 1);
+	AutoExecConfig();
+	LoadTranslations("tf2sandbox.phrases");
 }
 
 public void OnMapStart() 
@@ -279,7 +271,8 @@ public Action DisplayHud(Handle timer)
 
 public Action HandleTips(Handle timer)
 {
-	Build_PrintToAll(" %s", tips[GetRandomInt(0, sizeof(tips) - 1)]);
+	if (!g_iCvarTips == false)
+		Build_PrintToAll(" %t", tips[GetRandomInt(0, sizeof(tips) - 1)]);
 }
 
 public void OnMapEnd() 
@@ -297,19 +290,6 @@ public void OnMapEnd()
 				WriteFileString(hFile, szData, false);
 		}
 		CloseHandle(hFile);
-	}
-}
-
-public Action OnClientCommand(int client, int args)  
-{
-	if (Build_IsClientValid(client, client) && client > 0) 
-	{
-		char Lang[8];
-		GetClientCookie(client, g_hCookieclientLang, Lang, sizeof(Lang));
-		if (StrEqual(Lang, "1"))
-			g_bclientLang[client] = true;
-		else
-			g_bclientLang[client] = false;
 	}
 }
 
@@ -351,10 +331,8 @@ public void Hook_CvarServerLimit(Handle convar, const char[] oldValue, const cha
 
 public Action Command_Version(int client, int args) 
 {
-	if (g_bclientLang[client])
-		Build_PrintToChat(client, "TF2SB 系統核心版本: %s", BUILDMOD_VER);
-	else
-		Build_PrintToChat(client, "TF2SB Core version: %s", BUILDMOD_VER);
+	Build_PrintToChat(client, "%s", BUILDMOD_VER);
+
 	return Plugin_Handled;
 }
 
@@ -370,20 +348,14 @@ public Action Command_SpawnCount(int client, int args)
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
 	Build_Logging(client, "sm_my", szArgs);
-	if (g_bclientLang[client])
-		Build_PrintToChat(client, "你的上限: %i/%i [人偶: %i/%i], 伺服器上限: %i/%i", g_iPropCurrent[client], g_iCvarClPropLimit[client], g_iDollCurrent[client], g_iCvarClDollLimit, g_iServerCurrent, g_iCvarServerLimit);
-	else
-		Build_PrintToChat(client, "Your Limit: %i/%i [Ragdoll: %i/%i], Server Limit: %i/%i", g_iPropCurrent[client], g_iCvarClPropLimit[client], g_iDollCurrent[client], g_iCvarClDollLimit, g_iServerCurrent, g_iCvarServerLimit);
+	Build_PrintToChat(client, "Your Limit: %i/%i [Ragdoll: %i/%i], Server Limit: %i/%i", g_iPropCurrent[client], g_iCvarClPropLimit[client], g_iDollCurrent[client], g_iCvarClDollLimit, g_iServerCurrent, g_iCvarServerLimit);
 	if (Build_IsAdmin(client)) 
 	{
 		for (int i = 0; i < MaxClients; i++) 
 		{
 			if (Build_IsClientValid(i, i) && client != i) 
 			{
-				if (g_bclientLang[client])
-					Build_PrintToChat(client, "%N: %i/%i [人偶: %i/%i]", i, g_iPropCurrent[i], g_iCvarClPropLimit[i], g_iDollCurrent[i], g_iCvarClDollLimit);
-				else
-					Build_PrintToChat(client, "%N: %i/%i [Ragdoll: %i/%i]", i, g_iPropCurrent[i], g_iCvarClPropLimit[i], g_iDollCurrent[i], g_iCvarClDollLimit);
+				Build_PrintToChat(client, "%N: %i/%i [Ragdoll: %i/%i]", i, g_iPropCurrent[i], g_iCvarClPropLimit[i], g_iDollCurrent[i], g_iCvarClDollLimit);
 			}
 		}
 	}
@@ -405,7 +377,7 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 	}
 	if (IsValidEntity(iEnt) && Build_IsClientValid(client, client)) 
 	{
-		if (g_iServerCurrent < g_iCvarServerLimit) 
+		if (g_iServerCurrent < g_iCvarServerLimit)
 		{
 			if (bIsDoll) 
 			{
@@ -416,11 +388,8 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 				} 
 				else 
 				{
-					ClientCommand(client, "playgamesound \"%s\"", "buttons/button10.wav");
-					if (g_bclientLang[client])
-						Build_PrintToChat(client, "你的人偶數量已達上限.");
-					else
-						Build_PrintToChat(client, "You've hit the ragdoll limit!");
+					ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
+					Build_PrintToChat(client, "You've hit the ragdoll limit!");
 					return false;
 				}
 			} 
@@ -430,11 +399,8 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 					g_iPropCurrent[client] += 1;
 				else 
 				{
-					ClientCommand(client, "playgamesound \"%s\"", "buttons/button10.wav");
-					if (g_bclientLang[client])
-						Build_PrintToChat(client, "你的物件數量已達上限.");
-					else
-						Build_PrintToChat(client, "You've hit the prop limit!");
+					ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
+					Build_PrintToChat(client, "You've hit the prop limit!");
 					return false;
 				}
 			}
@@ -444,11 +410,8 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 		} 
 		else 
 		{
-			ClientCommand(client, "playgamesound \"%s\"", "buttons/button10.wav");
-			if (g_bclientLang[client])
-				Build_PrintToChat(client, "伺服器總物件數量已達總上限.");
-			else
-				Build_PrintToChat(client, "Server props limit reach maximum.");
+			ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
+			Build_PrintToChat(client, "Global prop limit reached!");
 			return false;
 		}
 	}
@@ -526,22 +489,16 @@ public int Native_AllowToUse(Handle hPlugin, int iNumParams)
 		{
 			case 0: 
 			{
-				ClientCommand(client, "playgamesound \"%s\"", "buttons/button10.wav");
-				if (g_bclientLang[client])
-					Build_PrintToChat(client, "TF2SB 目前不能使用或已關閉!");
-				else
-					Build_PrintToChat(client, "TF2SB is not available or disabled!");
+				ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
+				Build_PrintToChat(client, "TF2SB is not available or disabled!");
 				return false;
 			}
 			case 1: 
 			{
 				if (!Build_IsAdmin(client)) 
 				{
-					if (g_bclientLang[client])
-						Build_PrintToChat(client, "TF2SB 目前不能使用或已關閉.");
-					else
-						Build_PrintToChat(client, "TF2SB is not available or disabled.");
-					ClientCommand(client, "playgamesound \"%s\"", "buttons/button10.wav");
+					Build_PrintToChat(client, "TF2SB is not available or disabled.");
+					ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
 					return false;
 				} 
 				else
@@ -563,7 +520,7 @@ public int Native_AllowFly(Handle hPlugin, int iNumParams)
 		//int AdminId:Aid = GetUserAdmin(client);
 		if (!g_iCvarFly == true) {
 			Build_PrintToChat(client, "Noclip is not available or disabled.");
-			ClientCommand(client, "playgamesound \"%s\"", "buttons/button10.wav");
+			ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
 			return false;
 		} else
 			return true;
@@ -653,10 +610,7 @@ public int Native_ClientAimEntity(Handle hPlugin, int iNumParams)
 	
 	if (bShowMsg) 
 	{
-		if (g_bclientLang[client])
-			Build_PrintToChat(client, "你未瞄準任何目標或目標無效.");
-		else
-			Build_PrintToChat(client, "You dont have a target or target invalid.");
+		Build_PrintToChat(client, "You dont have a target or target invalid.");
 	}
 	CloseHandle(trace);
 	return -1;
@@ -682,10 +636,7 @@ public int Native_IsOwner(Handle hPlugin, int iNumParams)
 		{
 			if (GetEntityFlags(iEnt) & (FL_CLIENT | FL_FAKECLIENT)) 
 			{
-				if (g_bclientLang[client])
-					Build_PrintToChat(client, "你沒有權限對玩家使用此指令!");
-				else
-					Build_PrintToChat(client, "You are not allowed to do this to players!");
+				Build_PrintToChat(client, "You are not allowed to do this to players!");
 				return false;
 			}
 			if (Build_ReturnEntityOwner(iEnt) == -1) 
@@ -815,16 +766,7 @@ public int Native_IsBlacklisted(Handle hPlugin, int iNumParams)
 	
 	if (BLed) 
 	{
-		if (g_bclientLang[client]) 
-		{
-			Build_PrintToChat(client, "你被加入黑名單了 :(");
-			Build_PrintToChat(client, "你可以請管理員解除你的黑名單 :(");
-		} 
-		else 
-		{
-			Build_PrintToChat(client, "You're banned from TF2 Sandbox! :(");
-			Build_PrintToChat(client, "For more details, appeal ban to LeadKiller.");
-		}
+		Build_PrintToChat(client, "You're blacklisted from using Team Fortress 2 Sandbox!");
 		return true;
 	}
 	return false;
@@ -857,17 +799,11 @@ public int Native_IsClientValid(Handle hPlugin, int iNumParams)
 		{
 			if (ReplyTarget) 
 			{
-				if (g_bclientLang[client])
-					Build_PrintToChat(client, "無法在目標玩家死亡狀態下使用.");
-				else
-					Build_PrintToChat(client, "This command can only be used on alive players.");
+				Build_PrintToChat(client, "This command can only be used on alive players.");
 			} 
 			else 
 			{
-				if (g_bclientLang[client])
-					Build_PrintToChat(client, "你無法在死亡狀態下使用此指令.");
-				else
-					Build_PrintToChat(client, "You cannot use the command if you dead.");
+				Build_PrintToChat(client, "You cannot use the command if you dead.");
 			}
 			return false;
 		}
