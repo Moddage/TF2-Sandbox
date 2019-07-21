@@ -22,7 +22,6 @@
 #include <sdktools>
 #include <build>
 #include <build_stocks>
-#include <smlib>
 #undef REQUIRE_PLUGIN
 #tryinclude <updater>
 #define REQUIRE_PLUGIN
@@ -238,7 +237,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			{
 				buttons += IN_USE;
 			}
-			else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl") && Entity_InRange(client, iAimTarget, 100.0))
+			else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl"))
 			{
 				FakeClientCommand(client, "sm_teleporter");
 			}

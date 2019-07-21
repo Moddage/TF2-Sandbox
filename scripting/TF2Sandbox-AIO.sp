@@ -24,7 +24,6 @@
 #include <build>
 #include <build_stocks>
 #include <vphysics>
-#include <smlib>
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
@@ -2578,12 +2577,12 @@ public void EntityInfo(int client, int iTarget)
 	}
 	
 	SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
-	if ((StrContains(szClass, "prop_door_", false) == 0 || StrEqual(szModel, "models/props_lab/teleplatform.mdl") || (GetCommandFlags("sm_cam") != INVALID_FCVAR_FLAGS && (StrEqual(szModel, "models/props_spytech/computer_screen_bank.mdl") || StrEqual(szModel, "models/props_lab/securitybank.mdl")))) && Entity_InRange(client, iTarget, 100.0)) {
+	/*if ((StrContains(szClass, "prop_door_", false) == 0 || StrEqual(szModel, "models/props_lab/teleplatform.mdl") || (GetCommandFlags("sm_cam") != INVALID_FCVAR_FLAGS && (StrEqual(szModel, "models/props_spytech/computer_screen_bank.mdl") || StrEqual(szModel, "models/props_lab/securitybank.mdl")))) && Entity_InRange(client, iTarget, 100.0)) {
 		ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 	}
-	else {
-		ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
-	}
+	else {*/
+	ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
+	//}
 
 	return;
 }
