@@ -238,8 +238,10 @@ public void OnPluginStart()
 	// godmode on spawn
 	HookEvent("player_spawn", Event_Spawn);
 
-	// TODO: translations
+	// translations
 	LoadTranslations("common.phrases");
+	LoadTranslations("tf2sandbox.phrases");
+
 	CreateTimer(0.1, Display_Msgs, 0, TIMER_REPEAT);
 
 	// disallow breaking props
@@ -250,15 +252,15 @@ public void OnPluginStart()
 	
 	// main menu
 	g_hMainMenu = CreateMenu(MainMenu);
-	SetMenuTitle(g_hMainMenu, "Spawnlist");
-	AddMenuItem(g_hMainMenu, "spawnlist", "Spawn...");
-	AddMenuItem(g_hMainMenu, "equipmenu", "Equip...");
-	AddMenuItem(g_hMainMenu, "playerstuff", "Player...");
+	SetMenuTitle(g_hMainMenu, "Team Fortress 2 Sandbox");
+	AddMenuItem(g_hMainMenu, "spawnlist", "Spawn Props");
+	AddMenuItem(g_hMainMenu, "equipmenu", "Equip Weapons");
+	AddMenuItem(g_hMainMenu, "playerstuff", "Player Conditions");
 	
 	// player menu
 	g_hPlayerStuff = CreateMenu(PlayerStuff);
-	SetMenuTitle(g_hPlayerStuff, /*"TF2SB - */ "Player...");
-	AddMenuItem(g_hPlayerStuff, "cond", "Conditions");
+	SetMenuTitle(g_hPlayerStuff, /*"TF2SB - */ "Player Conditions");
+	AddMenuItem(g_hPlayerStuff, "cond", "Addcond");
 	AddMenuItem(g_hPlayerStuff, "sizes", "Sizes");
 	AddMenuItem(g_hPlayerStuff, "poser", "Player Poser");
 	AddMenuItem(g_hPlayerStuff, "health", "Health");
@@ -280,7 +282,7 @@ public void OnPluginStart()
 	
 	// conditions
 	g_hCondMenu = CreateMenu(CondMenu);
-	SetMenuTitle(g_hCondMenu, /*"TF2SB - */ "Conditions");
+	SetMenuTitle(g_hCondMenu, /*"TF2SB - */ "Addcond List");
 	AddMenuItem(g_hCondMenu, "godmode", "Godmode");
 	AddMenuItem(g_hCondMenu, "crits", "Crits");
 	AddMenuItem(g_hCondMenu, "noclip", "Noclip");
@@ -337,7 +339,7 @@ public void OnPluginStart()
 	
 	// equip menu
 	g_hEquipMenu = CreateMenu(EquipMenu);
-	SetMenuTitle(g_hEquipMenu, /*"TF2SB - */ "Equip...");
+	SetMenuTitle(g_hEquipMenu, /*"TF2SB - */ "Equip Weapons");
 	// CreateTimer(2.0, TF2SB_DelayedStuff);
 	SetMenuExitBackButton(g_hEquipMenu, true);
 	
@@ -374,7 +376,7 @@ public void OnPluginStart()
 
 	// Prop Menu INIT
 	g_hPropMenu = CreateMenu(PropMenu);
-	SetMenuTitle(g_hPropMenu, /*"TF2SB - */ "Spawn..."); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenu, /*"TF2SB - */ "Spawn Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenu, true);
 
 	// Requested
@@ -401,7 +403,7 @@ public void OnPluginStart()
 
 	// Lead's Specialty Menu
 	g_hPropMenuLead = CreateMenu(PropMenuLead);
-	SetMenuTitle(g_hPropMenuLead, /*"TF2SB - */ "Specialty Props"); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuLead, /*"TF2SB - */ "Special Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuLead, true);
 	AddMenuItem(g_hPropMenuLead, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuLead, "emptyspace", "", ITEMDRAW_IGNORE);
@@ -409,7 +411,7 @@ public void OnPluginStart()
 
 	// Prop Menu Pickup
 	g_hPropMenuPickup = CreateMenu(PropMenuPickup);
-	SetMenuTitle(g_hPropMenuPickup, /*"TF2SB - */ "Item Props"); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuPickup, /*"TF2SB - */ "Pickup Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuPickup, true);
 	AddMenuItem(g_hPropMenuPickup, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuPickup, "emptyspace", "", ITEMDRAW_IGNORE);
@@ -725,11 +727,11 @@ public void OnAllPluginsLoaded()
 	AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
 	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
+	AddMenuItem(g_hPropMenu, "leadprops", "Special Props");
+	AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
 	AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
 	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
-	AddMenuItem(g_hPropMenu, "leadprops", "Specialty Props");
 	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
-	AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
 	AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
 
 	AddMenuItem(g_hEquipMenu, "toolgun", "--SANDBOX WEAPONS--", ITEMDRAW_DISABLED);
@@ -756,12 +758,12 @@ public void OnAllPluginsLoaded()
 
 	if(GetCommandFlags("sm_ss") != INVALID_FCVAR_FLAGS)
 	{
-		AddMenuItem(g_hMainMenu, "savesys", "Save...");
+		AddMenuItem(g_hMainMenu, "savesys", "Save System");
 	}
 
 	if(GetCommandFlags("sm_tf2sbperms") != INVALID_FCVAR_FLAGS)
 	{
-		AddMenuItem(g_hMainMenu, "permissions", "Permissions...");
+		AddMenuItem(g_hMainMenu, "permissions", "Permission System");
 	}
 
 	/*if(GetCommandFlags("sm_physgun") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_pg") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_sbpg") == INVALID_FCVAR_FLAGS)
@@ -780,6 +782,7 @@ public void OnAllPluginsLoaded()
 	if(GetCommandFlags("sm_cam") != INVALID_FCVAR_FLAGS)
 	{
 		AddMenuItem(g_hPropMenuLead, "camera", "Camera");
+		AddMenuItem(g_hPropMenuLead, "securitybank", "Security Bank");
 	}
 
 	if(GetCommandFlags("sm_laser") != INVALID_FCVAR_FLAGS)
@@ -805,7 +808,7 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), "THANKS FOR PLAYING!\n");
 
 	SetMenuTitle(g_hMenuCredits, buffer);
-	AddMenuItem(g_hMenuCredits, "0", "Close");
+	AddMenuItem(g_hMenuCredits, "back", "Back");
 	
 	RegAdminCmd("sm_tf2sb", Command_TF2SBCred, 0);
 	RegAdminCmd("sm_credits", Command_TF2SBCred, 0);
@@ -846,8 +849,7 @@ public void OnAllPluginsLoaded()
 		}
 	#endif
 
-	// misc
-	LoadTranslations("tf2sandbox.phrases");
+	AddMenuItem(g_hMainMenu, "credits", "Credits");
 }
 
 public Action Command_TF2SBCred(int client, int args)
@@ -859,7 +861,16 @@ public Action Command_TF2SBCred(int client, int args)
 
 public int TF2SBCred1(Handle menu, MenuAction action, int param1, int param2)
 {
-	// ???
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		char item[64];
+		GetMenuItem(menu, param2, item, sizeof(item));
+		
+		if (StrEqual(item, "back"))
+		{
+			DisplayMenu(g_hMainMenu, param1, MENU_TIME_FOREVER);
+		}
+	}
 }
 
 stock float GetEntitiesDistance(int ent1, int ent2)
@@ -2904,6 +2915,11 @@ public int MainMenu(Handle menu, MenuAction action, int param1, int param2)
 		if (StrEqual(item, "savesys"))
 		{
 			FakeClientCommand(param1, "sm_ss");
+		}
+
+		if (StrEqual(item, "credits"))
+		{
+			FakeClientCommand(param1, "sm_tf2sb");
 		}
 
 		if (StrEqual(item, "door"))
