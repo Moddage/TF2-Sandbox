@@ -180,16 +180,16 @@ public void OnPluginStart()
 	// building
 	RegAdminCmd("sm_build", Command_BuildMenu, 0);
 	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
-	RegAdminCmd("sm_delall", Command_DeleteAll, 0, "Delete all of your spawned entitys.");
-	RegAdminCmd("sm_del", Command_Delete, 0, "Delete an entity.");
+	RegAdminCmd("sm_delall", Command_DeleteAll, 0, "Delete all of your spawned props");
+	RegAdminCmd("sm_del", Command_Delete, 0, "Delete a entity");
 	RegAdminCmd("sm_setname", Command_SetName, 0, "Set the name of a prop");
 	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Scripted Door");
 	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light");
 	RegAdminCmd("sm_simplelight", Command_LightDynamic, 0, "Dynamic Light");
 	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, 0, "Half-Life 2 Door");
-	RegAdminCmd("sm_rotate", Command_Rotate, 0, "Rotate an entity.");
-	RegAdminCmd("sm_r", Command_Rotate, 0, "Rotate an entity.");
-	RegAdminCmd("sm_accuraterotate", Command_AccurateRotate, 0, "Accurate rotate a prop.");
+	RegAdminCmd("sm_rotate", Command_Rotate, 0, "Rotate an entity");
+	RegAdminCmd("sm_r", Command_Rotate, 0, "Rotate an entity");
+	RegAdminCmd("sm_accuraterotate", Command_AccurateRotate, 0, "Accurate rotate a prop");
 	RegAdminCmd("sm_ar", Command_AccurateRotate, 0, "Accurate rotate a prop.");
 	RegAdminCmd("sm_move", Command_Move, 0, "Move a prop to a position.");
 	RegAdminCmd("+copy", Command_Copy, 0, "Copy a prop");
@@ -358,6 +358,7 @@ public void OnPluginStart()
 	// size menu
 	g_hSizeMenu = CreateMenu(TF2SBSizeMenu);
 	SetMenuTitle(g_hSizeMenu, /*"TF2SB - */ "Player Sizes");
+	AddMenuItem(g_hSizeMenu, "0.10", "0.10x");
 	AddMenuItem(g_hSizeMenu, "0.25", "0.25x");
 	AddMenuItem(g_hSizeMenu, "0.50", "0.50x");
 	AddMenuItem(g_hSizeMenu, "0.75", "0.75x");
@@ -366,6 +367,10 @@ public void OnPluginStart()
 	AddMenuItem(g_hSizeMenu, "1.5", "1.5x");
 	AddMenuItem(g_hSizeMenu, "1.75", "1.75x");
 	AddMenuItem(g_hSizeMenu, "2.0", "2.0x");
+	AddMenuItem(g_hSizeMenu, "2.25", "2.25x");
+	AddMenuItem(g_hSizeMenu, "2.5", "2.5x");
+	AddMenuItem(g_hSizeMenu, "2.75", "2.75x");
+	AddMenuItem(g_hSizeMenu, "3.0", "3.0x");
 	SetMenuExitBackButton(g_hSizeMenu, true);
 	
 	/*								 *\
@@ -702,7 +707,7 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), " Coders:\n");
 	StrCat(buffer, sizeof(buffer), "   LeadKiller\n");
 	StrCat(buffer, sizeof(buffer), "   ✔TatLead\n");
-	StrCat(buffer, sizeof(buffer), "   _diamonedburned_\n");
+	StrCat(buffer, sizeof(buffer), "   _diamondburned_\n");
 	StrCat(buffer, sizeof(buffer), "   Danct12\n");
 	StrCat(buffer, sizeof(buffer), "   DaRkWoRlD\n");
 
@@ -710,6 +715,7 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), "   LeadKiller - English\n");
 	StrCat(buffer, sizeof(buffer), "   ✔TatLead - Traditional Chinese, Simplified Chinese\n");
 	StrCat(buffer, sizeof(buffer), "   Danct12 - Vietnamese\n");
+	StrCat(buffer, sizeof(buffer), "   RedlineLucario - Russian\n");
 
 	StrCat(buffer, sizeof(buffer), " Testers:\n");
 	StrCat(buffer, sizeof(buffer), "   periodicJudgement\n");
@@ -720,6 +726,7 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), "   TESTBOT#7\n");
 
 	StrCat(buffer, sizeof(buffer), " Additional:\n");
+	StrCat(buffer, sizeof(buffer), "    Huong Tram\n\n");
 	StrCat(buffer, sizeof(buffer), "  Buildmod:\n");
 	StrCat(buffer, sizeof(buffer), "    hjkwe654\n");
 	StrCat(buffer, sizeof(buffer), "    greenteaf0718\n\n");
@@ -1607,12 +1614,12 @@ public Action Command_Fly(int client, int args)
 	
 	if (GetEntityMoveType(client) != MOVETYPE_NOCLIP)
 	{
-		Build_PrintToChat(client, "Noclip ON");
+		Build_PrintToChat(client, "Noclip %t", "on");
 		SetEntityMoveType(client, MOVETYPE_NOCLIP);
 	}
 	else
 	{
-		Build_PrintToChat(client, "Noclip OFF");
+		Build_PrintToChat(client, "Noclip %t", "off");
 		SetEntityMoveType(client, MOVETYPE_WALK);
 	}
 	return Plugin_Handled;
@@ -2428,14 +2435,14 @@ public Action Command_ChangeGodMode(int client, int args)
 	
 	if (g_bGodmode[client])
 	{
-		Build_PrintToChat(client, "God Mode ON");
+		Build_PrintToChat(client, "God Mode %t", "on");
 		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
 		
 		g_bBuddha[client] = false;
 	}
 	else
 	{
-		Build_PrintToChat(client, "God Mode OFF");
+		Build_PrintToChat(client, "God Mode %t", "off");
 		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
 		
 		g_bBuddha[client] = false;
@@ -2453,14 +2460,14 @@ public Action Command_ChangeBuddha(int client, int args)
 	
 	if (g_bBuddha[client])
 	{
-		Build_PrintToChat(client, "Buddha ON");
+		Build_PrintToChat(client, "Buddha %t", "on");
 		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
 		g_bBuddha[client] = true;
 		g_bGodmode[client] = false;
 	}
 	else
 	{
-		Build_PrintToChat(client, "Buddha OFF");
+		Build_PrintToChat(client, "Buddha %t", "off");
 		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
 		
 		g_bGodmode[client] = false;
@@ -2475,7 +2482,7 @@ public Action Command_Health(int client, int args)
 		return Plugin_Handled;
 	
 	if (args < 1) {
-		Build_PrintToChat(client, "%t: !addhealth <number>", "usage");
+		Build_PrintToChat(client, "%t: !addhealth -300 - 15000", "usage");
 		return Plugin_Handled;
 	}
 	
@@ -2567,7 +2574,7 @@ public void EntityInfo(int client, int iTarget)
 		ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 	}
 	else {*/
-	ShowHudText(client, -1, "%s \nbuilt by %s", szPropString, szOwner);
+	ShowHudText(client, -1, "%s \n%T %s", szPropString, "builtby", client, szOwner);
 	//}
 
 	return;
@@ -2823,7 +2830,7 @@ public Action Command_ToolGun(int client, int args)
 		else
 		{
 			// DisplayMenu(g_hBuildHelperMenu, client, MENU_TIME_FOREVER); // probably going to use this for now, menus are better.
-			Build_PrintToChat(client, "You can use the latest toolgun from:");
+			// Build_PrintToChat(client, "You can use the latest toolgun from:");
 			Build_PrintToChat(client, "https://github.com/tf2-sandbox-studio/Module-ToolGun");
 		}
 		// GiveToolgun(client);
@@ -2845,7 +2852,7 @@ public Action Command_PhysGun(int client, int args)
 		int weapon = GetPlayerWeaponSlot(client, 1);
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon); */
 		// bruh moment
-		Build_PrintToChat(client, "You can use the latest physgun from:");
+		// Build_PrintToChat(client, "You can use the latest physgun from:");
 		Build_PrintToChat(client, "https://github.com/tf2-sandbox-studio/Module-PhysicsGun");
 	}
 	else
@@ -3006,12 +3013,12 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			if (TF2_IsPlayerInCondition(param1, TFCond_CritCanteen))
 			{
-				Build_PrintToChat(param1, "Crit Cond OFF");
+				Build_PrintToChat(param1, "Crit Cond %t", "off");
 				TF2_RemoveCondition(param1, TFCond_CritCanteen);
 			}
 			else
 			{
-				Build_PrintToChat(param1, "Crit Cond ON");
+				Build_PrintToChat(param1, "Crit Cond %t", "on");
 				TF2_AddCondition(param1, TFCond_CritCanteen, TFCondDuration_Infinite, 0);
 			}
 		}
@@ -3021,12 +3028,12 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			{
 				if (AIA_HasAIA(param1))
 				{
-					Build_PrintToChat(param1, "Infinite Ammo OFF");
+					Build_PrintToChat(param1, "Infinite Ammo %t", "off");
 					AIA_SetAIA(param1, false);
 				}
 				else
 				{
-					Build_PrintToChat(param1, "Infinite Ammo ON");
+					Build_PrintToChat(param1, "Infinite Ammo %t", "on");
 					AIA_SetAIA(param1, true);
 				}
 				// Build_PrintToChat(param1, "Learn more at !aiamenu");
@@ -3070,12 +3077,12 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			
 			if (GetEntityMoveType(param1) != MOVETYPE_FLY)
 			{
-				Build_PrintToChat(param1, "Fly ON");
+				Build_PrintToChat(param1, "Fly %t", "on");
 				SetEntityMoveType(param1, MOVETYPE_FLY);
 			}
 			else
 			{
-				Build_PrintToChat(param1, "Fly OFF");
+				Build_PrintToChat(param1, "Fly %t", "off");
 				SetEntityMoveType(param1, MOVETYPE_WALK);
 			}
 		}
@@ -3084,12 +3091,12 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			if (TF2_IsPlayerInCondition(param1, TFCond_NoHealingDamageBuff))
 			{
-				Build_PrintToChat(param1, "Mini-Crits OFF");
+				Build_PrintToChat(param1, "Mini-Crits %t", "off");
 				TF2_RemoveCondition(param1, TFCond_NoHealingDamageBuff);
 			}
 			else
 			{
-				Build_PrintToChat(param1, "Mini-Crits ON");
+				Build_PrintToChat(param1, "Mini-Crits %t", "on");
 				TF2_AddCondition(param1, TFCond_NoHealingDamageBuff, TFCondDuration_Infinite, 0);
 			}
 		}
@@ -3098,12 +3105,12 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			if (TF2_IsPlayerInCondition(param1, TFCond_DefenseBuffNoCritBlock))
 			{
-				Build_PrintToChat(param1, "Damage Reduction OFF");
+				Build_PrintToChat(param1, "Damage Reduction %t", "off");
 				TF2_RemoveCondition(param1, TFCond_DefenseBuffNoCritBlock);
 			}
 			else
 			{
-				Build_PrintToChat(param1, "Damage Reduction ON");
+				Build_PrintToChat(param1, "Damage Reduction %t", "on");
 				TF2_AddCondition(param1, TFCond_DefenseBuffNoCritBlock, TFCondDuration_Infinite, 0);
 			}
 		}
@@ -3112,12 +3119,12 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			if (TF2_IsPlayerInCondition(param1, TFCond_HalloweenSpeedBoost))
 			{
-				Build_PrintToChat(param1, "Speed Boost OFF");
+				Build_PrintToChat(param1, "Speed Boost %t", "off");
 				TF2_RemoveCondition(param1, TFCond_HalloweenSpeedBoost);
 			}
 			else
 			{
-				Build_PrintToChat(param1, "Speed Boost ON");
+				Build_PrintToChat(param1, "Speed Boost %t", "on");
 				TF2_AddCondition(param1, TFCond_HalloweenSpeedBoost, TFCondDuration_Infinite, 0);
 			}
 		}
@@ -3425,7 +3432,7 @@ public int TF2SBPoseMenu(Handle menu, MenuAction action, int param1, int param2)
 			{
 				DisplayMenu(menu, param1, MENU_TIME_FOREVER);
 				TF2_RemoveCondition(param1, TFCond_Taunting);
-				Build_PrintToChat(param1, "You're now no longer taunting.'");
+				Build_PrintToChat(param1, "%t", "nolongertaunting");
 			}
 		}
 	}
@@ -3668,7 +3675,7 @@ public int PropMenuLead(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_spawnprop security_camera_bracket");
 			g_bBuffer[param1] = true;
 			// FakeClientCommand(param1, "sm_camauto");
-			Build_PrintToChat(param1, "Use !cam on the camera to set it up!");
+			Build_PrintToChat(param1, "%t", "camera");
 		}
 		else if (StrEqual(info, "sdoor"))
 		{

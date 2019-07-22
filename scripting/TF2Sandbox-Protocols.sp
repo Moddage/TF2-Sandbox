@@ -389,7 +389,7 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 				else 
 				{
 					ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
-					Build_PrintToChat(client, "You've hit the ragdoll limit!");
+					Build_PrintToChat(client, "%t", "ragdolllimitreached");
 					return false;
 				}
 			} 
@@ -400,7 +400,7 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 				else 
 				{
 					ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
-					Build_PrintToChat(client, "You've hit the prop limit!");
+					Build_PrintToChat(client, "%t", "proplimitreached");
 					return false;
 				}
 			}
@@ -411,7 +411,7 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 		else 
 		{
 			ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
-			Build_PrintToChat(client, "Global prop limit reached!");
+			Build_PrintToChat(client, "%t", "globallimitreached");
 			return false;
 		}
 	}
@@ -610,7 +610,7 @@ public int Native_ClientAimEntity(Handle hPlugin, int iNumParams)
 	
 	if (bShowMsg) 
 	{
-		Build_PrintToChat(client, "You dont have a target or target invalid.");
+		Build_PrintToChat(client, "%t", "invalidtarget");
 	}
 	CloseHandle(trace);
 	return -1;
@@ -636,7 +636,7 @@ public int Native_IsOwner(Handle hPlugin, int iNumParams)
 		{
 			if (GetEntityFlags(iEnt) & (FL_CLIENT | FL_FAKECLIENT)) 
 			{
-				Build_PrintToChat(client, "You are not allowed to do this to players!");
+				Build_PrintToChat(client, "%t", "cantuseplayers");
 				return false;
 			}
 			if (Build_ReturnEntityOwner(iEnt) == -1) 
@@ -766,7 +766,7 @@ public int Native_IsBlacklisted(Handle hPlugin, int iNumParams)
 	
 	if (BLed) 
 	{
-		Build_PrintToChat(client, "You're blacklisted from using Team Fortress 2 Sandbox!");
+		Build_PrintToChat(client, "%t", "blacklisted");
 		return true;
 	}
 	return false;
@@ -799,11 +799,11 @@ public int Native_IsClientValid(Handle hPlugin, int iNumParams)
 		{
 			if (ReplyTarget) 
 			{
-				Build_PrintToChat(client, "This command can only be used on alive players.");
+				Build_PrintToChat(client, "%t", "deadtarget");
 			} 
 			else 
 			{
-				Build_PrintToChat(client, "You cannot use the command if you dead.");
+				Build_PrintToChat(client, "%t", "alivetouse");
 			}
 			return false;
 		}
