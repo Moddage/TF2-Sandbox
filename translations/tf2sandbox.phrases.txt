@@ -1,5 +1,18 @@
 "Phrases"
 {
+    "tf2sb1"
+    {
+        "en"    "[TF2SB] Plugin successfully started!"
+    }
+    "tf2sb2"
+    {
+        "#format"   "{1:s}"
+        "en"    "[TF2SB] Team Fortress 2 Sandbox is currently in beta, version {1}. If you have any issues with it, message the developers on the Discord or Steam Group."
+    }
+    "hudmsg"
+    {
+        "en"    "Press TAB or say !build\nCurrent Props: "
+    }
     "alivetouse"
     {
         "en"    "You must be alive to use this command!"

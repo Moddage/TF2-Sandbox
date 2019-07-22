@@ -197,13 +197,13 @@ public void OnPluginStart()
 
 	g_hBlackListArray = CreateArray(33, 128); // 33 arrays, every array size is 128
 	ReadBlackList();
-
-	PrintToServer("[TF2SB] Plugin successfully started!");
-	PrintToServer("[TF2SB] Team Fortress 2 Sandbox is currently in beta, version PRIVATE %s. If you have any issues with it, message the developers on the Discord or Steam Group.", BUILDMOD_VER);
 	CreateTimer(15.0, HandleTips, 0, 1);
 
 	AutoExecConfig();
 	LoadTranslations("tf2sandbox.phrases");
+
+	PrintToServer("%T", "tf2sb1", LANG_SERVER);
+	PrintToServer("%T", "tf2sb2", LANG_SERVER, BUILDMOD_VER);
 }
 
 public void OnMapStart() 
@@ -261,7 +261,7 @@ public Action DisplayHud(Handle timer)
 			
 		if (!g_bIN_SCORE[i])
 		{
-			ShowHudText(i, -1, "\nPress TAB or say !build\nCurrent Props: %i/%i", g_iPropCurrent[i], g_iCvarClPropLimit[i]);
+			ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClPropLimit[i]);
 		}
 		
 		//}
