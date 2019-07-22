@@ -699,10 +699,15 @@ public void OnAllPluginsLoaded()
 	Format(buffer, sizeof(buffer), "Credits\n\n\n");
 	StrCat(buffer, sizeof(buffer), " Coders:\n");
 	StrCat(buffer, sizeof(buffer), "   LeadKiller\n");
-	StrCat(buffer, sizeof(buffer), "   ✔BattlefieldDuck\n");
+	StrCat(buffer, sizeof(buffer), "   ✔TatLead\n");
 	StrCat(buffer, sizeof(buffer), "   _diamonedburned_\n");
 	StrCat(buffer, sizeof(buffer), "   Danct12\n");
 	StrCat(buffer, sizeof(buffer), "   DaRkWoRlD\n");
+
+	StrCat(buffer, sizeof(buffer), " Translators:\n");
+	StrCat(buffer, sizeof(buffer), "   LeadKiller - English\n");
+	StrCat(buffer, sizeof(buffer), "   ✔TatLead - Traditional Chinese, Simplified Chinese\n");
+	StrCat(buffer, sizeof(buffer), "   Danct12 - Vietnamese\n");
 
 	StrCat(buffer, sizeof(buffer), " Testers:\n");
 	StrCat(buffer, sizeof(buffer), "   periodicJudgement\n");
@@ -836,7 +841,7 @@ public void OnAllPluginsLoaded()
 				IntToString(i_idxs[i_index], szID, sizeof(szID));
 				ReplaceString(s_names[i_index], i_name_maxlength, "The ", ""); // bruh moment
 				if (StrContains(s_names[i_index], "Upgradeable", false) == -1 && StrContains(s_names[i_index], "Promo", false) == -1 && StrContains(s_names[i_index], "Poker Night", false) == -1 && StrContains(s_names[i_index], "Festive", false) == -1 && StrContains(s_names[i_index], "TF_WEAPON_", false) == -1)
-					AddMenuItem(g_hEquipMenu, szID, s_names[i_index]); // 😂👌
+					AddMenuItem(g_hEquipMenu, szID, s_names[i_index]);
 			}
 		}
 	#endif
@@ -1256,7 +1261,7 @@ public Action Command_kill(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_ReloadAIOPlugin(int client, int args)
+public Action Command_ReloadAIOPlugin(int client, int args) // 😂👌
 {
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
