@@ -3,103 +3,153 @@
     "tf2sb1"
     {
         "en"    "[TF2SB] Plugin successfully started!"
+        "chi"    "[TF2SB] 插件成功启动！"
+        "zho"    "[TF2SB] 插件成功啟動！"
     }
     "tf2sb2"
     {
         "#format"   "{1:s}"
         "en"    "[TF2SB] Team Fortress 2 Sandbox is currently in beta, version {1}. If you have any issues with it, message the developers on the Discord or Steam Group."
+        "chi"    "[TF2SB] 军团要塞2 沙盒插件目前处于测试阶段，版本{1}。如果您有任何问题，请在 Discord 或 Steam 群组上发送消息。"
+        "zho"    "[TF2SB] 絕地要塞2 沙盒插件目前處於測試階段，版本{1}。如果您有任何問題，請在 Discord 或 Steam 群組上發送消息。"
     }
     "hudmsg"
     {
         "en"    "Press TAB or say !build\nCurrent Props: "
+        "chi"    "按 TAB 键或打指令 !build\n目前的物件："
+        "zho"    "按 TAB 鍵或打指令 !build\n目前的物件："
     }
     "alivetouse"
     {
         "en"    "You must be alive to use this command!"
+        "chi"    "你必须活着才能使用这个指令！"
+        "zho"    "你必須活著才能使用這個指令！"
     }
     "toofast"
     {
         "en"    "You're doing it too fast! Slow it down!"
+        "chi"    "你做得太快了！慢下来！"
+        "zho"    "你做得太快了！慢下來！"
     }
     "alreadycopy"
     {
         "en"    "You are already copying something!"
+        "chi"    "你已经复制物件了！"
+        "zho"    "你已經復制物件了！"
     }
     // %t: !render <fx amount> <fx> <R> <G> <B>
     "usage"
     {
         "en"    "Usage"
+        "chi"    "用途"
+        "zho"    "用途"
     }
     "maxscale"
     {
         "en"    "Max scale is "
+        "chi"    "最大比例是 "
+        "zho"    "最大比例是 "
     }
     "higherthan"
     {
         "en"    "Scale must be higher than "
+        "chi"    "比例必须高于 "
+        "zho"    "比例必須高於 "
     }
     "skins"
     {
         "en"    "Not every model has multiple skins."
+        "chi"    "并非每个物件都有多个皮肤。"
+        "zho"    "並非每個物件都有多個皮膚。"
     }
     "sdoor"
     {
         "en"    "!sdoor 1~6 = Spawn door"
+        "chi"    "!sdoor 1~6 = 产生门"
+        "zho"    "!sdoor 1~6 = 産生門"
     }
     "sdoor2"
     {
         "en"    "!sdoor a = Select door"
+        "chi"    "!sdoor a = 选择门"
+        "zho"    "!sdoor a = 選擇門"
     }
     "sdoor3"
     {
         "en"    "!sdoor b = Select button (Shoot to open)"
+        "chi"    "!sdoor b = 选择按钮（射击打开）"
+        "zho"    "!sdoor b = 選擇按鈕（射擊打開）"
     }
     "sdoor4"
     {
         "en"    "!sdoor c = Select button (Press to open)"
+        "chi"    "!sdoor c = 选择按钮（按下打开）"
+        "zho"    "!sdoor c = 選擇按鈕（按下打開）"
     }
     "setname"
     {
         "en"    "Usage: !setname <name>"
+        "chi"    "用途: !setname <名字>"
+        "zho"    "用途: !setname <名字>"
     }
     "propnotfound"
     {
         "en"    "Prop not found: "
+        "chi"    "物件不存在:"
+        "zho"    "物件不存在:"
     }
     "deletedallprops"
     {
         "en"    "Deleted all props you owned."
+        "chi"    "删除了你所拥有的物件。"
+        "zho"    "刪除了你所擁有的物件。"
     }
     "noprops"
     {
         "en"    "You have no props!"
+        "chi"    "你没有物件！"
+        "zho"    "你沒有物件！"
     }
     "cantdelete"
     {
         "en"    "You cannot delete this!"
+        "chi"    "你不能删除这个！"
+        "zho"    "你不能刪除這個！"
     }
     "resupplied"
     {
         "en"    "You've been resupplied."
+        "chi"    "你已经被补给了。"
+        "zho"    "你已經被補給了。"
     }
     "tip1"
     {
         "en"    "If you want to delete everything you own, say !delall"
+        "chi"    "如果你想删除你所拥有物件，打指令 !delall"
+        "zho"    "如果你想刪除你所擁有物件，打指令 !delall"
     }
     "tip2"
     {
         "en"    "Say !del to delete the prop you are looking at."
+        "chi"    "打指令 !del 删除你正在看的物件。"
+        "zho"    "打指令 !del 刪除你正在看的物件。"
     }
     "tip3"
     {
         "en"    "Press TAB to open Spawnlist!"
+        "chi"    "按 TAB 键打开列表！"
+        "zho"    "按 TAB 鍵打開列表！"
     }
     "tip4"
     {
         "en"    "Say !god to turn off godmode"
+        "chi"    "打指令 !god 关掉无敌模式"
+        "zho"    "打指令 !god 關掉無敵模式"
     }
     "tip5"
     {
         "en"    "If you want to rocket jump while in godmode, say !buddha"
+        "chi"    "如果你想在无敌模式中跳火箭，那就打指令 !buddha"
+        "zho"    "如果你想在無敵模式中跳火箭，那就打指令 !buddha"
     }
 }
