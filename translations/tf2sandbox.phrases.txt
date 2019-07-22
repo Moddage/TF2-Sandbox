@@ -57,7 +57,7 @@
     }
     "invalidtarget"
     {
-        "en"    "You dont have a target or target invalid."
+        "en"    "You don't have a target or target invalid."
     }
     "deadtarget"
     {
