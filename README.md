@@ -15,7 +15,7 @@ You will need to install the following plugins:
  - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217)
  - [TF2Attributes](https://forums.alliedmods.net/showthread.php?t=210221)
  - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
- - [SteamTools](https://forums.alliedmods.net/showthread.php?t=261044)
+ - [SteamTools](https://builds.limetech.io/?p=steamtools)
  - [Updater](https://forums.alliedmods.net/showthread.php?t=169095)
  - [GiveWeapon](https://forums.alliedmods.net/showthread.php?t=141962)
 
@@ -28,7 +28,7 @@ You will need the following external includes:
  - [TF2Items](https://forums.alliedmods.net/showthread.php?t=115100)
  - [SMLib](https://github.com/bcserv/smlib/) (Optional)
  - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556) (Optional)
- - [SteamTools](https://forums.alliedmods.net/showthread.php?t=261044) (Optional)
+ - [SteamTools](https://builds.limetech.io/?p=steamtools) (Optional)
  - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217) (Optional)
  - [Updater](https://forums.alliedmods.net/showpost.php?p=2483353&postcount=580) (Optional)
  - [GiveWeapon](https://forums.alliedmods.net/showthread.php?t=141962) (Optional)
