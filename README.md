@@ -1,6 +1,6 @@
 # Team Fortress 2 Sandbox
 ### Description
-Team Fortress 2 Sandbox is a custom gamemode made for the video game [Team Fortress 2](https://store.steampowered.com/app/440/Team_Fortress_2/) that allows players to create things in a similar fashion as [BuildMod](https://sourceforge.net/projects/smbuildmod) and [Garrys Mod](https://store.steampowered.com/app/4000/Garrys_Mod/). It is based on a older yet similar idea by the Team Fortress 2 Server Community [MSTR](https://www.youtube.com/watch?v=jKcXxTijKxk).
+Team Fortress 2 Sandbox is a custom gamemode made for the video game [Team Fortress 2](https://store.steampowered.com/app/440/Team_Fortress_2/) that allows players to create things in a similar fashion as [BuildMod](https://sourceforge.net/projects/smbuildmod) and [Garry's Mod](https://store.steampowered.com/app/4000/Garrys_Mod/). It is based on a older yet similar idea by the Team Fortress 2 Server Community [MSTR](https://www.youtube.com/watch?v=jKcXxTijKxk).
 
 With Team Fortress 2 Sandbox, you can build bases, roleplay in a resturant, invent custom gamemodes, make rocket jump courses, design map layouts, produce machinimas, mess around, and more! The only limit is your own imagination!
 
