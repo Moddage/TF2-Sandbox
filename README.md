@@ -26,7 +26,6 @@ You will need the following external includes:
  - [MoreColors](https://forums.alliedmods.net/showthread.php?t=185016)
  - [TF2Attributes](https://forums.alliedmods.net/showthread.php?t=210221)
  - [TF2Items](https://forums.alliedmods.net/showthread.php?t=115100)
- - [SMLib](https://github.com/bcserv/smlib/) (Optional)
  - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556) (Optional)
  - [SteamTools](https://builds.limetech.io/?p=steamtools) (Optional)
  - [Advanced Infinite Ammo](https://forums.alliedmods.net/showthread.php?p=1754217) (Optional)

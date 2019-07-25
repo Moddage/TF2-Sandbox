@@ -6,7 +6,6 @@
 #include <sdktools>
 #include <sdkhooks>
 #include <build>
-#include <smlib>
 
 #pragma newdecls required
 
@@ -16,7 +15,7 @@ public Plugin myinfo =
 {
 	name = "TF2 Sandbox - Teleporter", 
 	author = "LeadKiller, BattlefieldDuck", 
-	description = "Ladder on Sandbox", 
+	description = "MSTR Teleporter", 
 	version = "1.0", 
 	url = "https://sandbox.moddage.site/"
 };
@@ -53,7 +52,7 @@ public Action Command_Teleporter(int client, int args)
 	menu.SetTitle("TF2SB - Teleporters");
 	
 	char szClass[64];
-	bool withinRange = false;
+	// bool withinRange = false;
 
 	for (int i = MaxClients; i < MAX_HOOK_ENTITIES; i++) if (IsValidEdict(i)) // taken from https://github.com/tf2-sandbox-studio/Module-Ladder
 	{
@@ -77,10 +76,10 @@ public Action Command_Teleporter(int client, int args)
 				{
 					menu.AddItem(szIndex, buffer);
 
-					if (Entity_InRange(client, i, 100.0))
-					{
+					/* if (Entity_InRange(client, i, 100.0))
+					{ 
 						withinRange = true;
-					}
+					}*/
 				}
 			}
 		}
@@ -88,8 +87,8 @@ public Action Command_Teleporter(int client, int args)
     
 	menu.ExitButton = true;
 
-	if (withinRange)
-		menu.Display(client, MENU_TIME_FOREVER);
+	//if (withinRange)
+	menu.Display(client, MENU_TIME_FOREVER);
 
 	return Plugin_Handled;
 }
