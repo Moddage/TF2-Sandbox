@@ -16,7 +16,7 @@
 */
 
 #pragma semicolon 1
-
+ 
 #include <sourcemod>
 #include <sdktools>
 #include <build>
@@ -41,7 +41,7 @@
 public Plugin myinfo =  
 {
 	name = "Team Fortress 2 Sandbox - Protocols", 
-	author = "LeadKiller, BattlefieldDuck, Danct12, DaRkWoRlD, greenteaf0718, and hjkwe654", 
+	author = "TF2SB Studio", 
 	description = "Build Protocols for Team Fortress 2 Sandbox", 
 	version = BUILDMOD_VER, 
 	url = "https://sandbox.moddage.site/"

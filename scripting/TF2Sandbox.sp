@@ -26,8 +26,6 @@
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
-#include <entity_prop_stocks>
-#include <tf2items>
 #undef REQUIRE_PLUGIN
 #tryinclude <updater>
 #tryinclude <tf2idb>
@@ -40,10 +38,6 @@
 #if BUILDMODAPI_VER < 3
 #error "build.inc is outdated. please update before compiling"
 #endif
-
-// Toolgun is gay
-#define EF_BONEMERGE			(1 << 0)
-#define EF_BONEMERGE_FASTCULL	(1 << 7)
 
 #pragma newdecls required
 
@@ -138,7 +132,7 @@ float nextactivetime[MAXPLAYERS + 1];
 public Plugin myinfo = 
 {
 	name = "Team Fortress 2 Sandbox", 
-	author = "LeadKiller, BattlefieldDuck, Danct12, DaRkWoRlD, FlaminSarge, javalia, greenteaf0718, and hjkwe654", 
+	author = "TF2SB Studio", 
 	description = "The base gamemode plugin of Team Fortress 2 Sandbox. Includes all base Sandbox modules in one plugin.", 
 	version = BUILDMOD_VER, 
 	url = "https://sandbox.moddage.site/"
@@ -1187,9 +1181,7 @@ public void OnAllPluginsLoaded()
 		StrCat(buffer, sizeof(buffer), "    Pelipoika\n");*/
 	}
 
-	RegAdminCmd("sm_g2", Command_PhysGun, 0);
 	RegAdminCmd("sm_g", Command_PhysGun, 0);
-	RegAdminCmd("sm_toolgun", Command_ToolGun, 0);
 
 	StrCat(buffer, sizeof(buffer), "THANKS FOR PLAYING!\n");
 
@@ -3193,31 +3185,6 @@ public Action Command_BuildMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_ToolGun(int client, int args)
-{
-	/*if (client > 0)
-	{
-		DisplayMenu(g_hBuildHelperMenu, client, MENU_TIME_FOREVER);
-	}*/
-	
-	if (client > 0 && client <= MaxClients && IsClientInGame(client) && IsPlayerAlive(client))
-	{
-		if(GetCommandFlags("sm_tg") != INVALID_FCVAR_FLAGS)
-		{
-			FakeClientCommand(client, "sm_tg");
-		}
-		else
-		{
-			// DisplayMenu(g_hBuildHelperMenu, client, MENU_TIME_FOREVER); // probably going to use this for now, menus are better.
-			// Build_PrintToChat(client, "You can use the latest toolgun from:");
-			Build_PrintToChat(client, "https://github.com/tf2-sandbox-studio/Module-ToolGun");
-		}
-		// GiveToolgun(client);
-	}
-	
-	return Plugin_Handled;
-}
-
 public Action Command_PhysGun(int client, int args)
 {
 	if(GetCommandFlags("sm_physgun") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_pg") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_sbpg") == INVALID_FCVAR_FLAGS)
@@ -3248,11 +3215,6 @@ public Action Command_PhysGun(int client, int args)
 			FakeClientCommand(client, "sm_sbpg");
 		}	
 	}
-}
-
-public Action Command_PhysGunNew(int client, int args)
-{
-	FakeClientCommand(client, "sm_pg");
 }
 
 public Action Command_Resupply(int client, int args)
@@ -3648,7 +3610,7 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		
 		if (StrEqual(item, "physgun"))
 		{
-			FakeClientCommand(param1, "sm_g2");
+			FakeClientCommand(param1, "sm_g");
 		}
 		else if (StrEqual(item, "physgun2"))
 		{
@@ -3677,10 +3639,6 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 				SetEntPropEnt(param1, Prop_Send, "m_hActiveWeapon", szWeapon);  
 			#endif
 		}
-		/*if (StrEqual(item, "portalgun"))
-		{
-				FakeClientCommand(param1, "sm_portalgun");
-		}*/
 	}
 	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
