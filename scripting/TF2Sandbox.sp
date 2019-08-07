@@ -3656,7 +3656,7 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		}
 		else if (StrEqual(item, "toolgun"))
 		{
-			FakeClientCommand(param1, "sm_toolgun");
+			FakeClientCommand(param1, "sm_tg");
 		}
 		else if (StrEqual(item, "portalgun"))
 		{
