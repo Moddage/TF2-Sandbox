@@ -30,6 +30,7 @@
 #tryinclude <updater>
 #tryinclude <tf2idb>
 #tryinclude <tf2items_giveweapon>
+#tryinclude <rtd2>
 #define REQUIRE_PLUGIN
 #tryinclude <advancedinfiniteammo>
 
@@ -289,6 +290,18 @@ public void OnPluginStart()
 	AddMenuItem(g_hCondMenu, "buddha", "Buddha");
 	AddMenuItem(g_hCondMenu, "removeweps", "Remove Weapons");
 	AddMenuItem(g_hCondMenu, "minicrits", "Mini-Crits");
+	#if defined _rtd2_included
+		AddMenuItem(g_hCondMenu, "drugged", "Drugged");
+		AddMenuItem(g_hCondMenu, "funnyfeeling", "Funny Feeling");
+		AddMenuItem(g_hCondMenu, "toxic", "Toxic");
+		AddMenuItem(g_hCondMenu, "drunkwalk", "Drunk Walk");
+		AddMenuItem(g_hCondMenu, "monochromia", "Monochromia");
+		AddMenuItem(g_hCondMenu, "springshoes", "Spring Shoes");
+		AddMenuItem(g_hCondMenu, "strongrecoil", "Strong Recoil");
+		AddMenuItem(g_hCondMenu, "lag", "Lag");
+		AddMenuItem(g_hCondMenu, "inclineproblem", "Incline Problem");
+		AddMenuItem(g_hCondMenu, "sickness", "Sickness");
+	#endif
 	SetMenuExitBackButton(g_hCondMenu, true);
 
 	// model
@@ -3350,7 +3363,7 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
 	{
-		DisplayMenu(g_hCondMenu, param1, MENU_TIME_FOREVER);
+		DisplayMenuAtItem(g_hCondMenu, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		char item[64];
 		GetMenuItem(menu, param2, item, sizeof(item));
 		
@@ -3367,10 +3380,10 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 				TF2_AddCondition(param1, TFCond_CritCanteen, TFCondDuration_Infinite, 0);
 			}
 		}
-
-		#if defined _AdvancedInfiniteAmmo_included
-			if (StrEqual(item, "infammo"))
-			{
+		
+		else if (StrEqual(item, "infammo"))
+		{
+			#if defined _AdvancedInfiniteAmmo_included
 				if (AIA_HasAIA(param1))
 				{
 					Build_PrintToChat(param1, "Infinite Ammo %t", "off");
@@ -3382,30 +3395,30 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 					AIA_SetAIA(param1, true);
 				}
 				// Build_PrintToChat(param1, "Learn more at !aiamenu");
-			}
-		#endif
+			#endif
+		}
 
 		/*if (StrEqual(item, "infclip"))
 		{
 			Build_PrintToChat(param1, "Learn more at !aiamenu");
 		}*/
 		
-		if (StrEqual(item, "resupply"))
+		else if (StrEqual(item, "resupply"))
 		{
 			FakeClientCommand(param1, "sm_resupply");
 		}
 		
-		if (StrEqual(item, "noclip"))
+		else if (StrEqual(item, "noclip"))
 		{
 			FakeClientCommand(param1, "sm_fly");
 		}
 		
-		if (StrEqual(item, "godmode"))
+		else if (StrEqual(item, "godmode"))
 		{
 			FakeClientCommand(param1, "sm_god");
 		}
 		
-		if (StrEqual(item, "buddha"))
+		else if (StrEqual(item, "buddha"))
 		{
 			FakeClientCommand(param1, "sm_buddha");
 		}
@@ -3415,7 +3428,7 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			FakeClientCommand(param1, "sm_buddha");				
 		}*/
 		
-		if (StrEqual(item, "fly"))
+		else if (StrEqual(item, "fly"))
 		{
 			if (!Build_AllowToUse(param1) || Build_IsBlacklisted(param1) || !Build_IsClientValid(param1, param1, true) || !Build_AllowFly(param1))
 				return 0;
@@ -3432,7 +3445,7 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			}
 		}
 		
-		if (StrEqual(item, "minicrits"))
+		else if (StrEqual(item, "minicrits"))
 		{
 			if (TF2_IsPlayerInCondition(param1, TFCond_NoHealingDamageBuff))
 			{
@@ -3446,7 +3459,7 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			}
 		}
 		
-		if (StrEqual(item, "damagereduce"))
+		else if (StrEqual(item, "damagereduce"))
 		{
 			if (TF2_IsPlayerInCondition(param1, TFCond_DefenseBuffNoCritBlock))
 			{
@@ -3460,7 +3473,7 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			}
 		}
 		
-		if (StrEqual(item, "speedboost"))
+		else if (StrEqual(item, "speedboost"))
 		{
 			if (TF2_IsPlayerInCondition(param1, TFCond_HalloweenSpeedBoost))
 			{
@@ -3474,9 +3487,26 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 			}
 		}
 		
-		if (StrEqual(item, "removeweps"))
+		else if (StrEqual(item, "removeweps"))
 		{
 			TF2_RemoveAllWeapons(param1);
+		}
+
+		/*else if (StrEqual(item, "removeperks"))
+		{
+			RTD2_Remove(param1, RTDRemove_Custom, "Removed Perks");
+		}*/
+
+		else
+		{
+			#if defined _rtd2_included
+				int inRTD = RTD2_Force(param1, item, 9999, param1);
+
+				if (inRTD == RTDForce_ClientInRoll)
+				{
+					RTD2_Remove(param1, RTDRemove_Custom, "Toggled Perk off");
+				}
+			#endif
 		}
 	}
 	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
