@@ -1101,6 +1101,7 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), "   ✔TatLead - Traditional Chinese, Simplified Chinese\n");
 	StrCat(buffer, sizeof(buffer), "   Danct12 - Vietnamese\n");
 	StrCat(buffer, sizeof(buffer), "   RedlineLucario - Russian\n");
+	StrCat(buffer, sizeof(buffer), "   RobertROU - French\n");
 
 	StrCat(buffer, sizeof(buffer), " Testers:\n");
 	StrCat(buffer, sizeof(buffer), "   periodicJudgement\n");
@@ -3500,9 +3501,7 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 		else
 		{
 			#if defined _rtd2_included
-				int inRTD = RTD2_Force(param1, item, 9999, param1);
-
-				if (inRTD == RTDForce_ClientInRoll)
+				if (RTD2_Force(param1, item, 9999, param1) == RTDForce_ClientInRoll)
 				{
 					RTD2_Remove(param1, RTDRemove_Custom, "Toggled Perk off");
 				}
