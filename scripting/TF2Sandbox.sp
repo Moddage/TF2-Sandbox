@@ -1102,6 +1102,7 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), "   Danct12 - Vietnamese\n");
 	StrCat(buffer, sizeof(buffer), "   RedlineLucario - Russian\n");
 	StrCat(buffer, sizeof(buffer), "   RobertROU - French\n");
+	StrCat(buffer, sizeof(buffer), "   Uncle Dispenser TF2SP - Spanish\n");
 
 	StrCat(buffer, sizeof(buffer), " Testers:\n");
 	StrCat(buffer, sizeof(buffer), "   periodicJudgement\n");
