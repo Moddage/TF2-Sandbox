@@ -2804,8 +2804,8 @@ public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
 		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
 	}
 
-	TF2Attrib_SetByName(client, "mod see enemy health", 1.0);
-	TF2_RegeneratePlayer(client);
+	// TF2Attrib_SetByName(client, "mod see enemy health", 1.0);
+	// TF2_RegeneratePlayer(client);
 
 	SetEntProp(client, Prop_Data, "m_CollisionGroup", 17);
 
@@ -2910,21 +2910,11 @@ public void EntityInfo(int client, int iTarget)
 		}
 	} */
 	
-	SetHudTextParams(0.015, 0.08, 0.01, 255, 255, 255, 255, 0, 6.0, 0.1, 0.2);
-	/*if (IsPlayer(iTarget)) {
-		int iHealth = GetClientHealth(iTarget);
-		if (iHealth <= 1)
-			iHealth = 0;
-		if (Build_IsAdmin(client)) {
-			char szSteamId[32], szIP[16];
-			GetClientAuthId(iTarget, AuthId_Steam2, szSteamId, sizeof(szSteamId));
-			GetClientIP(iTarget, szIP, sizeof(szIP));
-			ShowHudText(client, -1, "Player: %N\nHealth: %i\nUserID: %i\nSteamID:%s", iTarget, iHealth, GetClientUserId(iTarget), szSteamId);
-		} else {
-			ShowHudText(client, -1, "Player: %N\nHealth: %i", iTarget, iHealth);
-		}
+	SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
+	if (IsPlayer(iTarget) && GetClientTeam(iTarget) != GetClientTeam(client) && TF2_GetPlayerClass(client) != TFClass_Spy) {
+		ShowHudText(client, -1, "\n%N", iTarget);
 		return;
-	}*/
+	}
 
 	if (IsPlayer(iTarget)) {
 		return;
@@ -2955,7 +2945,6 @@ public void EntityInfo(int client, int iTarget)
 		szOwner = "*World";
 	}
 	
-	SetHudTextParams(-1.0, 0.6, 0.01, 255, 0, 0, 255);
 	/*if ((StrContains(szClass, "prop_door_", false) == 0 || StrEqual(szModel, "models/props_lab/teleplatform.mdl") || (GetCommandFlags("sm_cam") != INVALID_FCVAR_FLAGS && (StrEqual(szModel, "models/props_spytech/computer_screen_bank.mdl") || StrEqual(szModel, "models/props_lab/securitybank.mdl")))) && Entity_InRange(client, iTarget, 100.0)) {
 		ShowHudText(client, -1, "%s \nbuilt by %s\nPress [TAB] to use", szPropString, szOwner);
 	}
