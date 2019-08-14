@@ -293,6 +293,7 @@ public void OnPluginStart()
 	#if defined _rtd2_included
 		AddMenuItem(g_hCondMenu, "drugged", "Drugged");
 		AddMenuItem(g_hCondMenu, "funnyfeeling", "Funny Feeling");
+		AddMenuItem(g_hCondMenu, "frozen", "Frozen");
 		AddMenuItem(g_hCondMenu, "toxic", "Toxic");
 		AddMenuItem(g_hCondMenu, "drunkwalk", "Drunk Walk");
 		AddMenuItem(g_hCondMenu, "monochromia", "Monochromia");
