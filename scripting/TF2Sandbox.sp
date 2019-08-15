@@ -297,7 +297,9 @@ public void OnPluginStart()
 		AddMenuItem(g_hCondMenu, "toxic", "Toxic");
 		AddMenuItem(g_hCondMenu, "drunkwalk", "Drunk Walk");
 		AddMenuItem(g_hCondMenu, "monochromia", "Monochromia");
+		AddMenuItem(g_hCondMenu, "mercsdietwice", "Mercs Die Twice");
 		AddMenuItem(g_hCondMenu, "springshoes", "Spring Shoes");
+		AddMenuItem(g_hCondMenu, "lowgravity", "Low Gravity");
 		AddMenuItem(g_hCondMenu, "strongrecoil", "Strong Recoil");
 		AddMenuItem(g_hCondMenu, "lag", "Lag");
 		AddMenuItem(g_hCondMenu, "inclineproblem", "Incline Problem");
