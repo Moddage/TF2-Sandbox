@@ -89,6 +89,9 @@ static const char tips[5][] =
 	"tip5"
 };
 
+//float
+float g_fCoolDown[MAXPLAYERS + 1];
+
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) 
 {
 	RegPluginLibrary("build_test");
@@ -210,37 +213,59 @@ public void OnMapStart()
 {
 	CreateTimer(5.0, DisplayHud);
 	Build_FirstRun();
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if(IsClientInGame(client))
+		{
+			OnClientPutInServer(client);
+		}
+	}
+}
+
+public void OnClientPutInServer(int client)
+{
+    g_fCoolDown[client] = 0.0;
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
-	if (!g_bIN_SCORE[client] && (buttons & IN_SCORE))
+	if (buttons & IN_SCORE)
 	{
-		// If so, add the button to use (+use)
-		int iAimTarget = Build_ClientAimEntity(client, false, true);
-		char szClass[32];
-		char szModel[42];
-		if (iAimTarget != -1 && IsValidEdict(iAimTarget))
+		if (!g_bIN_SCORE[client])
 		{
-			GetEdictClassname(iAimTarget, szClass, sizeof(szClass));
-			GetEntPropString(iAimTarget, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
-
-			if (StrContains(szClass, "prop_door_", false) == 0)
-			{
-				buttons += IN_USE;
-			}
-			else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl"))
-			{
-				FakeClientCommand(client, "sm_teleporter");
+			if (g_fCoolDown[client] <= GetGameTime())
+			{	
+				g_fCoolDown[client] = GetGameTime() + 2.0;
+				
+				// If so, add the button to use (+use)
+				int iAimTarget = Build_ClientAimEntity(client, false, true);
+				char szClass[32];
+				char szModel[42];
+				if (iAimTarget != -1 && IsValidEdict(iAimTarget))
+				{
+					GetEdictClassname(iAimTarget, szClass, sizeof(szClass));
+					GetEntPropString(iAimTarget, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
+		
+					if (StrContains(szClass, "prop_door_", false) == 0)
+					{
+						buttons &= IN_USE;
+					}
+					else if (StrEqual(szModel, "models/props_lab/teleplatform.mdl"))
+					{
+						FakeClientCommand(client, "sm_teleporter");
+					}
+				}
+				else
+				{
+					if (GetClientMenu(client, INVALID_HANDLE) == MenuSource_None)
+					{
+						FakeClientCommand(client, "sm_build");
+					}
+				}
 			}
 		}
-		else
-		{
-			if (GetClientMenu(client, INVALID_HANDLE) == MenuSource_None)
-			{
-				FakeClientCommand(client, "sm_build");
-			}
-		}
+		
 		g_bIN_SCORE[client] = true;
 	}
 	else
