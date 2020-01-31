@@ -218,18 +218,18 @@ public void OnPluginStart()
 	// arrays, cookies
 	g_hCookieSDoorTarget = RegClientCookie("cookie_SDoorTarget", "For SDoor.", CookieAccess_Private); // TODO: Don't fucking do this dumb shit.
 	g_hCookieSDoorModel = RegClientCookie("cookie_SDoorModel", "For SDoor.", CookieAccess_Private);
-	g_hPropNameArray = CreateArray(33, 2048); // Max Prop List is 1024-->2048
-	g_hPropModelPathArray = CreateArray(128, 2048); // Max Prop List is 1024-->2048
-	g_hPropTypeArray = CreateArray(33, 2048); // Max Prop List is 1024-->2048
-	g_hPropStringArray = CreateArray(256, 2048);
-	g_hPropNameArrayDonor = CreateArray(33, 2048); // Max Prop List is 1024-->2048
-	g_hPropModelPathArrayDonor = CreateArray(128, 2048); // Max Prop List is 1024-->2048
-	g_hPropTypeArrayDonor = CreateArray(33, 2048); // Max Prop List is 1024-->2048
-	g_hPropStringArrayDonor = CreateArray(256, 2048);
+	g_hPropNameArray = CreateArray(33, 4064); // Max Prop List is 1024-->2048
+	g_hPropModelPathArray = CreateArray(128, 4064); // Max Prop List is 1024-->2048
+	g_hPropTypeArray = CreateArray(33, 4064); // Max Prop List is 1024-->2048
+	g_hPropStringArray = CreateArray(256, 4064);
+	g_hPropNameArrayDonor = CreateArray(33, 4064); // Max Prop List is 1024-->2048
+	g_hPropModelPathArrayDonor = CreateArray(128, 4064); // Max Prop List is 1024-->2048
+	g_hPropTypeArrayDonor = CreateArray(33, 4064); // Max Prop List is 1024-->2048
+	g_hPropStringArrayDonor = CreateArray(256, 4064);
 
 	// read props.ini and props-extended.ini
-	ReadProps();
-	ReadPropsDonor();
+	ReadProps(false, "configs/buildmod/props.ini");
+	ReadProps(true, "configs/buildmod/props-extended.ini");
 	
 	// godmode on spawn
 	HookEvent("player_spawn", Event_Spawn);
@@ -323,6 +323,8 @@ public void OnPluginStart()
 	AddMenuItem(g_hModelMenu, "models/bots/headless_hatman.mdl", "HHH");
 	AddMenuItem(g_hModelMenu, "models/bots/skeleton_sniper/skeleton_sniper.mdl", "Skeleton");
 	SetMenuExitBackButton(g_hModelMenu, true);
+
+	// TODO: Bonemerge
 
 	// voice fx
 	g_hHealthMenu = CreateMenu(HealthMenu);
@@ -565,7 +567,7 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuWeapons, "hitmansheatmaker", "The Hitman's Heatmaker");
 	AddMenuItem(g_hPropMenuWeapons, "holidaypunch", "The Holiday Punch");
 	AddMenuItem(g_hPropMenuWeapons, "homewrecker", "The Homewrecker");
-	AddMenuItem(g_hPropMenuWeapons, "horselessheadlesshorsemansheadtaker", "The Horseless Headless Horseman's Headtaker");
+	AddMenuItem(g_hPropMenuWeapons, "horselessheadlesshorsemanshead", "The Horseless Headless Horseman's Headtaker");
 	AddMenuItem(g_hPropMenuWeapons, "hothand", "The Hot Hand");
 	AddMenuItem(g_hPropMenuWeapons, "ironcurtain", "The Iron Curtain");
 	AddMenuItem(g_hPropMenuWeapons, "killingglovesofboxing", "The Killing Gloves of Boxing");
@@ -635,68 +637,100 @@ public void OnPluginStart()
 	g_hPropMenuCosmetics = CreateMenu(PropMenuCosmetics);
 	SetMenuTitle(g_hPropMenuCosmetics, /*"TF2SB - */ "Cosmetic Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuCosmetics, true);
-	AddMenuItem(g_hPropMenuCosmetics, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuCosmetics, "ararfestivetree", "A Rather Festive Tree");
 	AddMenuItem(g_hPropMenuCosmetics, "allbrero", "Allbrero");
 	AddMenuItem(g_hPropMenuCosmetics, "anger", "Anger");
 	AddMenuItem(g_hPropMenuCosmetics, "armoredauthority", "Armored Authority");
 	AddMenuItem(g_hPropMenuCosmetics, "attendant", "Attendant");
+	AddMenuItem(g_hPropMenuCosmetics, "audiofile", "Audio File");
+	AddMenuItem(g_hPropMenuCosmetics, "aztecwarrior", "Aztec Warrior");
+	AddMenuItem(g_hPropMenuCosmetics, "bmoc", "B.M.O.C.");
 	AddMenuItem(g_hPropMenuCosmetics, "backbitersbillycock", "Backbiter's Billycock");
 	AddMenuItem(g_hPropMenuCosmetics, "backwardsballcap", "Backwards Ballcap");
+	AddMenuItem(g_hPropMenuCosmetics, "ballkickingboots", "Ball-Kicking Boots");
 	AddMenuItem(g_hPropMenuCosmetics, "baronvonhavenaplane", "Baron von Havenaplane");
 	AddMenuItem(g_hPropMenuCosmetics, "basemetalbillycock", "Base Metal Billycock");
 	AddMenuItem(g_hPropMenuCosmetics, "battershelmet", "Batter's Helmet");
 	AddMenuItem(g_hPropMenuCosmetics, "battleboonie", "Battle Boonie");
 	AddMenuItem(g_hPropMenuCosmetics, "belgiandetective", "Belgian Detective");
 	AddMenuItem(g_hPropMenuCosmetics, "belltowerspecops", "Belltower Spec Ops");
+	AddMenuItem(g_hPropMenuCosmetics, "benefactorskanmuri", "Benefactor's Kanmuri");
 	AddMenuItem(g_hPropMenuCosmetics, "berlinersbuckelm", "Berliner's Bucket Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "bigchief", "Big Chief");
 	AddMenuItem(g_hPropMenuCosmetics, "birdcage", "Birdcage");
 	AddMenuItem(g_hPropMenuCosmetics, "blackwatch", "Black Watch");
 	AddMenuItem(g_hPropMenuCosmetics, "blazingbull", "Blazing Bull");
+	AddMenuItem(g_hPropMenuCosmetics, "blightedbeak", "Blighted Beak");
 	AddMenuItem(g_hPropMenuCosmetics, "bolgan", "Bolgan");
+	AddMenuItem(g_hPropMenuCosmetics, "bolganfamilycrest", "Bolgan Family Crest");
+	AddMenuItem(g_hPropMenuCosmetics, "boltactionblitzer", "Bolt Action Blitzer");
 	AddMenuItem(g_hPropMenuCosmetics, "boltedbicorne", "Bolted Bicorne");
 	AddMenuItem(g_hPropMenuCosmetics, "boltedbushman", "Bolted Bushman");
 	AddMenuItem(g_hPropMenuCosmetics, "bombingrun", "Bombing Run");
 	AddMenuItem(g_hPropMenuCosmetics, "bonedome", "Bone Dome");
+	AddMenuItem(g_hPropMenuCosmetics, "bonkboy", "Bonk Boy");
 	AddMenuItem(g_hPropMenuCosmetics, "bonkhelm", "Bonk Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "bonkleadwear", "Bonk Leadwear");
 	AddMenuItem(g_hPropMenuCosmetics, "bootlegbasemetalbillycock", "Bootleg Base Metal Billycock");
+	AddMenuItem(g_hPropMenuCosmetics, "bostonboombringer", "Boston Boom-Bringer");
+	AddMenuItem(g_hPropMenuCosmetics, "botdogger", "Bot Dogger");
+	AddMenuItem(g_hPropMenuCosmetics, "brainiacgoggles", "Brainiac Goggles");
+	AddMenuItem(g_hPropMenuCosmetics, "brainiachairpiece", "Brainiac Hairpiece");
 	AddMenuItem(g_hPropMenuCosmetics, "brigadehelm", "Brigade Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "brimfullofbullets", "Brim-Full Of Bullets");
 	AddMenuItem(g_hPropMenuCosmetics, "broadbandbonnet", "Broadband Bonnet");
+	AddMenuItem(g_hPropMenuCosmetics, "brownbomber", "Brown Bomber");
 	AddMenuItem(g_hPropMenuCosmetics, "buccaneersbicorne", "Buccaneer's Bicorne");
 	AddMenuItem(g_hPropMenuCosmetics, "buckarooshat", "Buckaroos Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "buckethat", "Bucket Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "buildersblueprints", "Builder's Blueprints");
 	AddMenuItem(g_hPropMenuCosmetics, "bunsenbrave", "Bunsen Brave");
 	AddMenuItem(g_hPropMenuCosmetics, "burningbeanie", "Burning Beanie");
 	AddMenuItem(g_hPropMenuCosmetics, "burningquestion", "Burning Question");
 	AddMenuItem(g_hPropMenuCosmetics, "bushmansboonie", "Bushman's Boonie");
 	AddMenuItem(g_hPropMenuCosmetics, "cadaverscranium", "Cadaver's Cranium");
+	AddMenuItem(g_hPropMenuCosmetics, "camerabeard", "Camera Beard");
+	AddMenuItem(g_hPropMenuCosmetics, "camerahelm", "Camera Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "caponescapper", "Capone's Capper");
+	AddMenuItem(g_hPropMenuCosmetics, "captainscocktails", "Captain's Cocktails");
+	AddMenuItem(g_hPropMenuCosmetics, "cariboucompanion", "Caribou Companion");
 	AddMenuItem(g_hPropMenuCosmetics, "carouserscapotain", "Carouser's Capotain");
 	AddMenuItem(g_hPropMenuCosmetics, "centurion", "Centurion");
 	AddMenuItem(g_hPropMenuCosmetics, "charmerschapeau", "Charmer's Chapeau");
 	AddMenuItem(g_hPropMenuCosmetics, "chiefconstable", "Chief Constable");
 	AddMenuItem(g_hPropMenuCosmetics, "chieftainschallenge", "Chieftain's Challenge");
+	AddMenuItem(g_hPropMenuCosmetics, "civiliangradejackhat", "Civilian Grade JACK Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "classycapper", "Classy Capper");
 	AddMenuItem(g_hPropMenuCosmetics, "clockwerkshelm", "Clockwerk's Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "cloudcrasher", "Cloud Crasher");
+	AddMenuItem(g_hPropMenuCosmetics, "coldcase", "Cold Case");
 	AddMenuItem(g_hPropMenuCosmetics, "combatmedicscrushercap", "Combat Medic's Crusher Cap");
 	AddMenuItem(g_hPropMenuCosmetics, "commandoelite", "Commando Elite");
+	AddMenuItem(g_hPropMenuCosmetics, "commonstatclock", "Common Stat Clock");
 	AddMenuItem(g_hPropMenuCosmetics, "conjurerscowl", "Conjurer's Cowl");
 	AddMenuItem(g_hPropMenuCosmetics, "connoisseurscap", "Connoisseur's Cap");
 	AddMenuItem(g_hPropMenuCosmetics, "conquistador", "Conquistador");
 	AddMenuItem(g_hPropMenuCosmetics, "coppershardtop", "Copper's Hard Top");
 	AddMenuItem(g_hPropMenuCosmetics, "cosanostracap", "Cosa Nostra Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "cottonhead", "Cotton Head");
 	AddMenuItem(g_hPropMenuCosmetics, "counterfeitbillycock", "Counterfeit Billycock");
 	AddMenuItem(g_hPropMenuCosmetics, "coupedisaster", "Coupe D'isaster");
+	AddMenuItem(g_hPropMenuCosmetics, "couvrecorner", "Couvre Corner");
 	AddMenuItem(g_hPropMenuCosmetics, "croclearslouch", "Crocleather Slouch");
+	AddMenuItem(g_hPropMenuCosmetics, "crocodilesmile", "Crocodile Smile");
+	AddMenuItem(g_hPropMenuCosmetics, "cronesdome", "Crone's Dome");
 	AddMenuItem(g_hPropMenuCosmetics, "crosscommcrashhelmet", "Cross-Comm Crash Helmet");
 	AddMenuItem(g_hPropMenuCosmetics, "crosscommexpress", "Cross-Comm Express");
+	AddMenuItem(g_hPropMenuCosmetics, "crosslinkerscoil", "Crosslinker's Coil");
 	AddMenuItem(g_hPropMenuCosmetics, "cyborgstunlmet", "Cyborg Stunt Helmet");
+	AddMenuItem(g_hPropMenuCosmetics, "dailyduelwinnerrewardhat", "Daily Duel Winner Reward Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "dailygiftgiverrewardhat", "Daily Gift Giver Reward Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "dailymapstamprewardhat", "Daily Map Stamp Reward Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "darkfalkirkhelm", "Dark Falkirk Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "dasnaggenvatcher", "Das Naggenvatcher");
 	AddMenuItem(g_hPropMenuCosmetics, "dasubersternmann", "Das Ubersternmann");
 	AddMenuItem(g_hPropMenuCosmetics, "dashinhashshashin", "Dashin' Hashshashin");
+	AddMenuItem(g_hPropMenuCosmetics, "deadlittlebuddy", "Dead Little Buddy");
 	AddMenuItem(g_hPropMenuCosmetics, "defiantspartan", "Defiant Spartan");
 	AddMenuItem(g_hPropMenuCosmetics, "demokabuto", "Demo Kabuto");
 	AddMenuItem(g_hPropMenuCosmetics, "demomanhallmark", "Demoman Hallmark");
@@ -705,38 +739,67 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuCosmetics, "detectivenoir", "Detective Noir");
 	AddMenuItem(g_hPropMenuCosmetics, "doctorssack", "Doctor's Sack");
 	AddMenuItem(g_hPropMenuCosmetics, "doeboy", "Doe-Boy");
+	AddMenuItem(g_hPropMenuCosmetics, "drsdappertopper", "Dr's Dapper Topper");
 	AddMenuItem(g_hPropMenuCosmetics, "dragonbornhelmet", "Dragonborn Helmet");
+	AddMenuItem(g_hPropMenuCosmetics, "ebenezer", "Ebenezer");
 	AddMenuItem(g_hPropMenuCosmetics, "electricescorter", "Electric Escorter");
 	AddMenuItem(g_hPropMenuCosmetics, "eliminatorssafeguard", "Eliminators Safeguard");
+	AddMenuItem(g_hPropMenuCosmetics, "ellishat", "Ellis Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "engineerearmuffs", "Engineer Earmuffs");
 	AddMenuItem(g_hPropMenuCosmetics, "engineerweldingmask", "Engineer Welding Mask");
 	AddMenuItem(g_hPropMenuCosmetics, "engineerscap", "Engineer's Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "exquisiterack", "Exquisite Rack");
 	AddMenuItem(g_hPropMenuCosmetics, "familiarfez", "Familiar Fez");
 	AddMenuItem(g_hPropMenuCosmetics, "fancyfedora", "Fancy Fedora");
 	AddMenuItem(g_hPropMenuCosmetics, "fatmansfieldcap", "Fat Man's Field Cap");
 	AddMenuItem(g_hPropMenuCosmetics, "fearedfiend", "Feathered Fiend");
 	AddMenuItem(g_hPropMenuCosmetics, "fedfightinfedora", "Fed-Fightin' Fedora");
+	AddMenuItem(g_hPropMenuCosmetics, "federalcasemaker", "Federal Casemaker");
 	AddMenuItem(g_hPropMenuCosmetics, "firewallhelmet", "Firewall Helmet");
 	AddMenuItem(g_hPropMenuCosmetics, "flamboyantflamenco", "Flamboyant Flamenco");
 	AddMenuItem(g_hPropMenuCosmetics, "flamingokid", "Flamingo Kid");
 	AddMenuItem(g_hPropMenuCosmetics, "flippedtrilby", "Flipped Trilby");
 	AddMenuItem(g_hPropMenuCosmetics, "footballhelmet", "Football Helmet");
+	AddMenuItem(g_hPropMenuCosmetics, "friendlyitem", "Friendly Item");
 	AddMenuItem(g_hPropMenuCosmetics, "fruitshoot", "Fruit Shoot");
+	AddMenuItem(g_hPropMenuCosmetics, "fullheadofsteam", "Full Head of Steam");
 	AddMenuItem(g_hPropMenuCosmetics, "fullmetaldrillhat", "Full Metal Drill Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "furiousfukaamigasa", "Furious Fukaamigasa");
+	AddMenuItem(g_hPropMenuCosmetics, "gabeglasses", "Gabe Glasses");
+	AddMenuItem(g_hPropMenuCosmetics, "galvanizedgibus", "Galvanized Gibus");
+	AddMenuItem(g_hPropMenuCosmetics, "gentlemunitionneofleisure", "Gentle Munitionne of Leisure");
 	AddMenuItem(g_hPropMenuCosmetics, "gentlemansushanka", "Gentleman's Ushanka");
 	AddMenuItem(g_hPropMenuCosmetics, "germangonzila", "German Gonzila");
+	AddMenuItem(g_hPropMenuCosmetics, "ghastlygibus", "Ghastly Gibus");
+	AddMenuItem(g_hPropMenuCosmetics, "ghastlygibus2010", "Ghastly Gibus 2010");
+	AddMenuItem(g_hPropMenuCosmetics, "ghastlygibus2011", "Ghastly Gibus 2011");
+	AddMenuItem(g_hPropMenuCosmetics, "ghostlygibus", "Ghostly Gibus");
 	AddMenuItem(g_hPropMenuCosmetics, "gildedguard", "Gilded Guard");
 	AddMenuItem(g_hPropMenuCosmetics, "glengarrybonnet", "Glengarry Bonnet");
+	AddMenuItem(g_hPropMenuCosmetics, "grandmaster", "Grandmaster");
+	AddMenuItem(g_hPropMenuCosmetics, "graybanns", "Graybanns");
 	AddMenuItem(g_hPropMenuCosmetics, "grenadierhelm", "Grenadier Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "grenadierssoftcap", "Grenadier's Softcap");
 	AddMenuItem(g_hPropMenuCosmetics, "gridironguardian", "Gridiron Guardian");
 	AddMenuItem(g_hPropMenuCosmetics, "grimmhatte", "Grimm Hatte");
 	AddMenuItem(g_hPropMenuCosmetics, "gymrat", "Gym Rat");
+	AddMenuItem(g_hPropMenuCosmetics, "halfzatoichi", "Half-Zatoichi");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmaskdemoman", "Halloween Mask - Demoman");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmaskengineer", "Halloween Mask - Engineer");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmaskheavy", "Halloween Mask - Heavy");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmaskmedic", "Halloween Mask - Medic");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmaskpyro", "Halloween Mask - Pyro");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmasksaxtonhale", "Halloween Mask - Saxton Hale");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmaskscout", "Halloween Mask - Scout");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmasksniper", "Halloween Mask - Sniper");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmasksoldier", "Halloween Mask - Soldier");
+	AddMenuItem(g_hPropMenuCosmetics, "halloweenmaskspy", "Halloween Mask - Spy");
 	AddMenuItem(g_hPropMenuCosmetics, "handymanshandle", "Handyman's Handle");
 	AddMenuItem(g_hPropMenuCosmetics, "hardcounter", "Hard Counter");
+	AddMenuItem(g_hPropMenuCosmetics, "hardylaurel", "Hardy Laurel");
 	AddMenuItem(g_hPropMenuCosmetics, "harmburg", "Harmburg");
 	AddMenuItem(g_hPropMenuCosmetics, "hatofcards", "Hat of Cards");
+	AddMenuItem(g_hPropMenuCosmetics, "headhedge", "Head Hedge");
 	AddMenuItem(g_hPropMenuCosmetics, "headwarmer", "Head Warmer");
 	AddMenuItem(g_hPropMenuCosmetics, "heavyartilleryofficerscap", "Heavy Artillery Officer's Cap");
 	AddMenuItem(g_hPropMenuCosmetics, "heavytopknot", "Heavy Topknot");
@@ -745,20 +808,41 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuCosmetics, "hermes", "Hermes");
 	AddMenuItem(g_hPropMenuCosmetics, "heroshachimaki", "Hero's Hachimaki");
 	AddMenuItem(g_hPropMenuCosmetics, "holyhunter", "Holy Hunter");
+	AddMenuItem(g_hPropMenuCosmetics, "hongkongcone", "Hong Kong Cone");
+	AddMenuItem(g_hPropMenuCosmetics, "horrificheadsplitter", "Horrific Headsplitter");
+	AddMenuItem(g_hPropMenuCosmetics, "horselessheadlesshorsemanshead", "Horseless Headless Horseman's Head");
+	AddMenuItem(g_hPropMenuCosmetics, "hotdogger", "Hot Dogger");
+	AddMenuItem(g_hPropMenuCosmetics, "humanitarianshachimaki", "Humanitarian's Hachimaki");
+	AddMenuItem(g_hPropMenuCosmetics, "hunterindarkness", "Hunter in Darkness");
 	AddMenuItem(g_hPropMenuCosmetics, "idiotbox", "Idiot Box");
 	AddMenuItem(g_hPropMenuCosmetics, "industrialfestivizer", "Industrial Festivizer");
 	AddMenuItem(g_hPropMenuCosmetics, "infernalimpaler", "Infernal Impaler");
 	AddMenuItem(g_hPropMenuCosmetics, "janissaryhat", "Janissary Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "jumpersjeepcap", "Jumper's Jeepcap");
+	AddMenuItem(g_hPropMenuCosmetics, "junglewreath", "Jungle Wreath");
+	AddMenuItem(g_hPropMenuCosmetics, "killerexclusive", "Killer Exclusive");
+	AddMenuItem(g_hPropMenuCosmetics, "kissking", "Kiss King");
 	AddMenuItem(g_hPropMenuCosmetics, "linspecteur", "L'Inspecteur");
+	AddMenuItem(g_hPropMenuCosmetics, "l4dhat", "L4D Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "largeluchadore", "Large Luchadore");
 	AddMenuItem(g_hPropMenuCosmetics, "larrikinrobin", "Larrikin Robin");
 	AddMenuItem(g_hPropMenuCosmetics, "laststraw", "Last Straw");
+	AddMenuItem(g_hPropMenuCosmetics, "law", "Law");
+	AddMenuItem(g_hPropMenuCosmetics, "lepartyphantom", "Le Party Phantom");
 	AddMenuItem(g_hPropMenuCosmetics, "letchsled", "Letch's LED");
 	AddMenuItem(g_hPropMenuCosmetics, "littlebuddy", "Little Buddy");
+	AddMenuItem(g_hPropMenuCosmetics, "lofilongwave", "Lo-Fi Longwave");
+	AddMenuItem(g_hPropMenuCosmetics, "lordcockswainsnoveltymuttoncho", "Lord Cockswain's Novelty Mutton Chops and Pipe");
 	AddMenuItem(g_hPropMenuCosmetics, "lordcockswainspithhelmet", "Lord Cockswain's Pith Helmet");
+	AddMenuItem(g_hPropMenuCosmetics, "loyaltyreward", "Loyalty Reward");
 	AddMenuItem(g_hPropMenuCosmetics, "luckyshot", "Lucky Shot");
 	AddMenuItem(g_hPropMenuCosmetics, "madamedixie", "Madame Dixie");
+	AddMenuItem(g_hPropMenuCosmetics, "mademan", "Made Man");
 	AddMenuItem(g_hPropMenuCosmetics, "magnificentmongolian", "Magnificent Mongolian");
+	AddMenuItem(g_hPropMenuCosmetics, "mangnanimousmonarch", "Mangnanimous Monarch");
+	AddMenuItem(g_hPropMenuCosmetics, "manncocap", "Mann Co. Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "manncoonlinecap", "Mann Co. Online Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "mannanascap", "Mannanas Cap");
 	AddMenuItem(g_hPropMenuCosmetics, "maskofshaman", "Mask of the Shaman");
 	AddMenuItem(g_hPropMenuCosmetics, "mastersyellowbelt", "Master's Yellow Belt");
 	AddMenuItem(g_hPropMenuCosmetics, "medicgatsby", "Medic Gatsby");
@@ -766,33 +850,60 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuCosmetics, "medicgoggles", "Medic Goggles");
 	AddMenuItem(g_hPropMenuCosmetics, "medicmtghat", "Medic MtG Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "medicsmountaincap", "Medic's Mountain Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "mercenaryparkcap", "Mercenary Park Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "mildlydisturbinghalloweenmask", "Mildly Disturbing Halloween Mask");
+	AddMenuItem(g_hPropMenuCosmetics, "militarygradejackhat", "Military Grade JACK Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "milkman", "Milkman");
+	AddMenuItem(g_hPropMenuCosmetics, "mininglight", "Mining Light");
+	AddMenuItem(g_hPropMenuCosmetics, "mnchat", "MNC Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "mncmascothat", "MNC Mascot Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "modestmetalpileofscrap", "Modest Metal Pile of Scrap");
+	AddMenuItem(g_hPropMenuCosmetics, "modestpileofhat", "Modest Pile of Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "monoculus", "MONOCULUS!");
 	AddMenuItem(g_hPropMenuCosmetics, "napoleoncomplex", "Napoleon Complex");
 	AddMenuItem(g_hPropMenuCosmetics, "nappersrespite", "Napper's Respite");
+	AddMenuItem(g_hPropMenuCosmetics, "neckwearheadwear", "Neckwear Headwear");
 	AddMenuItem(g_hPropMenuCosmetics, "necronomicrown", "Necronomicrown");
+	AddMenuItem(g_hPropMenuCosmetics, "neverforgetcap", "Never Forget Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "nobleamassmentofhats", "Noble Amassment of Hats");
+	AddMenuItem(g_hPropMenuCosmetics, "noblenickelamassmentofhats", "Noble Nickel Amassment of Hats");
 	AddMenuItem(g_hPropMenuCosmetics, "officersushanka", "Officer's Ushanka");
 	AddMenuItem(g_hPropMenuCosmetics, "olgeezer", "Ol' Geezer");
 	AddMenuItem(g_hPropMenuCosmetics, "olsnaggletooth", "Ol' Snaggletooth");
 	AddMenuItem(g_hPropMenuCosmetics, "oldguadalajara", "Old Guadalajara");
+	AddMenuItem(g_hPropMenuCosmetics, "osxitem", "OSX Item");
 	AddMenuItem(g_hPropMenuCosmetics, "otolaryngologistsmirror", "Otolaryngologist's Mirror");
 	AddMenuItem(g_hPropMenuCosmetics, "outdoorsman", "Outdoorsman");
+	AddMenuItem(g_hPropMenuCosmetics, "parasitehat", "Parasite Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "pencilpusher", "Pencil Pusher");
+	AddMenuItem(g_hPropMenuCosmetics, "petballoonicorn", "Pet Balloonicorn");
+	AddMenuItem(g_hPropMenuCosmetics, "petreindoonicorn", "Pet Reindoonicorn");
 	AddMenuItem(g_hPropMenuCosmetics, "pilotka", "Pilotka");
+	AddMenuItem(g_hPropMenuCosmetics, "pipboy", "Pip-Boy");
+	AddMenuItem(g_hPropMenuCosmetics, "pithyprofessional", "Pithy Professional");
 	AddMenuItem(g_hPropMenuCosmetics, "platinumpickelhaube", "Platinum Pickelhaube");
 	AddMenuItem(g_hPropMenuCosmetics, "pluginprospector", "Plug-In Prospector");
+	AddMenuItem(g_hPropMenuCosmetics, "pointandshoot", "Point and Shoot");
 	AddMenuItem(g_hPropMenuCosmetics, "pokervisor", "Poker Visor");
 	AddMenuItem(g_hPropMenuCosmetics, "polarbear", "Polar Bear");
 	AddMenuItem(g_hPropMenuCosmetics, "polishwarbabushka", "Polish War Babushka");
+	AddMenuItem(g_hPropMenuCosmetics, "potatohat", "Potato Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "prairieheelbiters", "Prairie Heel Biters");
 	AddMenuItem(g_hPropMenuCosmetics, "prancerspride", "Prancer's Pride");
 	AddMenuItem(g_hPropMenuCosmetics, "princetavishscrown", "Prince Tavish's Crown");
 	AddMenuItem(g_hPropMenuCosmetics, "privateeye", "Private Eye");
 	AddMenuItem(g_hPropMenuCosmetics, "professionalspanama", "Professional's Panama");
 	AddMenuItem(g_hPropMenuCosmetics, "professorspeculiarity", "Professor's Peculiarity");
+	AddMenuItem(g_hPropMenuCosmetics, "propagandacontestfirstplace", "Propaganda Contest First Place");
+	AddMenuItem(g_hPropMenuCosmetics, "propagandacontestsecondplace", "Propaganda Contest Second Place");
+	AddMenuItem(g_hPropMenuCosmetics, "propagandacontestthirdplace", "Propaganda Contest Third Place");
 	AddMenuItem(g_hPropMenuCosmetics, "prussianpickelhaube", "Prussian Pickelhaube");
 	AddMenuItem(g_hPropMenuCosmetics, "puffypolarcap", "Puffy Polar Cap");
 	AddMenuItem(g_hPropMenuCosmetics, "pugilistsprotector", "Pugilist's Protector");
 	AddMenuItem(g_hPropMenuCosmetics, "puretincapotain", "Pure Tin Capotain");
+	AddMenuItem(g_hPropMenuCosmetics, "purityfist", "Purity Fist");
 	AddMenuItem(g_hPropMenuCosmetics, "pyrohelm", "Pyro Helm");
+	AddMenuItem(g_hPropMenuCosmetics, "pyromonocle", "Pyro Monocle");
 	AddMenuItem(g_hPropMenuCosmetics, "pyrosbeanie", "Pyro's Beanie");
 	AddMenuItem(g_hPropMenuCosmetics, "pyrosboronbeanie", "Pyro's Boron Beanie");
 	AddMenuItem(g_hPropMenuCosmetics, "pyromancersmask", "Pyromancer's Mask");
@@ -800,36 +911,62 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuCosmetics, "respectlessroboglove", "Respectless Robo-Glove");
 	AddMenuItem(g_hPropMenuCosmetics, "respectlessrubberglove", "Respectless Rubber Glove");
 	AddMenuItem(g_hPropMenuCosmetics, "rimmedraincatcher", "Rimmed Raincatcher");
+	AddMenuItem(g_hPropMenuCosmetics, "robotchickenhat", "Robot Chicken Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "robotrunningman", "Robot Running Man");
 	AddMenuItem(g_hPropMenuCosmetics, "runnerswarmup", "Runner's Warm-Up");
+	AddMenuItem(g_hPropMenuCosmetics, "saltydog", "Salty Dog");
+	AddMenuItem(g_hPropMenuCosmetics, "sarifcap", "Sarif Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "saxtonhat", "Saxton Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "scotchbonnet", "Scotch Bonnet");
 	AddMenuItem(g_hPropMenuCosmetics, "scotsmansstovepipe", "Scotsman's Stove Pipe");
 	AddMenuItem(g_hPropMenuCosmetics, "scoutbeanie", "Scout Beanie");
+	AddMenuItem(g_hPropMenuCosmetics, "scoutmtghat", "Scout MtG Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "scoutshako", "Scout Shako");
 	AddMenuItem(g_hPropMenuCosmetics, "scoutwhoopeecap", "Scout Whoopee Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "sealmask", "Seal Mask");
+	AddMenuItem(g_hPropMenuCosmetics, "securityshades", "Security Shades");
+	AddMenuItem(g_hPropMenuCosmetics, "seeingdouble", "Seeing Double");
+	AddMenuItem(g_hPropMenuCosmetics, "shoestringbudget", "Shoestring Budget");
 	AddMenuItem(g_hPropMenuCosmetics, "shooterstintopi", "Shooter's Tin Topi");
 	AddMenuItem(g_hPropMenuCosmetics, "sinnersshade", "Sinner's Shade");
+	AddMenuItem(g_hPropMenuCosmetics, "sixpackabs", "Six Pack Abs");
+	AddMenuItem(g_hPropMenuCosmetics, "skullislandtopper", "Skull Island Topper");
 	AddMenuItem(g_hPropMenuCosmetics, "skyhighflyguy", "Sky High Fly Guy");
 	AddMenuItem(g_hPropMenuCosmetics, "slopoke", "Slo-Poke");
 	AddMenuItem(g_hPropMenuCosmetics, "sniperfishinghat", "Sniper Fishing Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "sniperpithhelmet", "Sniper Pith Helmet");
+	AddMenuItem(g_hPropMenuCosmetics, "sniperssnipinglass", "Sniper's Snipin' Glass");
 	AddMenuItem(g_hPropMenuCosmetics, "soberstuntman", "Sober Stuntman");
 	AddMenuItem(g_hPropMenuCosmetics, "soldierdrillhat", "Soldier Drill Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "soldiersamuraihat", "Soldier Samurai Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "soldiersslopescopers", "Soldier's Slope Scopers");
+	AddMenuItem(g_hPropMenuCosmetics, "soldiersstash", "Soldier's Stash");
+	AddMenuItem(g_hPropMenuCosmetics, "spectresspectacles", "Spectre's Spectacles");
+	AddMenuItem(g_hPropMenuCosmetics, "spinechillingskull", "Spine-Chilling Skull");
+	AddMenuItem(g_hPropMenuCosmetics, "spinechillingskull2011", "Spine-Chilling Skull 2011");
+	AddMenuItem(g_hPropMenuCosmetics, "spinechillingskull2011style1", "Spine-Chilling Skull 2011 Style 1");
+	AddMenuItem(g_hPropMenuCosmetics, "spinechillingskull2011style2", "Spine-Chilling Skull 2011 Style 2");
+	AddMenuItem(g_hPropMenuCosmetics, "spinechillingskull2011style3", "Spine-Chilling Skull 2011 Style 3");
+	AddMenuItem(g_hPropMenuCosmetics, "spiralsallet", "Spiral Sallet");
 	AddMenuItem(g_hPropMenuCosmetics, "spyberet", "Spy Beret");
+	AddMenuItem(g_hPropMenuCosmetics, "spyonimask", "Spy Oni Mask");
 	AddMenuItem(g_hPropMenuCosmetics, "stahlhelm", "Stahlhelm");
 	AddMenuItem(g_hPropMenuCosmetics, "stainlesspot", "Stainless Pot");
 	AddMenuItem(g_hPropMenuCosmetics, "starboardcrusader", "Starboard Crusader");
 	AddMenuItem(g_hPropMenuCosmetics, "statelysteeltoe", "Stately Steel Toe");
 	AddMenuItem(g_hPropMenuCosmetics, "stealthsteeler", "Stealth Steeler");
+	AddMenuItem(g_hPropMenuCosmetics, "steelpipes", "Steel Pipes");
 	AddMenuItem(g_hPropMenuCosmetics, "steelshako", "Steel Shako");
+	AddMenuItem(g_hPropMenuCosmetics, "stereoscopicshades", "Stereoscopic Shades");
 	AddMenuItem(g_hPropMenuCosmetics, "stormspiritsjollyhat", "Storm Spirit's Jolly Hat");
 	AddMenuItem(g_hPropMenuCosmetics, "stoutshako", "Stout Shako");
 	AddMenuItem(g_hPropMenuCosmetics, "stovepipesnipershako", "Stovepipe Sniper Shako");
 	AddMenuItem(g_hPropMenuCosmetics, "strontiumstovepipe", "Strontium Stove Pipe");
 	AddMenuItem(g_hPropMenuCosmetics, "sultansceremonial", "Sultan's Ceremonial");
+	AddMenuItem(g_hPropMenuCosmetics, "summerhat", "Summer Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "summershades", "Summer Shades");
 	AddMenuItem(g_hPropMenuCosmetics, "surgeonsstahlhelm", "Surgeon's Stahlhelm");
+	AddMenuItem(g_hPropMenuCosmetics, "surgeonsstethoscope", "Surgeon's Stethoscope");
 	AddMenuItem(g_hPropMenuCosmetics, "swagmansswatter", "Swagman's Swatter");
 	AddMenuItem(g_hPropMenuCosmetics, "sydneystrawboat", "Sydney Straw Boat");
 	AddMenuItem(g_hPropMenuCosmetics, "tamoshanter", "Tam O'Shanter");
@@ -839,31 +976,52 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuCosmetics, "teutonictoque", "Teutonic Toque");
 	AddMenuItem(g_hPropMenuCosmetics, "texastengallon", "Texas Ten Gallon");
 	AddMenuItem(g_hPropMenuCosmetics, "texastingallon", "Texas Tin-Gallon");
+	AddMenuItem(g_hPropMenuCosmetics, "tfbirthdayhat2011", "TF Birthday Hat 2011");
 	AddMenuItem(g_hPropMenuCosmetics, "timelesstopper", "Timeless Topper");
 	AddMenuItem(g_hPropMenuCosmetics, "titaniumtyrolean", "Titanium Tyrolean");
 	AddMenuItem(g_hPropMenuCosmetics, "toughguystoque", "Tough Guy's Toque");
+	AddMenuItem(g_hPropMenuCosmetics, "toughstuffmuffs", "Tough Stuff Muffs");
+	AddMenuItem(g_hPropMenuCosmetics, "toweringpillarofhats", "Towering Pillar of Hats");
+	AddMenuItem(g_hPropMenuCosmetics, "toweringtitaniumpillarofhats", "Towering Titanium Pillar of Hats");
 	AddMenuItem(g_hPropMenuCosmetics, "toytailor", "Toy Tailor");
 	AddMenuItem(g_hPropMenuCosmetics, "trafficcone", "Traffic Cone");
+	AddMenuItem(g_hPropMenuCosmetics, "treasurehat1", "Treasure Hat 1");
+	AddMenuItem(g_hPropMenuCosmetics, "treasurehat2", "Treasure Hat 2");
+	AddMenuItem(g_hPropMenuCosmetics, "treasurehat3", "Treasure Hat 3");
 	AddMenuItem(g_hPropMenuCosmetics, "trencherstopper", "Trencher's Topper");
 	AddMenuItem(g_hPropMenuCosmetics, "triclops", "Triclops");
 	AddMenuItem(g_hPropMenuCosmetics, "trophybelt", "Trophy Belt");
+	AddMenuItem(g_hPropMenuCosmetics, "ttgglasses", "TTG Glasses");
+	AddMenuItem(g_hPropMenuCosmetics, "ttgmaxhat", "TTG Max Hat");
+	AddMenuItem(g_hPropMenuCosmetics, "tundratop", "Tundra Top");
 	AddMenuItem(g_hPropMenuCosmetics, "tungstentoque", "Tungsten Toque");
 	AddMenuItem(g_hPropMenuCosmetics, "tyrantshelm", "Tyrant's Helm");
 	AddMenuItem(g_hPropMenuCosmetics, "tyrantiumhelmet", "Tyrantium Helmet");
 	AddMenuItem(g_hPropMenuCosmetics, "uclanka", "U-clank-a");
+	AddMenuItem(g_hPropMenuCosmetics, "unusualcap", "Unusual Cap");
 	AddMenuItem(g_hPropMenuCosmetics, "vintagetyrolean", "Vintage Tyrolean");
 	AddMenuItem(g_hPropMenuCosmetics, "virtualrealityheadset", "Virtual Reality Headset");
 	AddMenuItem(g_hPropMenuCosmetics, "virusdoctor", "Virus Doctor");
+	AddMenuItem(g_hPropMenuCosmetics, "voodoojuju", "Voodoo Juju");
 	AddMenuItem(g_hPropMenuCosmetics, "voodoojuju(slightreturn)", "Voodoo Juju (Slight Return)");
 	AddMenuItem(g_hPropMenuCosmetics, "voxdiabolus", "Vox Diabolus");
+	AddMenuItem(g_hPropMenuCosmetics, "wareagle", "War Eagle");
+	AddMenuItem(g_hPropMenuCosmetics, "wargoggles", "War Goggles");
 	AddMenuItem(g_hPropMenuCosmetics, "warhead", "War Head");
 	AddMenuItem(g_hPropMenuCosmetics, "warpig", "War Pig");
+	AddMenuItem(g_hPropMenuCosmetics, "warswornhelmet", "Warsworn Helmet");
 	AddMenuItem(g_hPropMenuCosmetics, "wearmaster", "Weather Master");
+	AddMenuItem(g_hPropMenuCosmetics, "wellroundedrifleman", "Well-Rounded Rifleman");
 	AddMenuItem(g_hPropMenuCosmetics, "westernwear", "Western Wear");
 	AddMenuItem(g_hPropMenuCosmetics, "wetworks", "Wet Works");
 	AddMenuItem(g_hPropMenuCosmetics, "whirlywarrior", "Whirly Warrior");
+	AddMenuItem(g_hPropMenuCosmetics, "wikicap", "Wiki Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "wingstick", "Wingstick");
+	AddMenuItem(g_hPropMenuCosmetics, "worldtraveler", "World Traveler");
 	AddMenuItem(g_hPropMenuCosmetics, "yeoiledbakerboy", "Ye Oiled Baker Boy");
 	AddMenuItem(g_hPropMenuCosmetics, "yeoldebakerboy", "Ye Olde Baker Boy");
+	AddMenuItem(g_hPropMenuCosmetics, "yetiparkcap", "Yeti Park Cap");
+	AddMenuItem(g_hPropMenuCosmetics, "yetiparkhardhat", "Yeti Park Hardhat");
 
 	// Prop Menu Comics Prop
 	g_hPropMenuComic = CreateMenu(PropMenuComics);
@@ -1093,14 +1251,14 @@ public void OnAllPluginsLoaded()
 	
 	Format(buffer, sizeof(buffer), "Credits\n\n\n");
 	StrCat(buffer, sizeof(buffer), " Coders:\n");
-	StrCat(buffer, sizeof(buffer), "   LeadKiller\n");
+	StrCat(buffer, sizeof(buffer), "   Lead\n");
 	StrCat(buffer, sizeof(buffer), "   ✔TatLead\n");
 	StrCat(buffer, sizeof(buffer), "   _diamondburned_\n");
 	StrCat(buffer, sizeof(buffer), "   Danct12\n");
 	StrCat(buffer, sizeof(buffer), "   DaRkWoRlD\n");
 
 	StrCat(buffer, sizeof(buffer), " Translators:\n");
-	StrCat(buffer, sizeof(buffer), "   LeadKiller - English\n");
+	StrCat(buffer, sizeof(buffer), "   Danct12, Lead - English\n");
 	StrCat(buffer, sizeof(buffer), "   ✔TatLead - Traditional Chinese, Simplified Chinese\n");
 	StrCat(buffer, sizeof(buffer), "   Danct12 - Vietnamese\n");
 	StrCat(buffer, sizeof(buffer), "   RedlineLucario - Russian\n");
@@ -1146,7 +1304,7 @@ public void OnAllPluginsLoaded()
 
 	if(GetCommandFlags("sm_physgun") != INVALID_FCVAR_FLAGS)
 	{
-    	AddMenuItem(g_hEquipMenu, "physgunnew", "Physics Gun V4");
+    	AddMenuItem(g_hEquipMenu, "physgunnew", "Physics Gun V5");
 	}  
 
 	if(GetCommandFlags("portalgun") != INVALID_FCVAR_FLAGS) // https://forums.alliedmods.net/showthread.php?t=237940
@@ -1201,49 +1359,13 @@ public void OnAllPluginsLoaded()
 
 	RegAdminCmd("sm_g", Command_PhysGun, 0);
 
-	StrCat(buffer, sizeof(buffer), "THANKS FOR PLAYING!\n");
+	StrCat(buffer, sizeof(buffer), "Thank you so much for playing TF2SB!\n");
 
 	SetMenuTitle(g_hMenuCredits, buffer);
 	AddMenuItem(g_hMenuCredits, "back", "Back");
 	
 	RegAdminCmd("sm_tf2sb", Command_TF2SBCred, 0);
 	RegAdminCmd("sm_credits", Command_TF2SBCred, 0);
-
-	#if defined _tf2idb_included && defined _tf2items_giveweapon_included // most code taken from https://forums.alliedmods.net/showthread.php?t=293722
-		AddMenuItem(g_hEquipMenu, "toolgun", "--LIVE TF2 WEAPONS--", ITEMDRAW_DISABLED);
-		
-		ArrayList h_idxs = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT `id` FROM tf2idb_item WHERE ((slot='primary' OR slot='secondary' OR slot='melee') AND `class` != 'tf_wearable' AND `class` != 'tf_wearable_demoshield' AND `class` != 'tf_wearable_razorback') ORDER BY REPLACE(`name`, 'The ', '')"));
-
-		ArrayList h_name_maxlength = view_as<ArrayList>(TF2IDB_FindItemCustom("SELECT max(length(`name`)) FROM tf2idb_item WHERE ((slot='primary' OR slot='secondary' OR slot='melee') AND `class` != 'tf_wearable' AND `class` != 'tf_wearable_demoshield' AND `class` != 'tf_wearable_razorback') ORDER BY REPLACE(`name`, 'The ', '')"));
-		int i_nof_items = GetArraySize(h_idxs);
-		int i_name_maxlength = GetArrayCell(h_name_maxlength, 0); CloseHandle(h_name_maxlength);
-
-		int[] i_idxs = new int[i_nof_items];
-		// h_idxs, i_idxs
-		for (int i_iter = 0; i_iter < GetArraySize(h_idxs); i_iter++)
-		{
-			i_idxs[i_iter] = GetArrayCell(h_idxs, i_iter);
-		}
-		CloseHandle(h_idxs);
-
-		char[][] s_names = new char[i_nof_items][i_name_maxlength];
-		int[] i_bfields = new int[i_nof_items];
-		
-		//for each weapon
-		for (int i_index = 0; i_index < i_nof_items; i_index++)
-		{
-			if (TF2Items_CheckWeapon(i_idxs[i_index]))
-			{
-				char szID[256];
-				i_bfields[i_index] = TF2IDB_UsedByClasses(i_idxs[i_index]);
-				TF2IDB_GetItemName(i_idxs[i_index], s_names[i_index], i_name_maxlength);
-				IntToString(i_idxs[i_index], szID, sizeof(szID));
-				ReplaceString(s_names[i_index], i_name_maxlength, "The ", ""); // bruh moment
-				if (StrContains(s_names[i_index], "Upgradeable", false) == -1 && StrContains(s_names[i_index], "Promo", false) == -1 && StrContains(s_names[i_index], "Poker Night", false) == -1 && StrContains(s_names[i_index], "Festive", false) == -1 && StrContains(s_names[i_index], "TF_WEAPON_", false) == -1)
-					AddMenuItem(g_hEquipMenu, szID, s_names[i_index]);
-			}
-		}
-	#endif
 
 	AddMenuItem(g_hMainMenu, "credits", "Credits");
 }
@@ -1673,7 +1795,7 @@ public Action Command_ReloadAIOPlugin(int client, int args) // 😂👌
 	if (!Build_IsClientValid(client, client, true))
 		return Plugin_Handled;
 	
-	ReadProps();
+	// ReadProps();
 	Build_PrintToAll("TF2 Sandbox has updated!");
 	Build_PrintToAll("Please type !build to begin building!");
 	
@@ -1843,8 +1965,8 @@ public Action Command_PropScale(int client, int args)
 			return Plugin_Handled;
 		}
 
-		if (StringToInt(szPropScale) < 1) {
-			Build_PrintToChat(client, "%t1", "higherthan");
+		if (StringToFloat(szPropScale) < 0.1) {
+			Build_PrintToChat(client, "%t0.1", "higherthan");
 			return Plugin_Handled;
 		}
 
@@ -2261,6 +2383,8 @@ public Action Command_SpawnDoor(int client, int args)
 				IntToString(iName, szNameStr, sizeof(szNameStr));
 				Format(szFormatStr, sizeof(szFormatStr), "door%s", szNameStr);
 				DispatchKeyValue(iEntity, "targetname", szFormatStr);
+
+				Build_PrintToChat(client, "SDoor A set!");
 				
 				GetEntPropString(iEntity, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
 				SetClientCookie(client, g_hCookieSDoorTarget, szFormatStr);
@@ -2270,6 +2394,8 @@ public Action Command_SpawnDoor(int client, int args)
 				GetClientCookie(client, g_hCookieSDoorTarget, szDoorTarget, sizeof(szDoorTarget));
 				GetClientCookie(client, g_hCookieSDoorModel, szModel, sizeof(szModel));
 				
+				Build_PrintToChat(client, "SDoor B set!");
+
 				if (StrEqual(szModel, "models/props_lab/blastdoor001c.mdl")) {
 					Format(szFormatStr, sizeof(szFormatStr), "%s,setanimation,dog_open,0", szDoorTarget);
 					DispatchKeyValue(iEntity, "OnHealthChanged", szFormatStr);
@@ -2296,6 +2422,8 @@ public Action Command_SpawnDoor(int client, int args)
 				GetClientCookie(client, g_hCookieSDoorModel, szModel, sizeof(szModel));
 				DispatchKeyValue(iEntity, "spawnflags", "258");
 				
+				Build_PrintToChat(client, "SDoor C set!");
+
 				if (StrEqual(szModel, "models/props_lab/blastdoor001c.mdl")) {
 					Format(szFormatStr, sizeof(szFormatStr), "%s,setanimation,dog_open,0", szDoorTarget);
 					DispatchKeyValue(iEntity, "OnPlayerUse", szFormatStr);
@@ -2469,6 +2597,8 @@ public Action Command_SpawnProp(int client, int args)
 		return Plugin_Handled;
 	}
 	
+	EmitSoundToClient(client, "ui/panel_open.wav");
+
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
 	// TODO: JUST CHECK IF ITS A DONOR PROP OR NOT FOR VALUES AND DO REST ONLY ONCE
@@ -2660,9 +2790,9 @@ public Action Command_SpawnProp(int client, int args)
 	return Plugin_Handled;
 }
 
-void ReadProps()
+void ReadProps(bool Donator, char path[64])
 {
-	BuildPath(Path_SM, g_szFile, sizeof(g_szFile), "configs/buildmod/props.ini");
+	BuildPath(Path_SM, g_szFile, sizeof(g_szFile), path);// "configs/buildmod/props.ini");
 	
 	Handle iFile = OpenFile(g_szFile, "rt");
 	if (iFile == INVALID_HANDLE)
@@ -2701,95 +2831,37 @@ void ReadProps()
 		if ((szLine[0] == '/' && szLine[1] == '/') || (szLine[0] == ';' || szLine[0] == '\0'))
 			continue;
 		
-		ReadPropsLine(szLine, iCountProps++);
-	}
-	CloseHandle(iFile);
-}
-
-void ReadPropsLine(const char[] szLine, int iCountProps)
-{
-	char szPropInfo[4][128];
-	ExplodeString(szLine, ", ", szPropInfo, sizeof(szPropInfo), sizeof(szPropInfo[]));
-	
-	StripQuotes(szPropInfo[0]);
-	SetArrayString(g_hPropNameArray, iCountProps, szPropInfo[0]);
-	
-	StripQuotes(szPropInfo[1]);
-	SetArrayString(g_hPropModelPathArray, iCountProps, szPropInfo[1]);
-	
-	StripQuotes(szPropInfo[2]);
-	SetArrayString(g_hPropTypeArray, iCountProps, szPropInfo[2]);
-	
-	StripQuotes(szPropInfo[3]);
-	SetArrayString(g_hPropStringArray, iCountProps, szPropInfo[3]);
-	
-	AddMenuItem(g_hPropMenuHL2, szPropInfo[0], szPropInfo[3]);
-}
-
-void ReadPropsDonor()
-{
-	BuildPath(Path_SM, g_szFile, sizeof(g_szFile), "configs/buildmod/props-extended.ini");
-	
-	Handle iFile = OpenFile(g_szFile, "rt");
-	if (iFile == INVALID_HANDLE)
-		return;
-	
-	int iCountProps = 0;
-	while (!IsEndOfFile(iFile))
-	{
-		char szLine[255];
-		if (!ReadFileLine(iFile, szLine, sizeof(szLine)))
-			break;
-		
-		/* 略過註解 */
-		int iLen = strlen(szLine);
-		bool bIgnore = false;
-		
-		for (int i = 0; i < iLen; i++) {
-			if (bIgnore) {
-				if (szLine[i] == '"')
-					bIgnore = false;
-			} else {
-				if (szLine[i] == '"')
-					bIgnore = true;
-				else if (szLine[i] == ';') {
-					szLine[i] = '\0';
-					break;
-				} else if (szLine[i] == '/' && i != iLen - 1 && szLine[i + 1] == '/') {
-					szLine[i] = '\0';
-					break;
-				}
-			}
+		if (Donator == true) {
+			ReadPropsLine(szLine, iCountProps++, true);
+		} else {
+			ReadPropsLine(szLine, iCountProps++, false);
 		}
-		
-		TrimString(szLine);
-		
-		if ((szLine[0] == '/' && szLine[1] == '/') || (szLine[0] == ';' || szLine[0] == '\0'))
-			continue;
-		
-		ReadPropsLineDonor(szLine, iCountProps++);
 	}
 	CloseHandle(iFile);
 }
 
-void ReadPropsLineDonor(const char[] szLine, int iCountProps)
+void ReadPropsLine(const char[] szLine, int iCountProps, bool Donor)
 {
 	char szPropInfo[4][128];
 	ExplodeString(szLine, ", ", szPropInfo, sizeof(szPropInfo), sizeof(szPropInfo[]));
-	
 	StripQuotes(szPropInfo[0]);
-	SetArrayString(g_hPropNameArrayDonor, iCountProps, szPropInfo[0]);
-	
 	StripQuotes(szPropInfo[1]);
-	SetArrayString(g_hPropModelPathArrayDonor, iCountProps, szPropInfo[1]);
-	
 	StripQuotes(szPropInfo[2]);
-	SetArrayString(g_hPropTypeArrayDonor, iCountProps, szPropInfo[2]);
-	
 	StripQuotes(szPropInfo[3]);
-	SetArrayString(g_hPropStringArrayDonor, iCountProps, szPropInfo[3]);
 	
-	AddMenuItem(g_hPropMenuDonor, szPropInfo[0], szPropInfo[3]);
+	if (Donor) {
+		SetArrayString(g_hPropNameArrayDonor, iCountProps, szPropInfo[0]);
+		SetArrayString(g_hPropModelPathArrayDonor, iCountProps, szPropInfo[1]);
+		SetArrayString(g_hPropTypeArrayDonor, iCountProps, szPropInfo[2]);
+		SetArrayString(g_hPropStringArrayDonor, iCountProps, szPropInfo[3]);
+		AddMenuItem(g_hPropMenuDonor, szPropInfo[0], szPropInfo[3]);
+	} else {
+		SetArrayString(g_hPropNameArray, iCountProps, szPropInfo[0]);
+		SetArrayString(g_hPropModelPathArray, iCountProps, szPropInfo[1]);
+		SetArrayString(g_hPropTypeArray, iCountProps, szPropInfo[2]);
+		SetArrayString(g_hPropStringArray, iCountProps, szPropInfo[3]);
+		AddMenuItem(g_hPropMenuHL2, szPropInfo[0], szPropInfo[3]);
+	}
 }
 
 public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
@@ -2966,26 +3038,6 @@ bool IsFunc(int iEntity)
 		return true;
 	return false;
 }
-
-/*bool IsNpc(int iEntity)
-{
-	char szClass[32];
-	GetEdictClassname(iEntity, szClass, sizeof(szClass));
-	if (StrContains(szClass, "npc_", false) == 0)
-		return true;
-	return false;
-}
-
-bool IsWorldEnt(int iEntity)
-{
-	int szOwner = -1;
-	if (IsValidEntity(iEntity))
-		szOwner = Build_ReturnEntityOwner(iEntity);
-	
-	if (szOwner == 0)
-		return true;
-	return false;
-}*/
 
 bool IsPlayer(int iEntity)
 {
