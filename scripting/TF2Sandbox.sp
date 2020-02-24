@@ -169,6 +169,7 @@ public void OnPluginStart()
 	
 	// coloring, skins, scale
 	RegAdminCmd("sm_color", Command_Color, 0, "Color a prop.");
+	RegAdminCmd("sm_colour", Command_Color, 0, "Colour a prop.");
 	RegAdminCmd("sm_render", Command_Render, 0, "Render an entity.");
 	RegAdminCmd("sm_skin", Command_Skin, 0, "Color a prop.");
 	RegAdminCmd("sm_propscale", Command_PropScale, 0, "Prop Scale");
