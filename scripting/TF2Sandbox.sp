@@ -413,6 +413,18 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuRequested, "sniper", "Sniper");
 	AddMenuItem(g_hPropMenuRequested, "medic", "Medic");
 	AddMenuItem(g_hPropMenuRequested, "spy", "Spy");
+	AddMenuItem(g_hPropMenuRequested, "horseless", "Horseless Headless Horseman");
+	AddMenuItem(g_hPropMenuRequested, "skeleton", "Skeleton");
+	AddMenuItem(g_hPropMenuRequested, "sentrybuster", "Sentry Buster");
+	AddMenuItem(g_hPropMenuRequested, "robotscout", "Robot Scout");
+	AddMenuItem(g_hPropMenuRequested, "robotsoldier", "Robot Soldier");
+	AddMenuItem(g_hPropMenuRequested, "robotpyro", "Robot Pyro");
+	AddMenuItem(g_hPropMenuRequested, "robotdemoman", "Robot Demoman");
+	AddMenuItem(g_hPropMenuRequested, "robotheavy", "Robot Heavy");
+	AddMenuItem(g_hPropMenuRequested, "robotengineer", "Robot Engineer");
+	AddMenuItem(g_hPropMenuRequested, "robotsniper", "Robot Sniper");
+	AddMenuItem(g_hPropMenuRequested, "robotmedic", "Robot Medic");
+	AddMenuItem(g_hPropMenuRequested, "robotspy", "Robot Spy");
 	AddMenuItem(g_hPropMenuRequested, "cow", "Cow");
 	AddMenuItem(g_hPropMenuRequested, "explosion", "Explosion");
 	AddMenuItem(g_hPropMenuRequested, "muzzleflash", "Muzzleflash");
