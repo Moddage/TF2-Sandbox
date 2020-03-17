@@ -63,6 +63,7 @@ Handle g_hCvarNonOwner = INVALID_HANDLE;
 Handle g_hCvarFly = INVALID_HANDLE;
 Handle g_hCvarTips = INVALID_HANDLE;
 Handle g_hCvarClPropLimit = INVALID_HANDLE;
+Handle g_hCvarClDonatorLimit = INVALID_HANDLE;
 Handle g_hCvarClDollLimit = INVALID_HANDLE;
 Handle g_hCvarServerLimit = INVALID_HANDLE;
 
@@ -71,7 +72,8 @@ int g_iCvarEnabled;
 int g_iCvarNonOwner;
 int g_iCvarFly;
 int g_iCvarTips;
-int g_iCvarClPropLimit[MAXPLAYERS];
+int g_iCvarClPropLimit;
+int g_iCvarClDonatorLimit;
 int g_iCvarClDollLimit;
 int g_iCvarServerLimit;
 int g_iPropCurrent[MAXPLAYERS];
@@ -169,6 +171,7 @@ public void OnPluginStart()
 	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly or noclip to noclip or not?", 0, true, 0.0, true, 1.0);
 	g_hCvarTips = CreateConVar("sbox_tips", "1", "Will TF2Sandbox Tips be displayed?", 0, true, 0.0, true, 1.0);
 	g_hCvarClPropLimit = CreateConVar("sbox_maxpropsperplayer", "120", "Player prop spawn limit.", 0, true, 0.0);
+	g_hCvarClDonatorLimit = CreateConVar("sbox_maxpropsperdonator", "300", "Donator Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("sbox_maxragdolls", "10", "Player doll spawn limit.", 0, true, 0.0);
 	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit", 0, true, 0.0);
 	g_hCvarServerTag = CreateConVar("sbox_tag", "1", "Enable 'tf2sb' tag", 0, true, 1.0);
@@ -180,9 +183,9 @@ public void OnPluginStart()
 	g_iCvarTips = GetConVarBool(g_hCvarTips);
 	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
 	g_iCvarFly = GetConVarBool(g_hCvarFly);
-	for (int i = 0; i < MAXPLAYERS; i++)
-		g_iCvarClPropLimit[i] = GetConVarInt(g_hCvarClPropLimit);
-	
+
+	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);
+	g_iCvarClDonatorLimit = GetConVarInt(g_hCvarClDonatorLimit);
 	g_iCvarClDollLimit = GetConVarInt(g_hCvarClDollLimit);
 	g_iCvarServerLimit = GetConVarInt(g_hCvarServerLimit);
 	
@@ -191,6 +194,7 @@ public void OnPluginStart()
 	HookConVarChange(g_hCvarFly, Hook_CvarFly);
 	HookConVarChange(g_hCvarTips, Hook_CvarTips);
 	HookConVarChange(g_hCvarClPropLimit, Hook_CvarClPropLimit);
+	HookConVarChange(g_hCvarClDonatorLimit, Hook_CvarClDonatorLimit);
 	HookConVarChange(g_hCvarClDollLimit, Hook_CvarClDollLimit);
 	HookConVarChange(g_hCvarServerLimit, Hook_CvarServerLimit);
 	
@@ -286,7 +290,14 @@ public Action DisplayHud(Handle timer)
 			
 		if (!g_bIN_SCORE[i])
 		{
-			ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClPropLimit[i]);
+			if (CheckCommandAccess(i, "sm_tf2sb_donor", 0))
+			{
+				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClDonatorLimit);
+			}
+			else
+			{
+				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClPropLimit);
+			}
 		}
 		
 		//}
@@ -340,8 +351,12 @@ public void Hook_CvarTips(Handle convar, const char[] oldValue, const char[] new
 
 public void Hook_CvarClPropLimit(Handle convar, const char[] oldValue, const char[] newValue) 
 {
-	for (int i = 0; i < MAXPLAYERS; i++)
-		g_iCvarClPropLimit[i] = GetConVarInt(g_hCvarClPropLimit);
+	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);
+}
+
+public void Hook_CvarClDonatorLimit(Handle convar, const char[] oldValue, const char[] newValue) 
+{
+	g_iCvarClDonatorLimit = GetConVarInt(g_hCvarClDonatorLimit);
 }
 
 public void Hook_CvarClDollLimit(Handle convar, const char[] oldValue, const char[] newValue) 
@@ -373,14 +388,14 @@ public Action Command_SpawnCount(int client, int args)
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
 	Build_Logging(client, "sm_my", szArgs);
-	Build_PrintToChat(client, "Your Limit: %i/%i [Ragdoll: %i/%i], Server Limit: %i/%i", g_iPropCurrent[client], g_iCvarClPropLimit[client], g_iDollCurrent[client], g_iCvarClDollLimit, g_iServerCurrent, g_iCvarServerLimit);
+	Build_PrintToChat(client, "Your Limit: %i/%i [Ragdoll: %i/%i], Server Limit: %i/%i", g_iPropCurrent[client], g_iCvarClPropLimit, g_iDollCurrent[client], g_iCvarClDollLimit, g_iServerCurrent, g_iCvarServerLimit);
 	if (Build_IsAdmin(client)) 
 	{
 		for (int i = 0; i < MaxClients; i++) 
 		{
 			if (Build_IsClientValid(i, i) && client != i) 
 			{
-				Build_PrintToChat(client, "%N: %i/%i [Ragdoll: %i/%i]", i, g_iPropCurrent[i], g_iCvarClPropLimit[i], g_iDollCurrent[i], g_iCvarClDollLimit);
+				Build_PrintToChat(client, "%N: %i/%i [Ragdoll: %i/%i]", i, g_iPropCurrent[i], g_iCvarClPropLimit, g_iDollCurrent[i], g_iCvarClDollLimit);
 			}
 		}
 	}
@@ -420,8 +435,10 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 			} 
 			else 
 			{
-				if (g_iPropCurrent[client] < g_iCvarClPropLimit[client])
+				if ((CheckCommandAccess(client, "sm_tf2sb_donor", 0) && g_iPropCurrent[client] < g_iCvarClDonatorLimit) || g_iPropCurrent[client] < g_iCvarClPropLimit)
+				{
 					g_iPropCurrent[client] += 1;
+				}
 				else 
 				{
 					ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
