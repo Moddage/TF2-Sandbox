@@ -177,6 +177,7 @@ public void OnPluginStart()
 	// building
 	RegAdminCmd("sm_build", Command_BuildMenu, 0);
 	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
+	RegAdminCmd("sm_propfinder", Command_PropFinder, 0);
 	RegAdminCmd("sm_delall", Command_DeleteAll, 0, "Delete all of your spawned props");
 	RegAdminCmd("sm_del", Command_Delete, 0, "Delete a entity");
 	RegAdminCmd("sm_setname", Command_SetName, 0, "Set the name of a prop");
@@ -1419,7 +1420,7 @@ public void OnMapStart()
 {
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot1.wav", true);
 	PrecacheSound("buttons/button3.wav", true);
-	PrecacheSound("ui/panel_open.wav", true);
+	// PrecacheSound("ui/panel_open.wav", true);
 	PrecacheSound("ui/panel_close.wav", true);
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav", true);
 	for (int i = 1; i < MaxClients; i++)
@@ -2611,7 +2612,7 @@ public Action Command_SpawnProp(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	EmitSoundToClient(client, "ui/panel_open.wav");
+	// EmitSoundToClient(client, "ui/panel_open.wav");
 
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
@@ -3288,6 +3289,91 @@ public Action Command_PhysGun(int client, int args)
 			FakeClientCommand(client, "sm_sbpg");
 		}	
 	}
+}
+
+public Action Command_PropFinder(int client, int args)
+{
+	if (g_bBuffer[client])
+	{
+		Build_PrintToChat(client, "%t", "toofast");
+	}
+	else
+	{
+		Menu PropFinder = CreateMenu(PropFinderMenu);
+		SetMenuTitle(PropFinder, /*"TF2SB - */ "Prop Finder");
+		g_bBuffer[client] = true;
+		CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
+		for (int i = 1; i < MAX_HOOK_ENTITIES; i++)
+		{
+			if (IsValidEntity(i))
+			{
+				if (Build_ReturnEntityOwner(i) == client)
+				{
+					char name[128];
+					char id[6];
+					IntToString(i, id, sizeof(id));
+					GetEntPropString(i, Prop_Data, "m_iName", name, sizeof(name));
+					AddMenuItem(PropFinder, id, name);
+				}
+			}
+		}
+		SetMenuExitBackButton(PropFinder, true);
+		DisplayMenu(PropFinder, client, MENU_TIME_FOREVER);
+	}
+}
+
+public int PropFinderMenu(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		char item[64];
+		GetMenuItem(menu, param2, item, sizeof(item));
+		int i = StringToInt(item);
+		char name[128];
+		GetEntPropString(i, Prop_Data, "m_iName", name, sizeof(name));
+
+		Menu PropFinder = CreateMenu(PropFinderMenu2);
+		SetMenuTitle(PropFinder, /*"TF2SB - */ "Prop Finder - %s", name);
+		AddMenuItem(PropFinder, item, "Delete");
+		AddMenuItem(PropFinder, item, "Goto");
+		SetMenuExitBackButton(PropFinder, true);
+		DisplayMenu(PropFinder, param1, MENU_TIME_FOREVER);
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hMainMenu, param1, MENU_TIME_FOREVER);
+	}
+	return 0;
+}
+
+public int PropFinderMenu2(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		char item[64];
+		GetMenuItem(menu, param2, item, sizeof(item));
+		int i = StringToInt(item);
+
+		if (param2 == 0)
+		{
+			Build_RegisterEntityOwner(i, -1);
+			Build_SetLimit(param1, -1, true);
+			AcceptEntityInput(i, "Kill", -1);
+		}
+		else if (param2 == 1)
+		{
+			float vector[3];
+			GetEntPropVector(i, Prop_Send, "m_vecOrigin", vector);
+			TeleportEntity(param1, vector, NULL_VECTOR, NULL_VECTOR);
+		}
+
+		FakeClientCommand(param1, "sm_propfinder");
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		FakeClientCommand(param1, "sm_propfinder");
+	}
+	return 0;
 }
 
 public Action Command_Resupply(int client, int args)
