@@ -1419,6 +1419,7 @@ public void OnMapStart()
 {
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot1.wav", true);
 	PrecacheSound("buttons/button3.wav", true);
+	PrecacheSound("ui/panel_open.wav", true);
 	PrecacheSound("ui/panel_close.wav", true);
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav", true);
 	for (int i = 1; i < MaxClients; i++)
