@@ -1447,7 +1447,10 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
-	FakeClientCommand(client, "sm_delall");
+	if (!StrEqual(g_szConnectedClient[client], "", false)) {
+		g_szConnectedClient[client] = "";
+		FakeClientCommand(client, "sm_delall");
+	}
 	/*g_szConnectedClient[client] = "";
 	GetClientAuthId(client, AuthId_Steam2, g_szDisconnectClient[client], sizeof(g_szDisconnectClient));
 	int iCount;
