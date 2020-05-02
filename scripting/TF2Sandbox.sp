@@ -439,6 +439,7 @@ public void OnPluginStart()
 	SetMenuExitBackButton(g_hPropMenuLead, true);
 	AddMenuItem(g_hPropMenuLead, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuLead, "emptyspace", "", ITEMDRAW_IGNORE);
+	AddMenuItem(g_hPropMenuLead, "rickmay", "Rick May Statue");
 	AddMenuItem(g_hPropMenuLead, "light", "Light");
 
 	// Prop Menu Pickup
