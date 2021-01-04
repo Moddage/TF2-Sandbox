@@ -1452,26 +1452,8 @@ public void OnClientDisconnect(int client)
 		g_szConnectedClient[client] = "";
 		FakeClientCommand(client, "sm_delall");
 	}
-	/*g_szConnectedClient[client] = "";
-	GetClientAuthId(client, AuthId_Steam2, g_szDisconnectClient[client], sizeof(g_szDisconnectClient));
-	int iCount;
-	for (int iCheck = 0; iCheck < MAX_HOOK_ENTITIES; iCheck++) {
-		if (IsValidEntity(iCheck)) {
-			if (Build_ReturnEntityOwner(iCheck) == client) {
-				g_iTempOwner[iCheck] = client;
-				Build_RegisterEntityOwner(iCheck, -1);
-				iCount++;
-			}
-		}
-	}
-	Build_SetLimit(client, 0);
-	Build_SetLimit(client, 0, true);
-	if (iCount > 0) {
-		Handle hPack;
-		CreateDataTimer(0.001, Timer_Disconnect, hPack);
-		WritePackCell(hPack, client);
-		WritePackCell(hPack, 0);
-	}*/
+
+	g_bBuffer[client] = false;
 }
 
 public void OnClientConnected(int client)
@@ -3069,6 +3051,12 @@ bool IsPlayer(int iEntity)
 
 public Action Command_DeleteAll(int client, int args)
 {
+	if (g_bBuffer[client])
+	{
+		Build_PrintToChat(client, "%t", "toofast");
+		return Plugin_Handled;
+	}
+
 	if (!Build_AllowToUse(client) || !Build_IsClientValid(client, client))
 		return Plugin_Handled;
 	
@@ -3098,6 +3086,9 @@ public Action Command_DeleteAll(int client, int args)
 	Build_SetLimit(client, 0);
 	Build_SetLimit(client, 0, true);
 	
+	g_bBuffer[client] = true;
+	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
+
 	char szTemp[33], szArgs[128];
 	for (int i = 1; i <= GetCmdArgs(); i++) {
 		GetCmdArg(i, szTemp, sizeof(szTemp));
