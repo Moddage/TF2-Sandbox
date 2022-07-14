@@ -2624,7 +2624,6 @@ public Action Command_SpawnProp(int client, int args)
 	if (IndexInArray != -1) {
 		bool bIsDoll = false;
 		char szEntType[33];
-		char arg[1];
 		GetArrayString(g_hPropTypeArray, IndexInArray, szEntType, sizeof(szEntType));
 		
 		if (StrEqual(szEntType, "5"))
@@ -2686,7 +2685,6 @@ public Action Command_SpawnProp(int client, int args)
 			
 			DispatchSpawn(iEntity);
 			
-			PrintToChat(client, szPropFrozen);
 			if(!StrEqual(szPropFrozen, "1"))	
 			{
 				Phys_EnableCollisions(iEntity, false);
@@ -3200,6 +3198,10 @@ public Action Command_Delete(int client, int args)
 				if (iOwner != -1) {
 					if (StrEqual(szClass, "5"))
 						Build_SetLimit(iOwner, -1, true);
+					else if (Phys_IsGravityEnabled(iEntity))
+					{
+						Build_SetLimit(iOwner, -1, false, true);
+					}
 					else
 						Build_SetLimit(iOwner, -1);
 					Build_RegisterEntityOwner(iEntity, -1);
@@ -3222,9 +3224,11 @@ public Action Command_Delete(int client, int args)
 			AcceptEntityInput(Obj_Dissolver, "kill", -1);
 			DispatchKeyValue(iEntity, "targetname", "Del_Drop");
 		}
-		
+
 		if (StrEqual(szClass, "5"))
 			Build_SetLimit(client, -1, true);
+		else if (Phys_IsGravityEnabled(iEntity))
+			Build_SetLimit(client, -1, false, true);
 		else
 			Build_SetLimit(client, -1);
 		Build_RegisterEntityOwner(iEntity, -1);
@@ -3235,7 +3239,7 @@ public Action Command_Delete(int client, int args)
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
-	Build_DelPhysProp(client);
+	
 	Build_Logging(client, "sm_del", szArgs);
 	return Plugin_Handled;
 }
