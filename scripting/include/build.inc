@@ -38,9 +38,10 @@ native Build_ReturnEntityOwner(entity_index);
  * @param client_index		Client index.
  * @param amount			Amount to increase or decrease. If amount = 0 then set limit to 0.
  * @param Doll				Is prop_ragdoll?
+ * @param Phys              Is prop_physics enabled?
  * @noreturn
  */
-native Build_SetLimit(client_index, amount, bool:Doll = false);
+native Build_SetLimit(client_index, amount, bool:Doll = false, bool:Phys = false);
 
 /**
  * Check client can use BuildMod.
