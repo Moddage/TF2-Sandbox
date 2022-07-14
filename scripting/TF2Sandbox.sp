@@ -26,6 +26,7 @@
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2attributes>
+#include <vphysics>
 #undef REQUIRE_PLUGIN
 #tryinclude <updater>
 #tryinclude <tf2idb>
@@ -1246,6 +1247,19 @@ public void OnPluginStart()
 	AutoExecConfig();
 }
 
+public void OnPluginEnd()
+{
+	for(int i = 1; i <= MaxClients; i++) {
+	if(IsClientConnected(i))
+		{
+			if(i != 0)
+			{
+				FakeClientCommand(i, "sm_delall");
+			}
+		}
+  }
+}
+
 public void OnLibraryAdded(const char[] name)
 {
 	#if defined _updater_included
@@ -1536,7 +1550,7 @@ public Action Command_Copy(int client, int args)
 		
 		// Physics exploit can be introduced by copying physics objects
 		// if (StrEqual(szClass, "prop_dynamic")) {
-		szClass = "prop_dynamic_override";
+		szClass = "prop_physics_override";
 		// }
 		
 		g_iCopyTarget[client] = CreateEntityByName(szClass);
@@ -1559,7 +1573,7 @@ public Action Command_Copy(int client, int args)
 			
 			GetEdictClassname(g_iCopyTarget[client], szClass, sizeof(szClass));
 
-			if (StrEqual(szClass, "prop_dynamic_override")) {
+			if (StrEqual(szClass, "prop_physics_override")) {
 				SetEntProp(g_iCopyTarget[client], Prop_Send, "m_nSolidType", 6);
 				SetEntProp(g_iCopyTarget[client], Prop_Data, "m_nSolidType", 6);
 			}
@@ -1683,7 +1697,7 @@ public Action Timer_CopyMain(Handle timer, any client)
 			Phys_EnableMotion(g_iCopyTarget[client], false);
 			Phys_Sleep(g_iCopyTarget[client]);
 		}*/
-		SetEntityMoveType(g_iCopyTarget[client], MOVETYPE_NONE);
+		SetEntityMoveType(g_iCopyTarget[client], MOVETYPE_VPHYSICS);
 		TeleportEntity(g_iCopyTarget[client], fOriginEntity, NULL_VECTOR, NULL_VECTOR);
 		
 		if (g_bCopyIsRunning[client])
@@ -2247,7 +2261,7 @@ public Action Command_LightDynamic(int client, int args)
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
 	
-	int Obj_LightDMelon = CreateEntityByName("prop_dynamic");
+	int Obj_LightDMelon = CreateEntityByName("prop_physics");
 	if (Build_RegisterEntityOwner(Obj_LightDMelon, client)) {
 		char szBrightness[33], szColorR[33], szColorG[33], szColorB[33], szColor[33];
 		char szNameMelon[64];
@@ -2353,7 +2367,7 @@ public Action Command_SpawnDoor(int client, int args)
 	char szModel[128];
 	
 	if (StrEqual(szType[0], "1") || StrEqual(szType[0], "2") || StrEqual(szType[0], "3") || StrEqual(szType[0], "4") || StrEqual(szType[0], "5") || StrEqual(szType[0], "6") || StrEqual(szType[0], "7")) {
-		int Obj_Door = CreateEntityByName("prop_dynamic_override");
+		int Obj_Door = CreateEntityByName("prop_physics_override");
 		
 		switch (szType[0]) {
 			case '1':szModel = "models/props_lab/blastdoor001c.mdl";
@@ -2585,9 +2599,13 @@ public Action Command_SpawnProp(int client, int args)
 	}
 	
 	char szPropName[32], szPropFrozen[32], szPropString[256], szModelPath[128];
+	bool phys = false;
 	GetCmdArg(1, szPropName, sizeof(szPropName));
 	GetCmdArg(2, szPropFrozen, sizeof(szPropFrozen));
-	
+	if(StrEqual(szPropFrozen, "1"))
+	{
+		phys = true;
+	}
 	int IndexInArray = FindStringInArray(g_hPropNameArray, szPropName);
 	int IndexInArray2 = FindStringInArray(g_hPropNameArrayDonor, szPropName);
 	
@@ -2606,6 +2624,7 @@ public Action Command_SpawnProp(int client, int args)
 	if (IndexInArray != -1) {
 		bool bIsDoll = false;
 		char szEntType[33];
+		char arg[1];
 		GetArrayString(g_hPropTypeArray, IndexInArray, szEntType, sizeof(szEntType));
 		
 		if (StrEqual(szEntType, "5"))
@@ -2613,7 +2632,7 @@ public Action Command_SpawnProp(int client, int args)
 		
 		int iEntity = CreateEntityByName(szEntType);
 		
-		if (Build_RegisterEntityOwner(iEntity, client, bIsDoll)) {
+		if (Build_RegisterEntityOwner(iEntity, client, bIsDoll, phys)) {
 			float fOriginWatching[3], fOriginFront[3], fAngles[3], fRadiansX, fRadiansY;
 			
 			float iAim[3];
@@ -2641,13 +2660,23 @@ public Action Command_SpawnProp(int client, int args)
 			
 			//DispatchKeyValue(iEntity, "propnametf2sb", szPropString);
 			SetEntPropString(iEntity, Prop_Data, "m_iName", szPropString);
-			
-			if (StrEqual(szEntType, "prop_dynamic"))
+			if (StrEqual(szEntType, "prop_physics"))
+			{
+				SetEntityMoveType(iEntity, 6);
 				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
+				SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
+				SetEntProp(iEntity, Prop_Data, "nodamageforces", 0);
+			}
+
 			
-			if (StrEqual(szEntType, "prop_dynamic_override"))
+			if (StrEqual(szEntType, "prop_physics_overide"))
+			{
+				SetEntityMoveType(iEntity, 6);
 				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
-			
+				SetEntProp(iEntity, Prop_Data, "m_takedamage", 0);
+				SetEntProp(iEntity, Prop_Data, "nodamageforces", 0);
+			}
+
 			Build_ClientAimOrigin(client, iAim);
 			iAim[2] = iAim[2] + 10;
 			
@@ -2656,8 +2685,23 @@ public Action Command_SpawnProp(int client, int args)
 			
 			
 			DispatchSpawn(iEntity);
-			TeleportEntity(iEntity, iAim, NULL_VECTOR, NULL_VECTOR);
 			
+			PrintToChat(client, szPropFrozen);
+			if(!StrEqual(szPropFrozen, "1"))
+			{
+				Phys_EnableCollisions(iEntity, false);
+				Phys_EnableGravity(iEntity, false);
+				Phys_EnableDrag(iEntity, false);
+				Phys_EnableMotion(iEntity, false);
+			}
+			else
+			{
+				Phys_EnableCollisions(iEntity, true);
+				Phys_EnableGravity(iEntity, true);
+				Phys_EnableDrag(iEntity, true);
+				Phys_EnableMotion(iEntity, true);
+			}
+			TeleportEntity(iEntity, iAim, NULL_VECTOR, NULL_VECTOR);
 			
 			
 			// TE_SetupBeamPoints(iAim, vOriginPlayer, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
@@ -2729,11 +2773,11 @@ public Action Command_SpawnProp(int client, int args)
 			
 			//DispatchKeyValue(iEntity, "propnametf2sb", szPropString);
 			SetEntPropString(iEntity, Prop_Data, "m_iName", szPropString);
-			
-			if (StrEqual(szEntType, "prop_dynamic"))
+			SetEntityMoveType(iEntity, MOVETYPE_VPHYSICS);
+			if (StrEqual(szEntType, "prop_physics"))
 				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
 			
-			if (StrEqual(szEntType, "prop_dynamic_override"))
+			if (StrEqual(szEntType, "prop_physics_override"))
 				SetEntProp(iEntity, Prop_Send, "m_nSolidType", 6);
 			
 			Build_ClientAimOrigin(client, iAim);
@@ -3094,6 +3138,7 @@ public Action Command_DeleteAll(int client, int args)
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
+	Build_ResetPhysProps(client);
 	Build_Logging(client, "sm_delall", szArgs);
 	return Plugin_Handled;
 }
@@ -3190,6 +3235,7 @@ public Action Command_Delete(int client, int args)
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
+	Build_DelPhysProp(client);
 	Build_Logging(client, "sm_del", szArgs);
 	return Plugin_Handled;
 }

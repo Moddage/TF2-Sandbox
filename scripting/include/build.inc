@@ -10,7 +10,19 @@
  * @param Doll				Is prop_ragdoll?
  * @return					Ture on success. False on failure.
  */
-native bool:Build_RegisterEntityOwner(entity_index, client_index, bool:Doll = false);
+native bool:Build_RegisterEntityOwner(entity_index, client_index, bool:Doll = false, bool:Phys = false);
+
+
+/**
+ * Register an entity owner.
+ *
+ * @param entity_index		Entity index.
+ * @param client_index		Client index.
+ * @param Doll				Is prop_ragdoll?
+ * @param Phys              Is prop_physics?
+ * @return					Ture on success. False on failure.
+ */
+
 
 /**
  * Get an entity owner.
@@ -138,3 +150,19 @@ native bool:Build_IsBlacklisted(client_index);
  * @return					True if target valid. Otherwise false.
  */
 native bool:Build_IsClientValid(client_index, target_index, bool:Alive = false, bool:ReplyTarget = false);
+
+/**
+ * Reset phys prop count.
+ *
+ * @param client_index		Client index.
+ * @noreturn
+ */
+native Build_ResetPhysProps(client_index);
+
+/**
+ * Remove 1 phys prop count.
+ *
+ * @param client_index		Client index.
+ * @noreturn
+ */
+native Build_DelPhysProp(client_index);

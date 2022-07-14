@@ -62,8 +62,9 @@ Handle g_hCvarSwitch = INVALID_HANDLE;
 Handle g_hCvarNonOwner = INVALID_HANDLE;
 Handle g_hCvarFly = INVALID_HANDLE;
 Handle g_hCvarTips = INVALID_HANDLE;
-Handle g_hCvarClPropLimit = INVALID_HANDLE;
+Handle g_hCvarClPhysLimit	 = INVALID_HANDLE;
 Handle g_hCvarClDonatorLimit = INVALID_HANDLE;
+Handle g_hCvarClPropLimit = INVALID_HANDLE;
 Handle g_hCvarClDollLimit = INVALID_HANDLE;
 Handle g_hCvarServerLimit = INVALID_HANDLE;
 
@@ -74,9 +75,11 @@ int g_iCvarFly;
 int g_iCvarTips;
 int g_iCvarClPropLimit;
 int g_iCvarClDonatorLimit;
+int g_iCvarClPhysLimit;
 int g_iCvarClDollLimit;
 int g_iCvarServerLimit;
 int g_iPropCurrent[MAXPLAYERS];
+int g_iPhysCurrent[MAXPLAYERS];
 int g_iDollCurrent[MAXPLAYERS];
 int g_iServerCurrent;
 int g_iEntOwner[MAX_HOOK_ENTITIES] =  { -1, ... };
@@ -113,6 +116,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("Build_RemoveBlacklist", Native_RemoveBlacklist);
 	CreateNative("Build_IsBlacklisted", Native_IsBlacklisted);
 	CreateNative("Build_IsClientValid", Native_IsClientValid);
+	CreateNative("Build_ResetPhysProps", Native_ResetPhysProps);
+	CreateNative("Build_DelPhysProp", Native_DelPhysProp);
 	
 	#if defined _steamtools_included
 	MarkNativeAsOptional("Steam_SetGameDescription");
@@ -172,6 +177,7 @@ public void OnPluginStart()
 	g_hCvarTips = CreateConVar("sbox_tips", "1", "Will TF2Sandbox Tips be displayed?", 0, true, 0.0, true, 1.0);
 	g_hCvarClPropLimit = CreateConVar("sbox_maxpropsperplayer", "120", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDonatorLimit = CreateConVar("sbox_maxpropsperdonator", "300", "Donator Player prop spawn limit.", 0, true, 0.0);
+	g_hCvarClPhysLimit = CreateConVar("sbox_maxphyspropsperplayer", "50", "Player phys prop limit", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("sbox_maxragdolls", "10", "Player doll spawn limit.", 0, true, 0.0);
 	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit", 0, true, 0.0);
 	g_hCvarServerTag = CreateConVar("sbox_tag", "1", "Enable 'tf2sb' tag", 0, true, 1.0);
@@ -183,7 +189,7 @@ public void OnPluginStart()
 	g_iCvarTips = GetConVarBool(g_hCvarTips);
 	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
 	g_iCvarFly = GetConVarBool(g_hCvarFly);
-
+	g_iCvarClPhysLimit = GetConVarInt(g_hCvarClPhysLimit);
 	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);
 	g_iCvarClDonatorLimit = GetConVarInt(g_hCvarClDonatorLimit);
 	g_iCvarClDollLimit = GetConVarInt(g_hCvarClDollLimit);
@@ -193,6 +199,7 @@ public void OnPluginStart()
 	HookConVarChange(g_hCvarNonOwner, Hook_CvarNonOwner);
 	HookConVarChange(g_hCvarFly, Hook_CvarFly);
 	HookConVarChange(g_hCvarTips, Hook_CvarTips);
+	HookConVarChange(g_hCvarClPhysLimit, Hook_CvarClPhysLimit);
 	HookConVarChange(g_hCvarClPropLimit, Hook_CvarClPropLimit);
 	HookConVarChange(g_hCvarClDonatorLimit, Hook_CvarClDonatorLimit);
 	HookConVarChange(g_hCvarClDollLimit, Hook_CvarClDollLimit);
@@ -280,7 +287,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 public Action DisplayHud(Handle timer)
 {
-	SetHudTextParams(-1.0, 0.01, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
+
 	for(int i = 1; i <= MAXPLAYERS; i++) if (Build_IsClientValid(i, i))
 	{
 		//int hidehudnumber = GetEntProp(i, Prop_Send, "m_iHideHUD");
@@ -292,12 +299,19 @@ public Action DisplayHud(Handle timer)
 		{
 			if (CheckCommandAccess(i, "sm_tf2sb_donor", 0))
 			{
+				SetHudTextParams(-1.0, 0.01, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClDonatorLimit);
+				SetHudTextParams(-1.0, 0.08, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
+				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg2", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
 			}
 			else
 			{
+				SetHudTextParams(-1.0, 0.01, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClPropLimit);
+				SetHudTextParams(-1.0, 0.08, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
+				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg2", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
 			}
+
 		}
 		
 		//}
@@ -359,6 +373,11 @@ public void Hook_CvarClDonatorLimit(Handle convar, const char[] oldValue, const 
 	g_iCvarClDonatorLimit = GetConVarInt(g_hCvarClDonatorLimit);
 }
 
+public void Hook_CvarClPhysLimit(Handle convar, const char[] oldValue, const char[] newValue)
+{
+	g_iCvarClPhysLimit = GetConVarInt(g_hCvarClPhysLimit);
+}
+
 public void Hook_CvarClDollLimit(Handle convar, const char[] oldValue, const char[] newValue) 
 {
 	g_iCvarClDollLimit = GetConVarInt(g_hCvarClDollLimit);
@@ -388,7 +407,7 @@ public Action Command_SpawnCount(int client, int args)
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
 	Build_Logging(client, "sm_my", szArgs);
-	Build_PrintToChat(client, "Your Limit: %i/%i [Ragdoll: %i/%i], Server Limit: %i/%i", g_iPropCurrent[client], g_iCvarClPropLimit, g_iDollCurrent[client], g_iCvarClDollLimit, g_iServerCurrent, g_iCvarServerLimit);
+	Build_PrintToChat(client, "Your Limit: %i/%i [Ragdoll: %i/%i] [Phys Props: %i/%i], Server Limit: %i/%i", g_iPropCurrent[client], g_iCvarClPropLimit, g_iDollCurrent[client], g_iPhysCurrent[client], g_iCvarClPhysLimit, g_iCvarClDollLimit, g_iServerCurrent, g_iCvarServerLimit);
 	if (Build_IsAdmin(client)) 
 	{
 		for (int i = 0; i < MaxClients; i++) 
@@ -407,10 +426,11 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 	int iEnt = GetNativeCell(1);
 	int client = GetNativeCell(2);
 	bool bIsDoll = false;
-	
+	bool bIsPhys = false;
 	if (iNumParams >= 3)
 		bIsDoll = GetNativeCell(3);
-	
+	if(iNumParams >= 4)
+		bIsPhys = GetNativeCell(4);
 	if (client == -1) {
 		g_iEntOwner[iEnt] = -1;
 		return true;
@@ -432,7 +452,17 @@ public int Native_RegisterOwner(Handle hPlugin, int iNumParams)
 					Build_PrintToChat(client, "%t", "ragdolllimitreached");
 					return false;
 				}
-			} 
+			}
+			else if(bIsPhys)
+			{
+				if(g_iPhysCurrent[client] < g_iCvarClPhysLimit)
+					g_iPhysCurrent[client] += 1;
+				else
+				{
+					ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
+					return false;
+				}
+			}
 			else 
 			{
 				if ((CheckCommandAccess(client, "sm_tf2sb_donor", 0) && g_iPropCurrent[client] < g_iCvarClDonatorLimit) || g_iPropCurrent[client] < g_iCvarClPropLimit)
@@ -484,9 +514,12 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 	int client = GetNativeCell(1);
 	int Amount = GetNativeCell(2);
 	int bIsDoll = false;
+	int bIsPhys = false;
 	
 	if (iNumParams >= 3)
 		bIsDoll = GetNativeCell(3);
+	if(iNumParams >= 4)
+		bIsPhys = GetNativeCell(4);
 	
 	if (Amount == 0) 
 	{
@@ -495,7 +528,7 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 			g_iServerCurrent -= g_iDollCurrent[client];
 			g_iPropCurrent[client] -= g_iDollCurrent[client];
 			g_iDollCurrent[client] = 0;
-		} 
+		}
 		else 
 		{
 			g_iServerCurrent -= g_iPropCurrent[client];
@@ -509,6 +542,11 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 			if (g_iDollCurrent[client] > 0)
 				g_iDollCurrent[client] += Amount;
 		}
+		if(bIsPhys)
+		{
+			if(g_iPhysCurrent[client] > 0)
+				g_iPhysCurrent[client] += Amount;
+		}
 		if (g_iPropCurrent[client] > 0)
 			g_iPropCurrent[client] += Amount;
 		if (g_iServerCurrent > 0)
@@ -518,6 +556,8 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 		g_iDollCurrent[client] = 0;
 	if (g_iPropCurrent[client] < 0)
 		g_iPropCurrent[client] = 0;
+	if (g_iPhysCurrent[client] < 0)
+		g_iPhysCurrent[client] = 0;
 	if (g_iServerCurrent < 0)
 		g_iServerCurrent = 0;
 }
@@ -851,6 +891,17 @@ public int Native_IsClientValid(Handle hPlugin, int iNumParams)
 		}
 	}
 	return true;
+}
+public int Native_ResetPhysProps(Handle hPlugin, int iNumParams)
+{
+	int client = GetNativeCell(1);
+	g_iPhysCurrent[client] = 0;
+}
+
+public int Native_DelPhysProp(Handle hPlugin, int iNumParams)
+{
+	int client = GetNativeCell(1);
+	g_iPhysCurrent[client] -= 1;
 }
 
 void ReadBlackList() 
