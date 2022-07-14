@@ -1,0 +1,310 @@
+"Phrases"
+{
+    "tf2sb1"
+    {
+        "en"    "[TF2SB] Plugin successfully started!"
+        "chi"    "[TF2SB] 插件成功启动！"
+        "zho"    "[TF2SB] 插件成功啟動！"
+        "ru"    "[TF2SB] Плагин успешно запущен!"
+        "fr"    "[TF2SB] Plugin démarré avec succès! "
+        "es"    "[TF2SB] ¡El complemento se inició correctamente!"
+    }
+    "tf2sb2"
+    {
+        "#format"   "{1:s}"
+        "en"    "[TF2SB] Team Fortress 2 Sandbox is currently in beta, version {1}. If you have any issues with it, message the developers on the Discord or Steam Group."
+        "chi"    "[TF2SB] 军团要塞2 沙盒插件目前处于测试阶段，版本{1}。如果您有任何问题，请在 Discord 或 Steam 群组上发送消息。"
+        "zho"    "[TF2SB] 絕地要塞2 沙盒插件目前處於測試階段，版本{1}。如果您有任何問題，請在 Discord 或 Steam 群組上發送消息。"
+        "ru"    "[TF2SB] Team Fortress 2 Песочница в настоящее время в бета-версии , версия {1}. Если у вас возникнут какие-либо проблемы, сообщите об этом разработчикам в Discord или Steam группа."
+        "fr"    "[TF2SB] Team Fortress 2 Sandbox est actuellement en version bêta, version {1}. Si vous rencontrez des problèmes, envoyez un message aux développeurs du groupe Discord ou Steam."
+        "es"    "[TF2SB] Team Fortress 2 Sandbox está actualmente en versión beta, versión {1}. Si tiene algún problema, envíe un mensaje a los desarrolladores del Discord o Steam Group."
+    }
+    "hudmsg"
+    {
+        "en"    "Press TAB or say !build\nCurrent Props: "
+        "chi"    "按 TAB 键或打指令 !build\n目前的物件："
+        "zho"    "按 TAB 鍵或打指令 !build\n目前的物件："
+        "ru"    "Нажмите TAB или введите !build\nтекущие объекты: "
+        "fr"    "Appuyez sur la touche de tabulation ou dites! Build \ nAvantages actuels:"
+        "es"    "Presione TAB o diga !build\nActual Props:"
+    }
+    "builtby"
+    {
+        "en"    "Built by"
+        "chi"    "建造者"
+        "zho"    "建造者"
+        "ru"    "творец:"
+        "fr"    "Construit par"
+        "es"    "Construido por"
+    }
+    "on"
+    {
+        "en"    "ON"
+        "chi"    "开"
+        "zho"    "開"
+        "ru"    "На"
+        "fr"    "SUR"
+        "es"    "EN"
+    }
+    "off"
+    {
+        "en"    "OFF"
+        "chi"    "关"
+        "zho"    "關"
+        "ru"    "от"
+        "fr"    "DE"
+        "es"    "APAGADO"
+    }
+    "proplimitreached"
+    {
+        "en"    "You hit the Prop Limit!"
+        "fr"    "Vous atteignez la limite des prop!"
+        "es"    "¡Has alcanzado el límite de apoyo!"
+    }
+    "ragdolllimitreached"
+    {
+        "en"    "You hit the Ragdoll Limit!"
+        "fr"    "Vous atteignez la limite Ragdoll!"
+        "es"    "¡Has alcanzado el límite de Ragdoll!"
+    }
+    "globallimitreached"
+    {
+        "en"    "You hit the Global Limit!"
+        "fr"    "Vous atteignez la limite mondiale!"
+        "es"    "¡Llegaste al límite global!"
+    }
+    "invalidtarget"
+    {
+        "en"    "You don't have a target or target invalid."
+        "fr"    "Vous n'avez pas de cible ou de cible non valide."
+        "es"    "No tienes un objetivo o un objetivo no válido"
+    }
+    "deadtarget"
+    {
+        "en"    "This command can only be used on alive players."
+        "fr"    "Cette commande ne peut être utilisée que sur des joueurs en vie."
+        "es"    "Este comando solo se puede usar en jugadores vivos"
+    }
+    "cantuseplayers"
+    {
+        "en"    "You are not allowed to do this to players!"
+        "fr"    "Vous n'êtes pas autorisé à faire cela aux joueurs!"
+        "es"    "¡No tienes permitido hacer esto a los jugadores!"
+    }
+    "blacklisted"
+    {
+        "en"    "You're blacklisted from using Team Fortress 2 Sandbox!"
+        "fr"    "Vous utilisez la liste noire de Team Fortress 2 Sandbox!"
+        "es"    "¡Estás en la lista negra por usar Team Fortress 2 Sandbox!"
+    }
+    "nolongertaunting"
+    {
+        "en"    "You're no longer taunting."
+        "fr"    "Vous ne vous moquez plus."
+        "es"    "Ya no te burlas"
+    }
+    "camera"
+    {
+        "en"    "Say !cam while looking at the camera to set it up!"
+        "fr"    "Dis! Cam tout en regardant la caméra pour le configurer!"
+        "es"    "¡Di! Cámara mientras miras la cámara para configurarla!"
+    }
+    "alivetouse"
+    {
+        "en"    "You must be alive to use this command!"
+        "chi"    "你必须活着才能使用这个指令！"
+        "zho"    "你必須活著才能使用這個指令！"
+        "ru"    "Вы должны быть живы, чтобы использовать эту команду!"
+        "fr"    "Vous devez être en vie pour utiliser cette commande!"
+        "es"    "¡Debes estar vivo para usar este comando!"
+    }
+    "toofast"
+    {
+        "en"    "You're doing it too fast! Slow it down!"
+        "chi"    "你做得太快了！慢下来！"
+        "zho"    "你做得太快了！慢下來！"
+        "ru"    "Ты делаешь это слишком быстро! Помедленнее!"
+        "fr"    "Tu le fais trop vite! Ralentis!"
+        "es"    "¡Lo estás haciendo demasiado rápido! ¡Disminuye la velocidad!"
+    }
+    "alreadycopy"
+    {
+        "en"    "You are already copying something!"
+        "chi"    "你已经复制物件了！"
+        "zho"    "你已經復制物件了！"
+        "ru"    "Вы уже сейчас что-то копируете!"
+        "fr"    "Vous copiez déjà quelque chose!"
+        "es"    "¡Ya estás copiando algo!"
+    }
+    // %t: !render <fx amount> <fx> <R> <G> <B>
+    "usage"
+    {
+        "en"    "Usage"
+        "chi"    "用途"
+        "zho"    "用途"
+        "ru"    "Использование"
+        "es"    "Uso"
+    }
+    "maxscale"
+    {
+        "en"    "Max scale is "
+        "chi"    "最大比例是 "
+        "zho"    "最大比例是 "
+        "ru"    "Максимальная шкала "
+        "fr"    "L'échelle maximale est "
+        "es"    "La escala máxima es"
+    }
+    "higherthan"
+    {
+        "en"    "Scale must be higher than "
+        "chi"    "比例必须高于 "
+        "zho"    "比例必須高於 "
+        "ru"    "Масштаб должен быть выше чем "
+        "fr"    "L'échelle doit être supérieure à "
+        "es"    "La escala debe ser mayor que"
+    }
+    "skins"
+    {
+        "en"    "Not every model has multiple skins."
+        "chi"    "并非每个物件都有多个皮肤。"
+        "zho"    "並非每個物件都有多個皮膚。"
+        "ru"    "Не каждая модель имеет несколько скинов."
+        "fr"    "Tous les modèles n'ont pas plusieurs skins."
+        "es"    "No todos los modelos tienen máscaras múltiples"
+    }
+    "sdoor"
+    {
+        "en"    "!sdoor 1~6 = Spawn door"
+        "chi"    "!sdoor 1~6 = 产生门"
+        "zho"    "!sdoor 1~6 = 産生門"
+        "ru"    "!sdoor 1~6 = Поставь перед собой дверь"
+        "fr"    "!sdoor 1 ~ 6 = Spawn door"
+        "es"    "!sdoor 1 ~ 6 = Engendrar puerta"
+    }
+    "sdoor2"
+    {
+        "en"    "!sdoor a = Select door"
+        "chi"    "!sdoor a = 选择门"
+        "zho"    "!sdoor a = 選擇門"
+        "ru"    "!sdoor a = Выберите дверь"
+        "fr"    "!sdoor a = Sélectionnez la porte"
+        "es"    "!sdoor a = Seleccionar puerta"
+    }
+    "sdoor3"
+    {
+        "en"    "!sdoor b = Select button (Shoot to open)"
+        "chi"    "!sdoor b = 选择按钮（射击打开）"
+        "zho"    "!sdoor b = 選擇按鈕（射擊打開）"
+        "ru"    "!sdoor b = Выберите кнопку ( Стрелять, чтобы открыть )"
+        "fr"    "!sdoor b = bouton de sélection (tirer pour ouvrir)"
+        "es"    "!sdoor b = botón Seleccionar (disparar para abrir)"
+    }
+    "sdoor4"
+    {
+        "en"    "!sdoor c = Select button (Press to open)"
+        "chi"    "!sdoor c = 选择按钮（按下打开）"
+        "zho"    "!sdoor c = 選擇按鈕（按下打開）"
+        "ru"    "!sdoor c = Выберите кнопку ( Нажмите, чтобы открыть )"
+        "fr"    "!sdoor c = Select button (Appuyez pour ouvrir)"
+        "es"    "!sdoor c = botón Seleccionar (Presione para abrir)"
+    }
+    "setname"
+    {
+        "en"    "Usage: !setname <name>"
+        "chi"    "用途: !setname <名字>"
+        "zho"    "用途: !setname <名字>"
+        "ru"    "Использование: !setname <name>"
+        "fr"    "Usage: !setname <nom>"
+        "es"    "Uso: !setname <nombre>"
+    }
+    "propnotfound"
+    {
+        "en"    "Prop not found: "
+        "chi"    "物件不存在:"
+        "zho"    "物件不存在:"
+        "ru"    "Опора не найдена : "
+        "fr"    "Prop pas trouvé: "
+        "es"    "Prop no encontrado: "
+    }
+    "deletedallprops"
+    {
+        "en"    "Deleted all props you owned."
+        "chi"    "删除了你所拥有的物件。"
+        "zho"    "刪除了你所擁有的物件。"
+        "ru"    "Убраны все объекты, которые вам не принадлежат"
+        "fr"    "Supprimé tous les accessoires que vous possédiez."
+        "es"    "Eliminó todos los accesorios que poseía: "
+    }
+    "noprops"
+    {
+        "en"    "You have no props!"
+        "chi"    "你没有物件！"
+        "zho"    "你沒有物件！"
+        "ru"    "У вас нет объектов!"
+        "fr"    "Vous n'avez pas d'accessoires!"
+        "es"    "¡No tienes accesorios!"
+    }
+    "cantdelete"
+    {
+        "en"    "You cannot delete this!"
+        "chi"    "你不能删除这个！"
+        "zho"    "你不能刪除這個！"
+        "ru"    "Вы не можете удалить это!"
+        "fr"    "Vous ne pouvez pas supprimer ceci!"
+        "es"    "¡No puedes borrar esto!"
+    }
+    "resupplied"
+    {
+        "en"    "You've been resupplied."
+        "chi"    "你已经被补给了。"
+        "zho"    "你已經被補給了。"
+        "ru"    "Мы дали вам запасы"
+        "fr"    "Vous avez été réapprovisionné."
+        "es"    "Has sido reabastecido"
+    }
+    "tip1"
+    {
+        "en"    "If you want to delete everything you own, say !delall"
+        "chi"    "如果你想删除你所拥有物件，打指令 !delall"
+        "zho"    "如果你想刪除你所擁有物件，打指令 !delall"
+        "ru"    "Если вы хотите удалить все, что у вас есть, скажите !delall"
+        "fr"    "Si vous voulez supprimer tout ce que vous possédez, dites! Delall"
+        "es"    "Si desea eliminar todo lo que posee, diga !delall"
+    }
+    "tip2"
+    {
+        "en"    "Say !del to delete the prop you are looking at."
+        "chi"    "打指令 !del 删除你正在看的物件。"
+        "zho"    "打指令 !del 刪除你正在看的物件。"
+        "ru"    "Скажи !del, чтобы удалить объект, который вы смотрите."
+        "fr"    "Dis! Del pour supprimer l'accessoire que tu regardes."
+        "es"    "¡Di !del para eliminar el accesorio que estás viendo"
+    }
+    "tip3"
+    {
+        "en"    "Press TAB to open Spawnlist!"
+        "chi"    "按 TAB 键打开列表！"
+        "zho"    "按 TAB 鍵打開列表！"
+        "ru"    "Нажмите TAB, чтобы открыть список объектов!"
+        "fr"    "Appuyez sur TAB pour ouvrir Spawnlist!"
+        "es"    "¡Presiona TAB para abrir Spawnlist!"
+    }
+    "tip4"
+    {
+        "en"    "Say !god to turn off godmode"
+        "chi"    "打指令 !god 关掉无敌模式"
+        "zho"    "打指令 !god 關掉無敵模式"
+        "ru"    "Скажи !god, чтобы выключить режим бога"
+        "fr"    "Dites! Dieu pour désactiver le mode divin"
+        "es"    "¡Di Dios para apagar el modo divino"
+    }
+    "tip5"
+    {
+        "en"    "If you want to rocket jump while in godmode, say !buddha"
+        "chi"    "如果你想在无敌模式中跳火箭，那就打指令 !buddha"
+        "zho"    "如果你想在無敵模式中跳火箭，那就打指令 !buddha"
+        "ru"    "Если вы хотите прыгать с ракетами в то время как в режим бога, скажем !buddha"
+        "fr"    "Si vous voulez sauter en fusée en mode divin, dites! Bouddha"
+        "es"    "Si quieres saltar cohetes mientras estás en modo divino, ¡di !buddha"
+    }
+}
