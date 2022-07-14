@@ -61,6 +61,7 @@ Handle g_hBlackListArray;
 Handle g_hCvarSwitch = INVALID_HANDLE;
 Handle g_hCvarNonOwner = INVALID_HANDLE;
 Handle g_hCvarFly = INVALID_HANDLE;
+Handle g_hCvarPhysSwitch = INVALID_HANDLE;
 Handle g_hCvarTips = INVALID_HANDLE;
 Handle g_hCvarClPhysLimit	 = INVALID_HANDLE;
 Handle g_hCvarClDonatorLimit = INVALID_HANDLE;
@@ -72,6 +73,7 @@ Handle g_hCvarServerLimit = INVALID_HANDLE;
 int g_iCvarEnabled;
 int g_iCvarNonOwner;
 int g_iCvarFly;
+int g_iCvarPhysEnabled;
 int g_iCvarTips;
 int g_iCvarClPropLimit;
 int g_iCvarClDonatorLimit;
@@ -175,6 +177,7 @@ public void OnPluginStart()
 	g_hCvarNonOwner = CreateConVar("sbox_nonowner", "0", "Disable anti-grief", 0, true, 0.0, true, 1.0);
 	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly or noclip to noclip or not?", 0, true, 0.0, true, 1.0);
 	g_hCvarTips = CreateConVar("sbox_tips", "1", "Will TF2Sandbox Tips be displayed?", 0, true, 0.0, true, 1.0);
+	g_hCvarPhysSwitch = CreateConVar("sbox_enablephysprops", "0", "Allow props with physics", 0, true, 0.0, true, 1.0);
 	g_hCvarClPropLimit = CreateConVar("sbox_maxpropsperplayer", "120", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDonatorLimit = CreateConVar("sbox_maxpropsperdonator", "300", "Donator Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClPhysLimit = CreateConVar("sbox_maxphyspropsperplayer", "50", "Player phys prop limit", 0, true, 0.0);
@@ -189,6 +192,7 @@ public void OnPluginStart()
 	g_iCvarTips = GetConVarBool(g_hCvarTips);
 	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
 	g_iCvarFly = GetConVarBool(g_hCvarFly);
+	g_iCvarPhysEnabled = GetConVarBool(g_hCvarPhysSwitch);
 	g_iCvarClPhysLimit = GetConVarInt(g_hCvarClPhysLimit);
 	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);
 	g_iCvarClDonatorLimit = GetConVarInt(g_hCvarClDonatorLimit);
@@ -198,6 +202,7 @@ public void OnPluginStart()
 	HookConVarChange(g_hCvarSwitch, Hook_CvarEnabled);
 	HookConVarChange(g_hCvarNonOwner, Hook_CvarNonOwner);
 	HookConVarChange(g_hCvarFly, Hook_CvarFly);
+	HookConVarChange(g_hCvarPhysSwitch, Hook_CvarPhysEnabled);
 	HookConVarChange(g_hCvarTips, Hook_CvarTips);
 	HookConVarChange(g_hCvarClPhysLimit, Hook_CvarClPhysLimit);
 	HookConVarChange(g_hCvarClPropLimit, Hook_CvarClPropLimit);
@@ -356,6 +361,11 @@ public void Hook_CvarNonOwner(Handle convar, const char[] oldValue, const char[]
 public void Hook_CvarFly(Handle convar, const char[] oldValue, const char[] newValue) 
 {
 	g_iCvarFly = GetConVarBool(g_hCvarFly);
+}
+
+public void Hook_CvarPhysEnabled(Handle convar, const char[] oldValue, const char[] newValue)
+{
+	g_iCvarPhysEnabled = GetConVarBool(g_hCvarPhysSwitch);
 }
 
 public void Hook_CvarTips(Handle convar, const char[] oldValue, const char[] newValue) 
@@ -521,6 +531,7 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 	if(iNumParams >= 4)
 		bIsPhys = GetNativeCell(4);
 	
+	PrintToChat(client, "%i", bIsPhys);
 	if (Amount == 0) 
 	{
 		if (bIsDoll) 
@@ -528,6 +539,13 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 			g_iServerCurrent -= g_iDollCurrent[client];
 			g_iPropCurrent[client] -= g_iDollCurrent[client];
 			g_iDollCurrent[client] = 0;
+		}
+		if (bIsPhys)
+		{
+			PrintToChat(client, "Set to 0");
+			g_iServerCurrent -= g_iPhysCurrent[client];
+			g_iPhysCurrent[client] -= g_iPhysCurrent[client];
+			g_iPhysCurrent[client] = 0;
 		}
 		else 
 		{
@@ -545,10 +563,15 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 		if(bIsPhys)
 		{
 			if(g_iPhysCurrent[client] > 0)
+			{
 				g_iPhysCurrent[client] += Amount;
+			}
 		}
-		if (g_iPropCurrent[client] > 0)
-			g_iPropCurrent[client] += Amount;
+		if(!bIsPhys)
+		{
+			if (g_iPropCurrent[client] > 0)
+				g_iPropCurrent[client] += Amount;
+		}
 		if (g_iServerCurrent > 0)
 			g_iServerCurrent += Amount;
 	}
