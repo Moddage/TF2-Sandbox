@@ -1250,7 +1250,11 @@ public void OnPluginStart()
 public void OnPluginEnd()
 {
 	for(int i = 1; i <= MaxClients; i++) {
+<<<<<<< HEAD
     	if(IsClientConnected(i))
+=======
+	if(IsClientConnected(i))
+>>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 		{
 			if(i != 0)
 			{
@@ -2685,7 +2689,11 @@ public Action Command_SpawnProp(int client, int args)
 			
 			DispatchSpawn(iEntity);
 			
+<<<<<<< HEAD
 			if(!StrEqual(szPropFrozen, "1"))	
+=======
+			if(!StrEqual(szPropFrozen, "1"))
+>>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 			{
 				Phys_EnableCollisions(iEntity, false);
 				Phys_EnableGravity(iEntity, false);
@@ -3239,7 +3247,11 @@ public Action Command_Delete(int client, int args)
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 	Build_Logging(client, "sm_del", szArgs);
 	return Plugin_Handled;
 }
