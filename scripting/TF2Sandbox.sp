@@ -90,6 +90,7 @@ Handle g_hSizeMenu = INVALID_HANDLE;
 Handle g_hBuildHelperMenu = INVALID_HANDLE;
 Handle g_hPropMenuComic = INVALID_HANDLE;
 Handle g_hPropMenuConstructions = INVALID_HANDLE;
+Handle g_hPropMenuRagdolls = INVALID_HANDLE;
 Handle g_hPropMenuWeapons = INVALID_HANDLE;
 Handle g_hPropMenuCosmetics = INVALID_HANDLE;
 Handle g_hPropMenuPickup = INVALID_HANDLE;
@@ -213,7 +214,7 @@ public void OnPluginStart()
 
 	// props-extended.ini
 	g_hPropMenuDonor = CreateMenu(PropMenuDonor);
-	SetMenuTitle(g_hPropMenuDonor, /*"TF2SB - */ "Donator \nKeep in mind some of these props may not be removable!");
+	SetMenuTitle(g_hPropMenuDonor, /*"TF2SB - */ "Donator Props \nKeep in mind some of these props may not be removable!");
 	SetMenuExitBackButton(g_hPropMenuDonor, true);
 	AddMenuItem(g_hPropMenuDonor, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuDonor, "blank", "", ITEMDRAW_IGNORE);
@@ -406,27 +407,6 @@ public void OnPluginStart()
 	SetMenuExitBackButton(g_hPropMenuRequested, true);
 	AddMenuItem(g_hPropMenuRequested, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuRequested, "emptyspace", "", ITEMDRAW_IGNORE);
-	AddMenuItem(g_hPropMenuRequested, "scout", "Scout");
-	AddMenuItem(g_hPropMenuRequested, "soldier", "Soldier");
-	AddMenuItem(g_hPropMenuRequested, "pyro", "Pyro");
-	AddMenuItem(g_hPropMenuRequested, "demoman", "Demoman");
-	AddMenuItem(g_hPropMenuRequested, "heavy", "Heavy");
-	AddMenuItem(g_hPropMenuRequested, "engineer", "Engineer");
-	AddMenuItem(g_hPropMenuRequested, "sniper", "Sniper");
-	AddMenuItem(g_hPropMenuRequested, "medic", "Medic");
-	AddMenuItem(g_hPropMenuRequested, "spy", "Spy");
-	AddMenuItem(g_hPropMenuRequested, "horseless", "Horseless Headless Horseman");
-	AddMenuItem(g_hPropMenuRequested, "skeleton", "Skeleton");
-	AddMenuItem(g_hPropMenuRequested, "sentrybuster", "Sentry Buster");
-	AddMenuItem(g_hPropMenuRequested, "robotscout", "Robot Scout");
-	AddMenuItem(g_hPropMenuRequested, "robotsoldier", "Robot Soldier");
-	AddMenuItem(g_hPropMenuRequested, "robotpyro", "Robot Pyro");
-	AddMenuItem(g_hPropMenuRequested, "robotdemoman", "Robot Demoman");
-	AddMenuItem(g_hPropMenuRequested, "robotheavy", "Robot Heavy");
-	AddMenuItem(g_hPropMenuRequested, "robotengineer", "Robot Engineer");
-	AddMenuItem(g_hPropMenuRequested, "robotsniper", "Robot Sniper");
-	AddMenuItem(g_hPropMenuRequested, "robotmedic", "Robot Medic");
-	AddMenuItem(g_hPropMenuRequested, "robotspy", "Robot Spy");
 	AddMenuItem(g_hPropMenuRequested, "cow", "Cow");
 	AddMenuItem(g_hPropMenuRequested, "explosion", "Explosion");
 	AddMenuItem(g_hPropMenuRequested, "muzzleflash", "Muzzleflash");
@@ -1235,6 +1215,79 @@ public void OnPluginStart()
 	AddMenuItem(g_hPropMenuConstructions, "barrel01", "Yellow Barrel");
 	AddMenuItem(g_hPropMenuConstructions, "barrel03", "Yellow Barrel 2");
 
+	// Prop Menu Constructions Prop
+	g_hPropMenuRagdolls = CreateMenu(PropMenuRagdolls);
+	SetMenuTitle(g_hPropMenuRagdolls, /*"TF2SB - */ "Characters"); // \nSay /g in chat to move Entities!");
+	SetMenuExitBackButton(g_hPropMenuRagdolls, true);
+	AddMenuItem(g_hPropMenuRagdolls, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenuRagdolls, "emptyspace", "", ITEMDRAW_IGNORE);
+	AddMenuItem(g_hPropMenuRagdolls, "alyx", "Alyx Vance");
+	AddMenuItem(g_hPropMenuRagdolls, "eli", "Eli Vance");
+	AddMenuItem(g_hPropMenuRagdolls, "barney", "Barney Calhoun");
+	AddMenuItem(g_hPropMenuRagdolls, "dog", "DOG");
+	AddMenuItem(g_hPropMenuRagdolls, "gman", "Government Man");
+	AddMenuItem(g_hPropMenuRagdolls, "odessa", "Odessa");
+	AddMenuItem(g_hPropMenuRagdolls, "monk", "Father Grigori");
+	AddMenuItem(g_hPropMenuRagdolls, "mossman", "Judith Mossman");
+	AddMenuItem(g_hPropMenuRagdolls, "breen", "Dr. Breen");
+	AddMenuItem(g_hPropMenuRagdolls, "combine_s", "Combine Soldier");
+	AddMenuItem(g_hPropMenuRagdolls, "combine_sp", "Combine Prison Guard");
+	AddMenuItem(g_hPropMenuRagdolls, "combine_ss", "Combine Elite");
+	AddMenuItem(g_hPropMenuRagdolls, "antlion", "Antlion");
+	AddMenuItem(g_hPropMenuRagdolls, "antlionguard", "Antlion Guard");
+	AddMenuItem(g_hPropMenuRagdolls, "zombie", "Zombie");
+	AddMenuItem(g_hPropMenuRagdolls, "headcrab", "Headcrab");
+	AddMenuItem(g_hPropMenuRagdolls, "fastheadcrab", "Fast Headcrab");
+	AddMenuItem(g_hPropMenuRagdolls, "poisonheadcrab", "Poison Headcrab");
+	AddMenuItem(g_hPropMenuRagdolls, "zombietorso", "Zombie Torso");
+	AddMenuItem(g_hPropMenuRagdolls, "zombielegs", "Zombie Legs");
+	AddMenuItem(g_hPropMenuRagdolls, "poisonzombie", "Poison Zombie");
+	AddMenuItem(g_hPropMenuRagdolls, "fastzombie", "Fast Zombies");
+	AddMenuItem(g_hPropMenuRagdolls, "crow", "Crow");
+	AddMenuItem(g_hPropMenuRagdolls, "pigeon", "Pigeon");
+	AddMenuItem(g_hPropMenuRagdolls, "seagull", "Seagull");
+	AddMenuItem(g_hPropMenuRagdolls, "corpse", "Corpse");
+	AddMenuItem(g_hPropMenuRagdolls, "charple", "Charple 1");
+	AddMenuItem(g_hPropMenuRagdolls, "charple2", "Charple 2");
+	AddMenuItem(g_hPropMenuRagdolls, "charple3", "Charple 3");
+	AddMenuItem(g_hPropMenuRagdolls, "charple4", "Charple 4");
+	AddMenuItem(g_hPropMenuRagdolls, "male01", "Male 1");
+	AddMenuItem(g_hPropMenuRagdolls, "male02", "Male 2");
+	AddMenuItem(g_hPropMenuRagdolls, "male03", "Male 3");
+	AddMenuItem(g_hPropMenuRagdolls, "male04", "Male 4");
+	AddMenuItem(g_hPropMenuRagdolls, "male05", "Male 5");
+	AddMenuItem(g_hPropMenuRagdolls, "male06", "Male 6");
+	AddMenuItem(g_hPropMenuRagdolls, "male07", "Male 7");
+	AddMenuItem(g_hPropMenuRagdolls, "male08", "Male 8");
+	AddMenuItem(g_hPropMenuRagdolls, "male09", "Male 9");
+	AddMenuItem(g_hPropMenuRagdolls, "female01", "Female 1");
+	AddMenuItem(g_hPropMenuRagdolls, "female02", "Female 2");
+	AddMenuItem(g_hPropMenuRagdolls, "female03", "Female 3");
+	AddMenuItem(g_hPropMenuRagdolls, "female04", "Female 4");
+	AddMenuItem(g_hPropMenuRagdolls, "female06", "Female 6");
+	AddMenuItem(g_hPropMenuRagdolls, "female07", "Female 7");
+	AddMenuItem(g_hPropMenuRagdolls, "scout", "Scout");
+	AddMenuItem(g_hPropMenuRagdolls, "soldier", "Soldier");
+	AddMenuItem(g_hPropMenuRagdolls, "pyro", "Pyro");
+	AddMenuItem(g_hPropMenuRagdolls, "demoman", "Demoman");
+	AddMenuItem(g_hPropMenuRagdolls, "heavy", "Heavy");
+	AddMenuItem(g_hPropMenuRagdolls, "engineer", "Engineer");
+	AddMenuItem(g_hPropMenuRagdolls, "medic", "Medic");
+	AddMenuItem(g_hPropMenuRagdolls, "sniper", "Sniper");
+	AddMenuItem(g_hPropMenuRagdolls, "spy", "Spy");
+	AddMenuItem(g_hPropMenuRagdolls, "robotscout", "Robot Scout");
+	AddMenuItem(g_hPropMenuRagdolls, "robotsoldier", "Robot Soldier");
+	AddMenuItem(g_hPropMenuRagdolls, "robotpyro", "Robot Pyro");
+	AddMenuItem(g_hPropMenuRagdolls, "robotdemoman", "Robot Demoman");
+	AddMenuItem(g_hPropMenuRagdolls, "robotheavy", "Robot Heavy");
+	AddMenuItem(g_hPropMenuRagdolls, "robotengineer", "Robot Engineer");
+	AddMenuItem(g_hPropMenuRagdolls, "robotmedic", "Robot Medic");
+	AddMenuItem(g_hPropMenuRagdolls, "robotsniper", "Robot Sniper");
+	AddMenuItem(g_hPropMenuRagdolls, "robotspy", "Robot Spy");
+	AddMenuItem(g_hPropMenuRagdolls, "horseless", "Haunted Headless Horsemann");
+	AddMenuItem(g_hPropMenuRagdolls, "skeleton", "Skeleton");
+	AddMenuItem(g_hPropMenuRagdolls, "sentrybuster", "Sentry Buster");
+
 	// updater
 	#if defined _updater_included
     if (LibraryExists("updater"))
@@ -1250,11 +1303,8 @@ public void OnPluginStart()
 public void OnPluginEnd()
 {
 	for(int i = 1; i <= MaxClients; i++) {
-<<<<<<< HEAD
     	if(IsClientConnected(i))
-=======
 	if(IsClientConnected(i))
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 		{
 			if(i != 0)
 			{
@@ -1322,6 +1372,7 @@ public void OnAllPluginsLoaded()
 	AddMenuItem(g_hPropMenu, "cosmeticprops", "Cosmetics Props");
 	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
 	AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
+	AddMenuItem(g_hPropMenu, "ragdolls", "Characters");
 
 	AddMenuItem(g_hEquipMenu, "toolgun", "--SANDBOX WEAPONS--", ITEMDRAW_DISABLED);
 
@@ -1764,14 +1815,14 @@ public Action Command_OpenableDoorProp(int client, int args)
 		Build_ClientAimOrigin(client, fOriginAim);
 		fOriginAim[2] += 50;
 		
-		if (!IsModelPrecached("models/props_manor/doorframe_01_door_01a.mdl"))
-			PrecacheModel("models/props_manor/doorframe_01_door_01a.mdl");
+		if (!IsModelPrecached("modelsprops_c17/door01_left.mdl"))
+			PrecacheModel("modelsprops_c17/door01_left.mdl");
 		
-		DispatchKeyValue(iDoor, "model", "models/props_manor/doorframe_01_door_01a.mdl");
+		DispatchKeyValue(iDoor, "model", "models/props_c17/door01_left.mdl");
 		DispatchKeyValue(iDoor, "distance", "90");
 		DispatchKeyValue(iDoor, "speed", "100");
 		DispatchKeyValue(iDoor, "returndelay", "-1");
-		DispatchKeyValue(iDoor, "dmg", "-20");
+		DispatchKeyValue(iDoor, "dmg", "20");
 		DispatchKeyValue(iDoor, "opendir", "0");
 		DispatchKeyValue(iDoor, "spawnflags", "8192");
 		//DispatchKeyValue(iDoor, "OnFullyOpen", "!caller,close,,0,-1");
@@ -2265,7 +2316,7 @@ public Action Command_LightDynamic(int client, int args)
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
 	
-	int Obj_LightDMelon = CreateEntityByName("prop_physics");
+	int Obj_LightDMelon = CreateEntityByName("prop_dynamic");
 	if (Build_RegisterEntityOwner(Obj_LightDMelon, client)) {
 		char szBrightness[33], szColorR[33], szColorG[33], szColorB[33], szColor[33];
 		char szNameMelon[64];
@@ -2371,7 +2422,7 @@ public Action Command_SpawnDoor(int client, int args)
 	char szModel[128];
 	
 	if (StrEqual(szType[0], "1") || StrEqual(szType[0], "2") || StrEqual(szType[0], "3") || StrEqual(szType[0], "4") || StrEqual(szType[0], "5") || StrEqual(szType[0], "6") || StrEqual(szType[0], "7")) {
-		int Obj_Door = CreateEntityByName("prop_physics_override");
+		int Obj_Door = CreateEntityByName("prop_dynamic");
 		
 		switch (szType[0]) {
 			case '1':szModel = "models/props_lab/blastdoor001c.mdl";
@@ -2635,7 +2686,7 @@ public Action Command_SpawnProp(int client, int args)
 		
 		int iEntity = CreateEntityByName(szEntType);
 		
-		if (Build_RegisterEntityOwner(iEntity, client, bIsDoll, phys)) {
+		if (Build_RegisterEntityOwner(iEntity, client, bIsDoll)) {
 			float fOriginWatching[3], fOriginFront[3], fAngles[3], fRadiansX, fRadiansY;
 			
 			float iAim[3];
@@ -2689,11 +2740,8 @@ public Action Command_SpawnProp(int client, int args)
 			
 			DispatchSpawn(iEntity);
 			
-<<<<<<< HEAD
 			if(!StrEqual(szPropFrozen, "1"))	
-=======
 			if(!StrEqual(szPropFrozen, "1"))
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 			{
 				Phys_EnableCollisions(iEntity, false);
 				Phys_EnableGravity(iEntity, false);
@@ -2706,6 +2754,7 @@ public Action Command_SpawnProp(int client, int args)
 				Phys_EnableGravity(iEntity, true);
 				Phys_EnableDrag(iEntity, true);
 				Phys_EnableMotion(iEntity, true);
+				Phys_EnableCollisions(iEntity, true);
 			}
 			TeleportEntity(iEntity, iAim, NULL_VECTOR, NULL_VECTOR);
 			
@@ -3144,7 +3193,6 @@ public Action Command_DeleteAll(int client, int args)
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
-	Build_ResetPhysProps(client);
 	Build_Logging(client, "sm_delall", szArgs);
 	return Plugin_Handled;
 }
@@ -3208,7 +3256,7 @@ public Action Command_Delete(int client, int args)
 						Build_SetLimit(iOwner, -1, true);
 					else if (Phys_IsGravityEnabled(iEntity))
 					{
-						Build_SetLimit(iOwner, -1, false, true);
+						Build_SetLimit(iOwner, -1, true);
 					}
 					else
 						Build_SetLimit(iOwner, -1);
@@ -3236,7 +3284,7 @@ public Action Command_Delete(int client, int args)
 		if (StrEqual(szClass, "5"))
 			Build_SetLimit(client, -1, true);
 		else if (Phys_IsGravityEnabled(iEntity))
-			Build_SetLimit(client, -1, false, true);
+			Build_SetLimit(client, -1, true);
 		else
 			Build_SetLimit(client, -1);
 		Build_RegisterEntityOwner(iEntity, -1);
@@ -3247,11 +3295,6 @@ public Action Command_Delete(int client, int args)
 		GetCmdArg(i, szTemp, sizeof(szTemp));
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
-<<<<<<< HEAD
-	
-=======
-
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 	Build_Logging(client, "sm_del", szArgs);
 	return Plugin_Handled;
 }
@@ -3550,6 +3593,10 @@ public int PropMenu(Handle menu, MenuAction action, int param1, int param2)
 			{
 				FakeClientCommand(param1, "say !donate");
 			}
+		}
+		else if (StrEqual(info, "ragdolls"))
+		{
+		   DisplayMenu(g_hPropMenuRagdolls, param1, MENU_TIME_FOREVER);
 		}
 		else
 		{
@@ -4089,6 +4136,32 @@ public int PropMenuConstructions(Handle menu, MenuAction action, int param1, int
 	{
 		DisplayMenuAtItem(g_hPropMenuConstructions, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
 		//DisplayMenu(g_hPropMenuConstructions, param1, MENU_TIME_FOREVER);
+		char info[255];
+		
+		GetMenuItem(menu, param2, info, sizeof(info));
+		
+		if (StrEqual(info, "removeprops"))
+		{
+			// DisplayMenu(g_hRemoveMenu, param1, MENU_TIME_FOREVER);
+			FakeClientCommand(param1, "sm_del");
+		}
+		else
+		{
+			FakeClientCommand(param1, "sm_prop %s", info);
+		}
+	}
+	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		DisplayMenu(g_hPropMenu, param1, MENU_TIME_FOREVER);
+	}
+}
+
+public int PropMenuRagdolls(Handle menu, MenuAction action, int param1, int param2)
+{
+	if (action == MenuAction_Select && param1 > 0 && param1 <= MaxClients && IsClientInGame(param1))
+	{
+		DisplayMenuAtItem(g_hPropMenuRagdolls, param1, GetMenuSelectionPosition(), MENU_TIME_FOREVER);
+		//DisplayMenu(g_hPropMenuRagdolls, param1, MENU_TIME_FOREVER);
 		char info[255];
 		
 		GetMenuItem(menu, param2, info, sizeof(info));
