@@ -120,7 +120,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("Build_IsClientValid", Native_IsClientValid);
 	CreateNative("Build_ResetPhysProps", Native_ResetPhysProps);
 	CreateNative("Build_DelPhysProp", Native_DelPhysProp);
-	
+	CreateNative("Build_GetCurrentProps", Native_GetCurrentProps);
+    CreateNative("Build_GetCurrentPhysProps", Native_GetCurrentPhysProps);
+
 	#if defined _steamtools_included
 	MarkNativeAsOptional("Steam_SetGameDescription");
 	#endif
@@ -292,11 +294,6 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 public Action DisplayHud(Handle timer)
 {
-<<<<<<< HEAD
-	
-=======
-
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 	for(int i = 1; i <= MAXPLAYERS; i++) if (Build_IsClientValid(i, i))
 	{
 		//int hidehudnumber = GetEntProp(i, Prop_Send, "m_iHideHUD");
@@ -320,11 +317,7 @@ public Action DisplayHud(Handle timer)
 				SetHudTextParams(-1.0, 0.08, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg2", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
 			}
-<<<<<<< HEAD
 			
-=======
-
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 		}
 		
 		//}
@@ -573,21 +566,13 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 			if(g_iPhysCurrent[client] > 0)
 			{
 				g_iPhysCurrent[client] += Amount;
-<<<<<<< HEAD
 			}	
-=======
-			}
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 		}
 		if(!bIsPhys)
 		{
 			if (g_iPropCurrent[client] > 0)
 				g_iPropCurrent[client] += Amount;
-<<<<<<< HEAD
 		}	
-=======
-		}
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
 		if (g_iServerCurrent > 0)
 			g_iServerCurrent += Amount;
 	}
@@ -941,6 +926,18 @@ public int Native_DelPhysProp(Handle hPlugin, int iNumParams)
 {
 	int client = GetNativeCell(1);
 	g_iPhysCurrent[client] -= 1;
+}
+
+public int Native_GetCurrentProps(Handle hPlugin, int iNumParams)
+{
+    int client = GetNativeCell(1);
+    return g_iPropCurrent[client];
+}
+
+public int Native_GetCurrentPhysProps(Handle hPlugin, int iNumParams)
+{
+    int client = GetNativeCell(1);
+    return g_iPhysCurrent[client];
 }
 
 void ReadBlackList() 
