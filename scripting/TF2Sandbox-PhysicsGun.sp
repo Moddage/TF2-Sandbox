@@ -76,6 +76,8 @@ int g_iModelIndex;
 int g_iHaloIndex;
 int g_iPhysicsGunVM[2];
 int g_iPhysicsGunWM;
+int g_iCvarClPropLimit;
+int g_iCvarClPhysLimit;
 
 bool g_bPhysGunMode[MAXPLAYERS + 1];
 bool g_bShowHints[MAXPLAYERS + 1];
@@ -110,6 +112,9 @@ public void OnPluginStart()
 	
 	g_cvbCanGrabBuild = CreateConVar("sm_tf2sb_physgun_cangrabbuild", "0", "Enable/disable grabbing buildings", 0, true, 0.0, true, 1.0);
 	g_cvbFullDuplicate = CreateConVar("sm_tf2sb_physgun_fullduplicate", "0", "Enable/disable full duplicate feature - Disable = Only prop_dynamic", 0, true, 0.0, true, 1.0);
+	
+	g_iCvarClPhysLimit = GetConVarInt(g_hCvarClPhysLimit);
+	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);
 	
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	
@@ -1049,13 +1054,17 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 						g_bIN_ATTACK2[client] = true;
 						if(Phys_IsGravityEnabled(iEntity))	
 						{
-							Phys_EnableCollisions(iEntity, false);
-							Phys_EnableGravity(iEntity, false);
-							Phys_EnableDrag(iEntity, false);
-							Phys_EnableMotion(iEntity, false);
+							if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+							{
+								Phys_EnableCollisions(iEntity, false);
+								Phys_EnableGravity(iEntity, false);
+								Phys_EnableDrag(iEntity, false);
+								Phys_EnableMotion(iEntity, false);
+							}
 						}
 						else
 						{
+							if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
 							Phys_EnableCollisions(iEntity, true);
 							Phys_EnableGravity(iEntity, true);
 							Phys_EnableDrag(iEntity, true);
