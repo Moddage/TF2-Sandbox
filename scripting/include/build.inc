@@ -15,11 +15,7 @@ native bool:Build_RegisterEntityOwner(entity_index, client_index, bool:Doll = fa
 
 /**
  * Register an entity owner.
-<<<<<<< HEAD
  * 
-=======
- *
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
  * @param entity_index		Entity index.
  * @param client_index		Client index.
  * @param Doll				Is prop_ragdoll?
@@ -160,11 +156,7 @@ native bool:Build_IsClientValid(client_index, target_index, bool:Alive = false, 
  * Reset phys prop count.
  *
  * @param client_index		Client index.
-<<<<<<< HEAD
  * @noreturn					
-=======
- * @noreturn
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
  */
 native Build_ResetPhysProps(client_index);
 
@@ -172,10 +164,22 @@ native Build_ResetPhysProps(client_index);
  * Remove 1 phys prop count.
  *
  * @param client_index		Client index.
-<<<<<<< HEAD
  * @noreturn					
-=======
- * @noreturn
->>>>>>> 0681785044414eb0f74decbbb9e4f5bab2104d98
  */
 native Build_DelPhysProp(client_index);
+
+/**
+ * Check is target client valid.
+ *
+ * @param client_index		Client index.
+ * @return					Returns number of props client currently has. (Int)
+ */
+native Build_GetCurrentProps(client_index);
+
+/**
+ * Check is target client valid.
+ *
+ * @param client_index		Client index.
+ * @return					Returns number of phys props client currently has. (Int)
+ */
+native Build_GetCurrentPhysProps(client_index)
