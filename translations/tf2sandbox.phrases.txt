@@ -28,6 +28,10 @@
         "fr"    "Appuyez sur la touche de tabulation ou dites! Build \ nAvantages actuels:"
         "es"    "Presione TAB o diga !build\nActual Props:"
     }
+    "hudmsg2"
+    {
+        "en"    \nPhysics Props:
+    }
     "builtby"
     {
         "en"    "Built by"
