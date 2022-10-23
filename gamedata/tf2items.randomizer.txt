@@ -1,0 +1,15 @@
+"Games"
+{
+	/* Team Fortress 2 */
+	"tf"
+	{
+		"Offsets"
+		{
+			"CTFPlayer::EquipWearable"
+			{
+				"windows"	"435"
+				"linux"		"436"
+			}
+		}
+	}
+}

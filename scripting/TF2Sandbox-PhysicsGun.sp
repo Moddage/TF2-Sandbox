@@ -30,8 +30,6 @@ public const float ZERO_VECTOR[3] = {0.0, 0.0, 0.0};
 
 #define EF_NODRAW (1 << 5)
 
-int g_PhysGunModel;
-
 //Impluse
 #define IN_SPRAY 201
 
@@ -125,7 +123,6 @@ public void OnMapStart()
 	g_iPhysicsGunVM[0] = PrecacheModel(g_strPhysGunVM[0]);
 	g_iPhysicsGunVM[1] = PrecacheModel(g_strPhysGunVM[1]);
 	g_iPhysicsGunWM = PrecacheModel(MODEL_PHYSICSGUNWM);
-	g_PhysGunModel = PrecacheModel("models/weapons/v_superphyscannon.mdl");
 
 	PrecacheSound(SOUND_MODE);
 	PrecacheSound(SOUND_COPY);
@@ -250,7 +247,8 @@ public Action Command_EquipPhysicsGun(int client, int args)
 		SetEntProp(weapon, Prop_Send, "m_nSkin", 1);
 		SetEntProp(weapon, Prop_Send, "m_iWorldModelIndex", g_iPhysicsGunWM);
 		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", g_iPhysicsGunWM, _, 0);
-		SetEntProp(weapon, Prop_Send, "m_nSequence", 0);		
+		SetEntProp(weapon, Prop_Send, "m_nSequence", 0);
+		
 		TF2_RemoveWeaponSlot(client, WEAPON_SLOT);
 		DispatchSpawn(weapon);
 		
@@ -676,6 +674,7 @@ stock void ClientSettings(int client, int &buttons, int &impulse, float vel[3], 
 	if(IsHoldingPhysicsGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) == INVALID_ENT_REFERENCE)
 	{
 		//Hide Original viewmodel
+		SetEntProp(iViewModel, Prop_Send, "m_fEffects", GetEntProp(iViewModel, Prop_Send, "m_fEffects") | EF_NODRAW);
 		 
 		//Create client physics gun viewmodel
 		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iPhysicsGunVM[GetPhysGunWorldModelSkin(client)]));
