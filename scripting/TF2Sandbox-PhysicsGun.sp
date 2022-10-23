@@ -1216,7 +1216,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 			AcceptEntityInput(iGrabGlow, "Kill");
 		}
 	}
-	
+	 
 	if (IsHoldingPhysicsGun(client))
 	{
 		//Toggle PhysGun Mode (false: tf2, true: gmod)
