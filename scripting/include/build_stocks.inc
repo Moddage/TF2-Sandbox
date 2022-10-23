@@ -1,6 +1,7 @@
 #define Unicode_stocks "測試"
-new bool:g_bFirstRun = true;
-
+  ;new bool:g_bFirstRun = true;
+//^
+//This really should break it but it makes it work and i have no fucking idea why
 stock Build_GetSteamID() {
 	if (g_bFirstRun) {
 		new g_Obj_Dfilter = FindEntityByClassname(0, "cat_First_Run");
