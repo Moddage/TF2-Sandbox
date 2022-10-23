@@ -1216,7 +1216,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 			AcceptEntityInput(iGrabGlow, "Kill");
 		}
 	}
-	
+	 
 	if (IsHoldingPhysicsGun(client))
 	{
 		//Toggle PhysGun Mode (false: tf2, true: gmod)
@@ -1279,7 +1279,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 					
 					if (g_bShowHints[client])
 					{
-						Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate\n[T] Smart Copy");
+						Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
 					}
 					
 					ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nObject: %s\nColor: %i %i %i %i\nName: %s\nOwner: %s%s", strMode, strClassname, r, g, b, a, GetEntityName(iEntity), strUserName, strHints);
