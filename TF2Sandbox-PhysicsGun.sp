@@ -30,8 +30,6 @@ public const float ZERO_VECTOR[3] = {0.0, 0.0, 0.0};
 
 #define EF_NODRAW (1 << 5)
 
-int g_PhysGunModel;
-
 //Impluse
 #define IN_SPRAY 201
 
@@ -49,7 +47,7 @@ char g_strPhysGunVM[2][] =
 	"models/weapons/v_physcannon.mdl",
 	"models/weapons/v_superphyscannon.mdl"
 };
-#define MODEL_PHYSICSGUNWM "models/weapons/w_physics.mdl" //"models/weapons/w_superphyscannon.mdl" <- broken world model
+#define MODEL_PHYSICSGUNWM "models/tf2sandbox/w_physicsgun.mdl" //"models/weapons/w_superphyscannon.mdl" <- broken world model
 
 static const int g_iPhysicsGunWeaponIndex = 423;//Choose Saxxy(423) because the player movement won't become a villager
 static const int g_iPhysicsGunQuality = 1;
@@ -72,12 +70,16 @@ Handle g_hSyncHints;
 ConVar g_cvbCanGrabBuild;
 ConVar g_cvbFullDuplicate;
 
+Handle g_hCvarClPropLimit;
+Handle g_hCvarClPhysLimit;
+
 int g_iModelIndex;
 int g_iHaloIndex;
 int g_iPhysicsGunVM[2];
 int g_iPhysicsGunWM;
 int g_iCvarClPropLimit;
 int g_iCvarClPhysLimit;
+
 
 bool g_bPhysGunMode[MAXPLAYERS + 1];
 bool g_bShowHints[MAXPLAYERS + 1];
@@ -114,7 +116,7 @@ public void OnPluginStart()
 	g_cvbFullDuplicate = CreateConVar("sm_tf2sb_physgun_fullduplicate", "0", "Enable/disable full duplicate feature - Disable = Only prop_dynamic", 0, true, 0.0, true, 1.0);
 	
 	g_iCvarClPhysLimit = GetConVarInt(g_hCvarClPhysLimit);
-	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);
+	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);	
 	
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	
@@ -130,7 +132,13 @@ public void OnMapStart()
 	g_iPhysicsGunVM[0] = PrecacheModel(g_strPhysGunVM[0]);
 	g_iPhysicsGunVM[1] = PrecacheModel(g_strPhysGunVM[1]);
 	g_iPhysicsGunWM = PrecacheModel(MODEL_PHYSICSGUNWM);
-	g_PhysGunModel = PrecacheModel("models/weapons/v_superphyscannon.mdl");
+
+	
+	AddFileToDownloadsTable("models/tf2sandbox/w_physicsgun.dx80.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/w_physicsgun.dx90.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/w_physicsgun.sw.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/w_physicsgun.vvd");
+	AddFileToDownloadsTable("models/tf2sandbox/w_physicsgun.mdl");
 
 	PrecacheSound(SOUND_MODE);
 	PrecacheSound(SOUND_COPY);
@@ -255,7 +263,8 @@ public Action Command_EquipPhysicsGun(int client, int args)
 		SetEntProp(weapon, Prop_Send, "m_nSkin", 1);
 		SetEntProp(weapon, Prop_Send, "m_iWorldModelIndex", g_iPhysicsGunWM);
 		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", g_iPhysicsGunWM, _, 0);
-		SetEntProp(weapon, Prop_Send, "m_nSequence", 0);		
+		SetEntProp(weapon, Prop_Send, "m_nSequence", 0);
+		
 		TF2_RemoveWeaponSlot(client, WEAPON_SLOT);
 		DispatchSpawn(weapon);
 		
@@ -681,6 +690,7 @@ stock void ClientSettings(int client, int &buttons, int &impulse, float vel[3], 
 	if(IsHoldingPhysicsGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) == INVALID_ENT_REFERENCE)
 	{
 		//Hide Original viewmodel
+		SetEntProp(iViewModel, Prop_Send, "m_fEffects", GetEntProp(iViewModel, Prop_Send, "m_fEffects") | EF_NODRAW);
 		 
 		//Create client physics gun viewmodel
 		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iPhysicsGunVM[GetPhysGunWorldModelSkin(client)]));
@@ -1054,7 +1064,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 						g_bIN_ATTACK2[client] = true;
 						if(Phys_IsGravityEnabled(iEntity))	
 						{
-							if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+						    if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
 							{
 								Phys_EnableCollisions(iEntity, false);
 								Phys_EnableGravity(iEntity, false);
@@ -1064,7 +1074,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 						}
 						else
 						{
-							if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
+						    if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
 							Phys_EnableCollisions(iEntity, true);
 							Phys_EnableGravity(iEntity, true);
 							Phys_EnableDrag(iEntity, true);
@@ -1093,38 +1103,6 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 				if (g_bPhysGunMode[client])
 				{
 					DispatchKeyValueVector(iGrabPoint, "angles", GetAngleYOnly(angles));
-				}
-			}
-			
-			//When client press T key (Spray key)
-			if (impulse == IN_SPRAY)
-			{
-				//Smart Copy
-				if(g_fCopyCD[client] <= GetGameTime())
-				{
-					g_fCopyCD[client] = GetGameTime() + 1.0;
-					
-					//Unstick
-					AcceptEntityInput(iEntity, "ClearParent");
-					
-					//Create a copy
-					int iPasteEntity = Duplicator(iEntity);
-					if (IsValidEntity(iPasteEntity))
-					{
-						if (Build_RegisterEntityOwner(iPasteEntity, Build_ReturnEntityOwner(iEntity)))
-						{
-							EmitSoundToAll(SOUND_COPY, client, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, 0.8);
-						}
-						//Kill the prop when reach the prop limit
-						else
-						{
-							AcceptEntityInput(iPasteEntity, "Kill");
-						}
-					}
-					
-					//Stick
-					SetVariantString("!activator");
-					AcceptEntityInput(iEntity, "SetParent", iGrabPoint);
 				}
 			}
 		}
@@ -1217,7 +1195,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 			AcceptEntityInput(iGrabGlow, "Kill");
 		}
 	}
-	
+	 
 	if (IsHoldingPhysicsGun(client))
 	{
 		//Toggle PhysGun Mode (false: tf2, true: gmod)
@@ -1280,7 +1258,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 					
 					if (g_bShowHints[client])
 					{
-						Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate\n[T] Smart Copy");
+						Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
 					}
 					
 					ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nObject: %s\nColor: %i %i %i %i\nName: %s\nOwner: %s%s", strMode, strClassname, r, g, b, a, GetEntityName(iEntity), strUserName, strHints);

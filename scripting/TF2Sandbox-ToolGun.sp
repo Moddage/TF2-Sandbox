@@ -10,6 +10,7 @@
 #include <sdktools>
 #include <build>
 #include <tf2_stocks>
+#include <vphysics>
 
 #pragma newdecls required
 
@@ -25,10 +26,25 @@ public Plugin myinfo =
 //Tool Gun Settings
 #define WEAPON_SLOT 1
 
+enum PhysicsGunSequence
+{
+	IDLE = 0,
+	HOLD_IDLE,
+	DRAW,
+	HOLSTER,
+	fire,
+	ALTFIRE,
+	CHARGEUP
+}
+
+bool g_bIN_ATTACK[MAXPLAYERS + 1];
+bool g_bIN_ATTACK2[MAXPLAYERS + 1];
+bool g_bIN_ATTACK3[MAXPLAYERS + 1];
+
 #define MODEL_TOOLLASER	"materials/sprites/physbeam.vmt"
 #define MODEL_HALOINDEX	"materials/sprites/halo01.vmt"
-#define MODEL_TOOLGUNVM	"models/weapons/v_357.mdl"
-#define MODEL_TOOLGUNWM	"models/weapons/w_357.mdl"
+#define MODEL_TOOLGUNVM	"models/tf2sandbox/weapons/v_357.mdl"
+#define MODEL_TOOLGUNWM	"models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.mdl"
 
 #define SOUND_TOOLGUN_SHOOT	(GetRandomInt(0, 1))? "weapons/airboat/airboat_gun_lastshot1.wav":"weapons/airboat/airboat_gun_lastshot2.wav"
 #define SONND_TOOLGUN_SELECT "buttons/button15.wav"
@@ -97,6 +113,30 @@ public void OnMapStart()
 	g_iHaloIndex = PrecacheModel(MODEL_HALOINDEX);
 	g_iToolGunVM = PrecacheModel(MODEL_TOOLGUNVM);
 	g_iToolGunWM = PrecacheModel(MODEL_TOOLGUNWM);
+
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.dx80.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.dx90.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.sw.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.vvd");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.mdl");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/v_357.dx80.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/v_357.dx90.vtx");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/v_357.vvd");
+	AddFileToDownloadsTable("models/tf2sandbox/weapons/v_357.mdl");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/screen.vmt");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/screen_bg.vmt");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/screen_bg.vtf");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun.vmt");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun.vtf");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun_exp.vtf");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun_mask.vtf");	
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun2.vmt");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun2.vtf");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun2_mask.vtf");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun3.vmt");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun3.vtf");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun3_exp.vtf");
+	AddFileToDownloadsTable("materials/models/weapons/v_toolgun/toolgun3_mask.vtf");
 
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot1.wav");
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav");
@@ -230,29 +270,41 @@ public void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast
 #define EF_NODRAW 32
 public Action WeaponSwitchHookPost(int client, int entity)
 {
-	if(client <= 0 || client > MaxClients || !IsClientInGame(client) || !IsPlayerAlive(client))
-	{
-		return Plugin_Continue;
-	}
-		
 	int iViewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	if(IsHoldingToolGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) == INVALID_ENT_REFERENCE)
 	{
 		//Hide Original viewmodel
-		int iEffects = GetEntProp(iViewModel, Prop_Send, "m_fEffects");
-		iEffects |= EF_NODRAW;
-		SetEntProp(iViewModel, Prop_Send, "m_fEffects", iEffects);
+		SetEntProp(iViewModel, Prop_Send, "m_fEffects", GetEntProp(iViewModel, Prop_Send, "m_fEffects") | EF_NODRAW);
 		 
-		//Create client toolgun viewmodel
+		//Create client physics gun viewmodel
 		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iToolGunVM));
+		
+		int iTFViewModel = EntRefToEntIndex(g_iClientVMRef[client]);
+		if (IsValidEntity(iTFViewModel))
+		{
+			SetEntProp(iTFViewModel, Prop_Send, "m_nSequence", view_as<PhysicsGunSequence>(DRAW));
+			SetEntPropFloat(iTFViewModel, Prop_Send, "m_flPlaybackRate", 2.0);
+			
+			CreateTimer(1.0, ResetPhysGunPlaybackRate, client, TIMER_FLAG_NO_MAPCHANGE);
+		}
 	}
-	//Remove client toolgun viewmodel
-	else if (EntRefToEntIndex(g_iClientVMRef[client]) != INVALID_ENT_REFERENCE)
+	//Remove client physics gun viewmodel
+	else if (!IsHoldingToolGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) != INVALID_ENT_REFERENCE)
 	{
 		AcceptEntityInput(EntRefToEntIndex(g_iClientVMRef[client]), "Kill");
 	}
 	
 	return Plugin_Continue;
+}
+
+public Action ResetPhysGunPlaybackRate(Handle timer, int client)
+{
+	int iTFViewModel = EntRefToEntIndex(g_iClientVMRef[client]);
+	if (IsValidEntity(iTFViewModel))
+	{
+		SetEntProp(iTFViewModel, Prop_Send, "m_nSequence", view_as<PhysicsGunSequence>(IDLE));
+		SetEntPropFloat(iTFViewModel, Prop_Send, "m_flPlaybackRate", 0.0);
+	}
 }
 
 #define MAX_TOOLS 9
@@ -273,10 +325,43 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	else if (!IsHoldingToolGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) != INVALID_ENT_REFERENCE)
 	{
 		AcceptEntityInput(EntRefToEntIndex(g_iClientVMRef[client]), "Kill");
+	}	
+	
+	if (IsHoldingToolGun(client))
+	{
+		int iTFViewModel = EntRefToEntIndex(g_iClientVMRef[client]);
+		
+		if (buttons & IN_ATTACK || buttons & IN_ATTACK2)
+		{
+			if (IsValidEntity(iTFViewModel))
+			{
+				if (!g_bIN_ATTACK[client])
+				{
+					g_bIN_ATTACK[client] = true;
+					
+					SetEntProp(iTFViewModel, Prop_Send, "m_nSequence", view_as<PhysicsGunSequence>(HOLD_IDLE));
+					SetEntPropFloat(iTFViewModel, Prop_Send, "m_flPlaybackRate", 5.0);
+				}
+			}
+		}
+		else
+		{
+			if (IsValidEntity(iTFViewModel))
+			{
+				if (g_bIN_ATTACK[client])
+				{
+					SetEntProp(iTFViewModel, Prop_Send, "m_nSequence", view_as<PhysicsGunSequence>(IDLE));
+					SetEntPropFloat(iTFViewModel, Prop_Send, "m_flPlaybackRate", 0.0);
+				}
+			}
+			
+			g_bIN_ATTACK[client] = false;
+		}
 	}
 	
 	if (IsHoldingToolGun(client) && ((buttons & IN_ATTACK) || (buttons & IN_ATTACK2) || (buttons & IN_ATTACK3)) && g_fToolsCD[client] <= 0.0)
 	{
+
 		g_fToolsCD[client] = 2.0;
 		
 		if (buttons & IN_ATTACK || buttons & IN_ATTACK2)
