@@ -2707,7 +2707,7 @@ public Action Command_SpawnProp(int client, int args)
 				Phys_EnableCollisions(iEntity, true);
 			}
             fAngles[0] = 0
-            fAngles[1] = fAngles[1]
+            fAngles[1] = fAngles[1] + 180
 			TeleportEntity(iEntity, iAim, fAngles, NULL_VECTOR);
 			
 			
