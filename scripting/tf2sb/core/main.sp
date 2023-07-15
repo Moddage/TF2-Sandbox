@@ -2706,7 +2706,9 @@ public Action Command_SpawnProp(int client, int args)
 				Phys_EnableMotion(iEntity, true);
 				Phys_EnableCollisions(iEntity, true);
 			}
-			TeleportEntity(iEntity, iAim, NULL_VECTOR, NULL_VECTOR);
+            fAngles[0] = 0
+            fAngles[1] = fAngles[1]
+			TeleportEntity(iEntity, iAim, fAngles, NULL_VECTOR);
 			
 			
 			// TE_SetupBeamPoints(iAim, vOriginPlayer, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
