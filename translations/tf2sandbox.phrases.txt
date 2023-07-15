@@ -30,7 +30,7 @@
     }
     "hudmsg2"
     {
-        "en"    \nPhysics Props:
+        "en"    "Physics Props: "
     }
     "builtby"
     {
