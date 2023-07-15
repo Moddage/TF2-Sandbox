@@ -532,7 +532,6 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 	if(iNumParams >= 4)
 		bIsPhys = GetNativeCell(4);
 	
-	PrintToChat(client, "%i", bIsPhys);
 	if (Amount == 0) 
 	{
 		if (bIsDoll) 
