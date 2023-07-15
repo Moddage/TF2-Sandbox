@@ -1,5 +1,14 @@
 #define Unicode_stocks "測試"
-  ;new bool:g_bFirstRun = true;
+#include <sdktools>
+new bool:g_bFirstRun = true;
+
+public bool:TraceRayDontHitPlayers(entity, mask, any:data)
+{
+	if(0 < entity <= MaxClients)
+		return false;
+	return true;
+}
+
 //^
 //This really should break it but it makes it work and i have no fucking idea why
 stock Build_GetSteamID() {
@@ -87,6 +96,18 @@ stock bool IsBuildable(int client) //Is the place that client pointing is build-
 	}
 	return true;
 }
+
+stock GetClientSightEnd(client, Float:out[3])
+{
+	decl Float:m_fEyes[3];
+	decl Float:m_fAngles[3];
+	GetClientEyePosition(client, m_fEyes);
+	GetClientEyeAngles(client, m_fAngles);
+	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, TraceRayDontHitPlayers);
+	if(TR_DidHit())
+		TR_GetEndPosition(out);
+}
+
 
 stock bool IsValidClient(int client) 
 { 

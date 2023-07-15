@@ -15,7 +15,7 @@
     along with TF2 Sandbox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma semicolon 1
+#pragma semicolon 1;
 
 #include <clientprefs>
 #include <sourcemod>
@@ -3315,15 +3315,6 @@ public Action Timer_PropBreak(Handle timer, any iEntity)
 		Build_RegisterEntityOwner(iEntity, -1);
 		AcceptEntityInput(iEntity, "kill", -1);
 	}
-}
-
-stock int DrowLine(float vPoint1[3], float vPoint2[3], Color[4], bool bFinale = false)
-{
-	if (bFinale)
-		TE_SetupBeamPoints(vPoint1, vPoint2, g_Beam, g_Halo, 0, 66, 0.5, 7.0, 7.0, 0, 0.0, Color, 20);
-	else
-		TE_SetupBeamPoints(vPoint1, vPoint2, g_Beam, g_Halo, 0, 66, 0.15, 7.0, 7.0, 0, 0.0, Color, 20);
-	TE_SendToAll();
 }
 
 stock int CreatePush(float vOrigin[3], float fMagnitude, float fRange, char szSpawnFlags[8])

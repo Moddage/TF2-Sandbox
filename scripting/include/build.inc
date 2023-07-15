@@ -1,5 +1,5 @@
 #define BUILDMODAPI_VER 3
-#define BUILDMOD_VER "0.88"
+#define BUILDMOD_VER "0.71"
 #define MAX_HOOK_ENTITIES 4096
 
 /**
@@ -10,19 +10,7 @@
  * @param Doll				Is prop_ragdoll?
  * @return					Ture on success. False on failure.
  */
-native bool:Build_RegisterEntityOwner(entity_index, client_index, bool:Doll = false, bool:Phys = false);
-
-
-/**
- * Register an entity owner.
- * 
- * @param entity_index		Entity index.
- * @param client_index		Client index.
- * @param Doll				Is prop_ragdoll?
- * @param Phys              Is prop_physics?
- * @return					Ture on success. False on failure.
- */
-
+native bool:Build_RegisterEntityOwner(entity_index, client_index, bool:Doll = false);
 
 /**
  * Get an entity owner.
@@ -38,10 +26,9 @@ native Build_ReturnEntityOwner(entity_index);
  * @param client_index		Client index.
  * @param amount			Amount to increase or decrease. If amount = 0 then set limit to 0.
  * @param Doll				Is prop_ragdoll?
- * @param Phys              Is prop_physics enabled?
  * @noreturn
  */
-native Build_SetLimit(client_index, amount, bool:Doll = false, bool:Phys = false);
+native Build_SetLimit(client_index, amount, bool:Doll = false);
 
 /**
  * Check client can use BuildMod.
@@ -151,35 +138,3 @@ native bool:Build_IsBlacklisted(client_index);
  * @return					True if target valid. Otherwise false.
  */
 native bool:Build_IsClientValid(client_index, target_index, bool:Alive = false, bool:ReplyTarget = false);
-
-/**
- * Reset phys prop count.
- *
- * @param client_index		Client index.
- * @noreturn					
- */
-native Build_ResetPhysProps(client_index);
-
-/**
- * Remove 1 phys prop count.
- *
- * @param client_index		Client index.
- * @noreturn					
- */
-native Build_DelPhysProp(client_index);
-
-/**
- * Check is target client valid.
- *
- * @param client_index		Client index.
- * @return					Returns number of props client currently has. (Int)
- */
-native Build_GetCurrentProps(client_index);
-
-/**
- * Check is target client valid.
- *
- * @param client_index		Client index.
- * @return					Returns number of phys props client currently has. (Int)
- */
-native Build_GetCurrentPhysProps(client_index)
