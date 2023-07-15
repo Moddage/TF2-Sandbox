@@ -1,51 +1,4 @@
-/*
-	This file is part of TF2 Sandbox.
-	
-	TF2 Sandbox is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    TF2 Sandbox is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with TF2 Sandbox.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-#pragma semicolon 1
- 
-#include <sourcemod>
-#include <sdktools>
-#include <build>
-#include <build_stocks>
-#undef REQUIRE_PLUGIN
-#tryinclude <updater>
-#define REQUIRE_PLUGIN
-#tryinclude <steamworks>
-
-#define DEBUG 
-
-#define UPDATE_URL ""
-
-#if BUILDMODAPI_VER < 3
-#error "build.inc is outdated. please update before compiling"
-#endif
-
 #define MSGTAG "\x01[\x04TF2SB\x01]"
-
-#pragma newdecls required
-
-public Plugin myinfo =  
-{
-	name = "Team Fortress 2 Sandbox - Protocols", 
-	author = "TF2SB Studio", 
-	description = "Build Protocols for Team Fortress 2 Sandbox", 
-	version = BUILDMOD_VER, 
-	url = "https://sandbox.moddage.site/"
-};
 
 //bool
 #if defined _SteamWorks_Included
@@ -133,7 +86,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
-public void OnLibraryAdded(const char[] name)
+public void OnLibraryAdded_Protocols(const char[] name)
 {
 	#if defined _updater_included
     if (StrEqual(name, "updater"))
@@ -165,7 +118,7 @@ public void OnConfigsExecuted()
 	}
 }
 
-public void OnPluginStart() 
+public void OnPluginStart_Protocols() 
 {
 	// Check for update status:
 	#if defined _updater_included
@@ -227,7 +180,7 @@ public void OnPluginStart()
 	PrintToServer("%T", "tf2sb2", LANG_SERVER, BUILDMOD_VER);
 }
 
-public void OnMapStart() 
+public void OnMapStart_Protocols() 
 {
 	CreateTimer(5.0, DisplayHud);
 	Build_FirstRun();
@@ -236,12 +189,12 @@ public void OnMapStart()
 	{
 		if(IsClientInGame(client))
 		{
-			OnClientPutInServer(client);
+			OnClientPutInServer_Protocols(client);
 		}
 	}
 }
 
-public void OnClientPutInServer(int client)
+public void OnClientPutInServer_Protocols(int client)
 {
     g_fCoolDown[client] = 0.0;
 }
