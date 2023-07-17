@@ -355,22 +355,13 @@ public void OnPluginStart_Main()
 	g_hPropMenuRequested = CreateMenu(PropMenuRequested);
 	SetMenuTitle(g_hPropMenuRequested, /*"TF2SB - */ "Requested Props"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuRequested, true);
-	AddMenuItem(g_hPropMenuRequested, "removeprops", "| Remove");
-	AddMenuItem(g_hPropMenuRequested, "emptyspace", "", ITEMDRAW_IGNORE);
-	AddMenuItem(g_hPropMenuRequested, "cow", "Cow");
-	AddMenuItem(g_hPropMenuRequested, "explosion", "Explosion");
-	AddMenuItem(g_hPropMenuRequested, "muzzleflash", "Muzzleflash");
-	AddMenuItem(g_hPropMenuRequested, "security_camera2", "Security Camera 2");	
-	AddMenuItem(g_hPropMenuRequested, "tank", "Tank");
-	AddMenuItem(g_hPropMenuRequested, "tank_track", "Tank Track");
 
 	// Lead's Specialty Menu
 	g_hPropMenuLead = CreateMenu(PropMenuLead);
-	SetMenuTitle(g_hPropMenuLead, /*"TF2SB - */ "Special Props"); // \nSay /g in chat to move Entities!");
+	SetMenuTitle(g_hPropMenuLead, /*"TF2SB - */ "Entities"); // \nSay /g in chat to move Entities!");
 	SetMenuExitBackButton(g_hPropMenuLead, true);
 	AddMenuItem(g_hPropMenuLead, "removeprops", "| Remove");
 	AddMenuItem(g_hPropMenuLead, "emptyspace", "", ITEMDRAW_IGNORE);
-	AddMenuItem(g_hPropMenuLead, "rickmay", "Rick May Statue");
 	AddMenuItem(g_hPropMenuLead, "light", "Light");
 
 	// Prop Menu Pickup
@@ -996,6 +987,7 @@ public void OnPluginStart_Main()
 	AddMenuItem(g_hPropMenuComic, "campervan", "Camper Van");
 	AddMenuItem(g_hPropMenuComic, "chair", "Chair");
 	AddMenuItem(g_hPropMenuComic, "chalkboard01", "Chalk Board");
+	AddMenuItem(g_hPropMenuComic, "cow", "Cow");
 	AddMenuItem(g_hPropMenuComic, "box_cluster01", "Cluster of Boxes");
 	AddMenuItem(g_hPropMenuComic, "box_cluster02", "Cluster of Boxes 2");
 	AddMenuItem(g_hPropMenuComic, "coffeemachine", "Coffee Machine");
@@ -1005,6 +997,7 @@ public void OnPluginStart_Main()
 	AddMenuItem(g_hPropMenuComic, "milk_crate", "Crate of Milk");
 	AddMenuItem(g_hPropMenuComic, "dumptruck", "Dump Truck");
 	AddMenuItem(g_hPropMenuComic, "dumptruck_empty", "Dump Truck (Empty)");
+	AddMenuItem(g_hPropMenuComic, "explosion", "Explosion");
 	AddMenuItem(g_hPropMenuComic, "fire_extinguisher", "Fire Extinguisher");
 	AddMenuItem(g_hPropMenuComic, "fire_extinguisher_cabinet01", "Fire Extinguisher Cabinet");
 	AddMenuItem(g_hPropMenuComic, "ingot001", "Gold Ingot");
@@ -1023,6 +1016,7 @@ public void OnPluginStart_Main()
 	AddMenuItem(g_hPropMenuComic, "miningcrate002", "Mining Crate 2");
 	AddMenuItem(g_hPropMenuComic, "mop_and_bucket", "Mop and Bucket");
 	AddMenuItem(g_hPropMenuComic, "mvm_museum_case", "Museum Case");
+	AddMenuItem(g_hPropMenuComic, "muzzleflash", "Muzzleflash");
 	AddMenuItem(g_hPropMenuComic, "signpost001", "No Swimming Sign");
 	AddMenuItem(g_hPropMenuComic, "resupply_locker", "Non-working Resupply Locker");
 	AddMenuItem(g_hPropMenuComic, "oilcan01", "Oilcan 1");
@@ -1044,6 +1038,7 @@ public void OnPluginStart_Main()
 	AddMenuItem(g_hPropMenuComic, "portrait_01", "Portrait Painting");
 	AddMenuItem(g_hPropMenuComic, "computer_low", "Potato Computer");
 	AddMenuItem(g_hPropMenuComic, "propane_tank_tall01", "Propane Tank Tall");
+	AddMenuItem(g_hPropMenuComic, "rickmay", "Rick May Statue");
 	AddMenuItem(g_hPropMenuComic, "sack_flat", "Sack Flat");
 	AddMenuItem(g_hPropMenuComic, "sack_stack", "Sack Stack");
 	AddMenuItem(g_hPropMenuComic, "sack_stack_pallet", "Sack Stack's Pallet");
@@ -1312,17 +1307,18 @@ public void OnAllPluginsLoaded()
 	StrCat(buffer, sizeof(buffer), "    hjkwe654\n");
 	StrCat(buffer, sizeof(buffer), "    greenteaf0718\n\n");
 
-	AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
-	AddMenuItem(g_hPropMenu, "constructprops", "Construction Props");
-	AddMenuItem(g_hPropMenu, "comicprops", "Comic Props");
-	AddMenuItem(g_hPropMenu, "leadprops", "Special Props");
-	AddMenuItem(g_hPropMenu, "requestedprops", "Requested Props");
-	AddMenuItem(g_hPropMenu, "pickupprops", "Pickup Props");
-	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons Props");
-	AddMenuItem(g_hPropMenu, "cosmeticprops", "Cosmetics Props");
-	AddMenuItem(g_hPropMenu, "hl2props", "Miscellaneous Props");
-	AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
+	//AddMenuItem(g_hPropMenu, "removeprops", "| Remove");
+	AddMenuItem(g_hPropMenu, "constructprops", "Construction");
+	AddMenuItem(g_hPropMenu, "comicprops", "Comic");
+	AddMenuItem(g_hPropMenu, "leadprops", "Entities");
+	// AddMenuItem(g_hPropMenu, "requestedprops", "Effects");
 	AddMenuItem(g_hPropMenu, "ragdolls", "Characters");
+	AddMenuItem(g_hPropMenu, "weaponsprops", "Weapons");
+	AddMenuItem(g_hPropMenu, "cosmeticprops", "Cosmetics");
+	AddMenuItem(g_hPropMenu, "pickupprops", "Pickups");
+	AddMenuItem(g_hPropMenu, "donatorprops", "Donator Props");
+
+	AddMenuItem(g_hPropMenu, "hl2props", "Half-Life 2");
 
 	AddMenuItem(g_hEquipMenu, "toolgun", "--SANDBOX WEAPONS--", ITEMDRAW_DISABLED);
 
