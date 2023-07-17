@@ -3070,6 +3070,7 @@ public void EntityInfo(int client, int iTarget)
 		szOwner = "*Disconnected";
 	} else {
 		szOwner = "*World";
+		return;
 	}
 	
 	/*if ((StrContains(szClass, "prop_door_", false) == 0 || StrEqual(szModel, "models/props_lab/teleplatform.mdl") || (GetCommandFlags("sm_cam") != INVALID_FCVAR_FLAGS && (StrEqual(szModel, "models/props_spytech/computer_screen_bank.mdl") || StrEqual(szModel, "models/props_lab/securitybank.mdl")))) && Entity_InRange(client, iTarget, 100.0)) {
