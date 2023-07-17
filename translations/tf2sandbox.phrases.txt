@@ -21,14 +21,23 @@
     }
     "hudmsg"
     {
-        "en"    "Press TAB or say !build\nCurrent Props: "
-        "chi"    "按 TAB 键或打指令 !build\n目前的物件："
-        "zho"    "按 TAB 鍵或打指令 !build\n目前的物件："
-        "ru"    "Нажмите TAB или введите !build\nтекущие объекты: "
-        "fr"    "Appuyez sur la touche de tabulation ou dites! Build \ nAvantages actuels:"
-        "es"    "Presione TAB o diga !build\nActual Props:"
+        "en"    "Press TAB or say !build"
+        "chi"    "按 TAB 键或打指令 !build"
+        "zho"    "按 TAB 鍵或打指令 !build"
+        "ru"    "Нажмите TAB или введите !build"
+        "fr"    "Appuyez sur la touche de tabulation ou dites! Build"
+        "es"    "Presione TAB o diga !build"
     }
     "hudmsg2"
+    {
+        "en"    "Current Props: "
+        "chi"    "目前的物件："
+        "zho"    "目前的物件："
+        "ru"    "текущие объекты: "
+        "fr"    "Avantages actuels:"
+        "es"    "Actual Props:"
+    }
+    "hudmsg3"
     {
         "en"    "Physics Props: "
     }

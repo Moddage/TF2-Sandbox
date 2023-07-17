@@ -3037,7 +3037,7 @@ public void EntityInfo(int client, int iTarget)
 		}
 	} */
 	
-	SetHudTextParams(-1.0, 0.6, 0.01, 255, 255, 255, 255);
+	SetHudTextParams(-1.0, 0.85, 0.01, 255, 255, 255, 255);
 	if (IsPlayer(iTarget) && GetClientTeam(iTarget) != GetClientTeam(client) && TF2_GetPlayerClass(client) != TFClass_Spy) {
 		ShowHudText(client, -1, "\n%N", iTarget);
 		return;

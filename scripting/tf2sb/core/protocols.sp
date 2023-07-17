@@ -256,19 +256,22 @@ public Action DisplayHud(Handle timer)
 			
 		if (!g_bIN_SCORE[i])
 		{
+			SetHudTextParams(-1.0, 0.01, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
+			ShowHudText(i, -1, "\n%T", "hudmsg", i);
+
 			if (CheckCommandAccess(i, "sm_tf2sb_donor", 0))
 			{
-				SetHudTextParams(-1.0, 0.01, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
-				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClDonatorLimit);
-				SetHudTextParams(-1.0, 0.08, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
-				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg2", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
+				if (g_iPropCurrent[i] > 0) {
+					SetHudTextParams(0, 0.85, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
+					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClDonatorLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
+				}
 			}
 			else
 			{
-				SetHudTextParams(-1.0, 0.01, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
-				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg", i, g_iPropCurrent[i], g_iCvarClPropLimit);
-				SetHudTextParams(-1.0, 0.08, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
-				ShowHudText(i, -1, "\n%T%i/%i", "hudmsg2", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
+				if (g_iPropCurrent[i] > 0) {
+					SetHudTextParams(0, 0.85, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
+					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClPropLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
+				}
 			}
 			
 		}
