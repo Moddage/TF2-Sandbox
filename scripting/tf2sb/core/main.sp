@@ -1443,6 +1443,8 @@ public void OnMapStart_Main()
 	// PrecacheSound("ui/panel_open.wav", true);
 	PrecacheSound("ui/panel_close.wav", true);
 	PrecacheSound("weapons/airboat/airboat_gun_lastshot2.wav", true);
+	PrecacheSound("weapons/airboat/airboat_gun_energy1.wav", true);
+	PrecacheSound("weapons/airboat/airboat_gun_energy2.wav", true);
 	for (int i = 1; i < MaxClients; i++)
 	{
 		g_szConnectedClient[i] = "";
@@ -3193,7 +3195,7 @@ public Action Command_Delete(int client, int args)
 		TE_SetupBeamPoints(vOriginAim, vOriginPlayer, g_PBeam, g_Halo, 0, 66, 1.0, 3.0, 3.0, 0, 0.0, ColorBlue, 20);
 		TE_SendToAll();*/
 
-		EmitSoundToClient(client, "ui/panel_close.wav");
+		EmitAmbientSound("weapons/airboat/airboat_gun_energy2.wav", vOriginAim, iEntity, SNDLEVEL_NORMAL, SND_NOFLAGS, 1.0, GetRandomInt(120, 130));
 		
 		if (Build_IsAdmin(client)) {
 			if (StrEqual(szClass, "player") || StrContains(szClass, "prop_") == 0 || StrContains(szClass, "npc_") == 0 || StrContains(szClass, "weapon_") == 0 || StrContains(szClass, "item_") == 0) {
