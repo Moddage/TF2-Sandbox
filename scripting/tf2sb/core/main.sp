@@ -2682,7 +2682,6 @@ public Action Command_SpawnProp(int client, int args)
 			}
 
 			Build_ClientAimOrigin(client, iAim);
-			iAim[2] = iAim[2] + 10;
 			
 			GetClientAbsOrigin(client, vOriginPlayer);
 			vOriginPlayer[2] = vOriginPlayer[2] + 50;
