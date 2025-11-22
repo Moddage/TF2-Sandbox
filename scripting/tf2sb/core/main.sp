@@ -1383,9 +1383,7 @@ public void OnAllPluginsLoaded()
 	if(GetCommandFlags("sm_tg") != INVALID_FCVAR_FLAGS)
 	{
 		AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
-		/*StrCat(buffer, sizeof(buffer), "  Toolgun:\n");
-		StrCat(buffer, sizeof(buffer), "    Pelipoika\n");*/
-	}
+	} 
 
 	RegAdminCmd("sm_g", Command_PhysGun, 0);
 
@@ -3843,10 +3841,10 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			FakeClientCommand(param1, "sm_physgun");
 		}
-		else if (StrEqual(item, "toolgun"))
+	/* 	else if (StrEqual(item, "toolgun"))
 		{
 			FakeClientCommand(param1, "sm_tg");
-		}
+		} */
 		else if (StrEqual(item, "portalgun"))
 		{
 			FakeClientCommand(param1, "portalgun");

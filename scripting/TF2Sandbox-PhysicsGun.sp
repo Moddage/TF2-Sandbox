@@ -115,8 +115,8 @@ public void OnPluginStart()
 	g_cvbCanGrabBuild = CreateConVar("sm_tf2sb_physgun_cangrabbuild", "0", "Enable/disable grabbing buildings", 0, true, 0.0, true, 1.0);
 	g_cvbFullDuplicate = CreateConVar("sm_tf2sb_physgun_fullduplicate", "0", "Enable/disable full duplicate feature - Disable = Only prop_dynamic", 0, true, 0.0, true, 1.0);
 	
-	g_iCvarClPhysLimit = GetConVarInt(FindConVar("sbox_maxphyspropsperplayer"));
 	g_iCvarClPropLimit = GetConVarInt(FindConVar("sbox_maxpropsperplayer"));	
+	g_iCvarClPhysLimit = GetConVarInt(FindConVar("sbox_maxphyspropsperplayer"));
 	
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	
@@ -693,7 +693,7 @@ stock void ClientSettings(int client, int &buttons, int &impulse, float vel[3], 
 		SetEntProp(iViewModel, Prop_Send, "m_fEffects", GetEntProp(iViewModel, Prop_Send, "m_fEffects") | EF_NODRAW);
 		 
 		//Create client physics gun viewmodel
-		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iPhysicsGunVM[GetPhysGunWorldModelSkin(client)]));
+		//g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iPhysicsGunVM[GetPhysGunWorldModelSkin(client)]));
 		
 		int iTFViewModel = EntRefToEntIndex(g_iClientVMRef[client]);
 		if (IsValidEntity(iTFViewModel))
