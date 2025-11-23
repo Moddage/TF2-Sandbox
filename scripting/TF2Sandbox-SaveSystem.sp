@@ -16,7 +16,7 @@
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "Battlefield Duck"
+#define PLUGIN_AUTHOR "Battlefield Duck, maintained by Yuuki795"
 #define PLUGIN_VERSION "9.7"
 
 #include <sourcemod>

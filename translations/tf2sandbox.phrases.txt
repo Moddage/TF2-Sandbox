@@ -12,7 +12,7 @@
     "tf2sb2"
     {
         "#format"   "{1:s}"
-        "en"    "[TF2SB] Team Fortress 2 Sandbox is currently in beta, version {1}. If you have any issues with it, message the developers on the Discord or Steam Group."
+        "en"    "[TF2SB] Team Fortress 2 Sandbox is currently version {1}. If you have any issues with it, message @Yuuki795 on Discord or create a GitHub issue."
         "chi"    "[TF2SB] 军团要塞2 沙盒插件目前处于测试阶段，版本{1}。如果您有任何问题，请在 Discord 或 Steam 群组上发送消息。"
         "zho"    "[TF2SB] 絕地要塞2 沙盒插件目前處於測試階段，版本{1}。如果您有任何問題，請在 Discord 或 Steam 群組上發送消息。"
         "ru"    "[TF2SB] Team Fortress 2 Песочница в настоящее время в бета-версии , версия {1}. Если у вас возникнут какие-либо проблемы, сообщите об этом разработчикам в Discord или Steam группа."
