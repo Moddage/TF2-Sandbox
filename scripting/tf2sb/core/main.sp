@@ -3131,7 +3131,7 @@ public Action Command_DeleteAll(int client, int args)
 	}
 	
 	Build_SetLimit(client, 0);
-	Build_SetLimit(client, 0, true);
+	Build_SetLimit(client, 0, false, true);
 	
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
