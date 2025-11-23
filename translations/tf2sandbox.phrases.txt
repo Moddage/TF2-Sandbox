@@ -30,7 +30,7 @@
     }
     "hudmsg2"
     {
-        "en"    "Current Props: "
+        "en"    "Static Props: "
         "chi"    "目前的物件："
         "zho"    "目前的物件："
         "ru"    "текущие объекты: "
@@ -40,6 +40,10 @@
     "hudmsg3"
     {
         "en"    "Physics Props: "
+    }
+    "hudmsg4"
+    {
+        "en"    "Total Props:"
     }
     "builtby"
     {

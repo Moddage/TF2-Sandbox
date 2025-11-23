@@ -265,14 +265,14 @@ public Action DisplayHud(Handle timer)
 			{
 				if (g_iPropCurrent[i] > 0 || g_iPhysCurrent[i] > 0) {
 					SetHudTextParams(0, 0.85, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
-					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClDonatorLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
+					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClDonatorLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit, "hudmsg4", i, g_iPhysCurrent[i] + g_iPropCurrent[i], g_iCvarClPhysLimit + g_iCvarClDonatorLimit);
 				}
 			}
 			else
 			{
 				if (g_iPropCurrent[i] > 0 || g_iPhysCurrent[i] > 0) {
 					SetHudTextParams(0, 0.85, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
-					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClPropLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
+					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClPropLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit, "hudmsg4", i, g_iPhysCurrent[i] + g_iPropCurrent[i], g_iCvarClPhysLimit + g_iCvarClPropLimit);
 				}
 			}
 			
