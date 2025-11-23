@@ -2,8 +2,8 @@
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "BattlefieldDuck"
-#define PLUGIN_VERSION "1.9"
+#define PLUGIN_AUTHOR "BattlefieldDuck, Maintained by Yuuki795"
+#define PLUGIN_VERSION "3"
 
 #include <sourcemod>
 #include <sdkhooks>

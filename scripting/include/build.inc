@@ -190,3 +190,7 @@ native Build_GetCurrentPhysProps(client);
  * @param client_index		Client index.
  * @return					Returns number of phys props client currently has. (Int)
  */
+
+native Build_RemoveFromPropCount(client, isPhys);
+
+native Build_AddToPropCount(client, isPhys);

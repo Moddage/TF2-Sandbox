@@ -75,6 +75,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("Build_DelPhysProp", Native_DelPhysProp);
 	CreateNative("Build_GetCurrentProps", Native_GetCurrentProps);
     CreateNative("Build_GetCurrentPhysProps", Native_GetCurrentPhysProps);
+	CreateNative("Build_AddToPropCount", Native_AddToPropCount);
+	CreateNative("Build_RemoveFromPropCount", Native_RemoveFromPropCount);
 
 	#if defined _steamtools_included
 	MarkNativeAsOptional("Steam_SetGameDescription");
@@ -261,14 +263,14 @@ public Action DisplayHud(Handle timer)
 
 			if (CheckCommandAccess(i, "sm_tf2sb_donor", 0))
 			{
-				if (g_iPropCurrent[i] > 0) {
+				if (g_iPropCurrent[i] > 0 || g_iPhysCurrent[i] > 0) {
 					SetHudTextParams(0, 0.85, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClDonatorLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
 				}
 			}
 			else
 			{
-				if (g_iPropCurrent[i] > 0) {
+				if (g_iPropCurrent[i] > 0 || g_iPhysCurrent[i] > 0) {
 					SetHudTextParams(0, 0.85, 0.01, 0, 255, 255, 255, 0, 1.0, 0.5, 0.5);
 					ShowHudText(i, -1, "\n%T%i/%i\n%T%i/%i", "hudmsg2", i, g_iPropCurrent[i], g_iCvarClPropLimit, "hudmsg3", i, g_iPhysCurrent[i], g_iCvarClPhysLimit);
 				}
@@ -498,7 +500,6 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 		}
 		if (bIsPhys)
 		{
-			PrintToChat(client, "Set to 0");
 			g_iServerCurrent -= g_iPhysCurrent[client];
 			g_iPhysCurrent[client] -= g_iPhysCurrent[client];
 			g_iPhysCurrent[client] = 0;
@@ -519,9 +520,8 @@ public int Native_SetLimit(Handle hPlugin, int iNumParams)
 		if(bIsPhys)
 		{
 			if(g_iPhysCurrent[client] > 0)
-			{
 				g_iPhysCurrent[client] += Amount;
-			}	
+				
 		}
 		if(!bIsPhys)
 		{
@@ -893,6 +893,44 @@ public int Native_GetCurrentPhysProps(Handle hPlugin, int iNumParams)
 {
     int client = GetNativeCell(1);
     return g_iPhysCurrent[client];
+}
+
+public int Native_AddToPropCount(Handle hPlugin, int iNumParams)
+{
+	int client = GetNativeCell(1);
+	bool isPhys = GetNativeCell(2);
+
+	if (isPhys)
+	{
+		g_iPhysCurrent[client] += 1;
+		return g_iPhysCurrent[client];
+	}
+
+	else
+	{
+		g_iPropCurrent[client] += 1;
+		return g_iPropCurrent[client];
+	}
+}
+
+public int Native_RemoveFromPropCount(Handle hPlugin, int iNumParams)
+{
+	int client = GetNativeCell(1);
+	bool isPhys = GetNativeCell(2);
+
+	if (isPhys && g_iPhysCurrent[client] > 0)
+	{
+		g_iPhysCurrent[client] -= 1;
+		return g_iPhysCurrent[client];
+	}
+
+	else if(g_iPropCurrent[client] > 0)
+	{
+		g_iPropCurrent[client] -= 1;
+		return g_iPropCurrent[client];
+	}
+
+	return -1;
 }
 
 void ReadBlackList() 

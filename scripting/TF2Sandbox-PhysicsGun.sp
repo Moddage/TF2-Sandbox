@@ -2,8 +2,8 @@
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "BattlefieldDuck"
-#define PLUGIN_VERSION "5.5"
+#define PLUGIN_AUTHOR "BattlefieldDuck, Maintained by Yuuki795"
+#define PLUGIN_VERSION "7"
 
 #include <sourcemod>
 #include <sdkhooks>
@@ -81,6 +81,7 @@ int g_iCvarClPropLimit;
 int g_iCvarClPhysLimit;
 
 
+
 bool g_bPhysGunMode[MAXPLAYERS + 1];
 bool g_bShowHints[MAXPLAYERS + 1];
 bool g_bIN_ATTACK[MAXPLAYERS + 1];
@@ -103,7 +104,7 @@ MoveType g_mtOriginal[MAXPLAYERS + 1];
 float g_fRotateCD[MAXPLAYERS + 1];
 float g_fCopyCD[MAXPLAYERS + 1];
 
-public void OnPluginStart()
+public void OnAllPluginsLoaded()
 {
 	CreateConVar("sm_tf2sb_physgun_version", PLUGIN_VERSION, "", FCVAR_SPONLY|FCVAR_NOTIFY);
 	
@@ -1067,7 +1068,7 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 						GetEntityClassname(iEntity, strClassnameFreezeUnfreeze, sizeof(strClassnameFreezeUnfreeze));
 						if(StrEqual(strClassnameFreezeUnfreeze, "player"))
 						{
-							PrintToChatAll("%s", GetEntProp(iEntity, Prop_Send, "m_fFlags")|FL_FROZEN);
+							//freeze players (doesnt work yet)
 							if(GetEntProp(iEntity, Prop_Send, "m_fFlags")|FL_FROZEN)
 							{
 								SetEntProp(iEntity, Prop_Send, "m_fFlags", (GetEntProp(client, Prop_Send, "m_fFlags")&~FL_FROZEN));
@@ -1083,6 +1084,8 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 							{
 								if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
 								{
+									Build_RemoveFromPropCount(client, true);
+									Build_AddToPropCount(client, false);
 									Phys_EnableCollisions(iEntity, false);
 									Phys_EnableGravity(iEntity, false);
 									Phys_EnableDrag(iEntity, false);
@@ -1092,11 +1095,14 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 							else
 							{
 								if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
-								Phys_EnableCollisions(iEntity, true);
-								Phys_EnableGravity(iEntity, true);
-								Phys_EnableDrag(iEntity, true);
-								Phys_EnableMotion(iEntity, true);
-
+								{
+									Build_RemoveFromPropCount(client,false);
+									Build_AddToPropCount(client, true);
+									Phys_EnableCollisions(iEntity, true);
+									Phys_EnableGravity(iEntity, true);
+									Phys_EnableDrag(iEntity, true);
+									Phys_EnableMotion(iEntity, true);
+								}
 							}
 						}
 					
