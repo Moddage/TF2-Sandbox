@@ -5,7 +5,7 @@ Team Fortress 2 Sandbox is a custom gamemode made for the video game [Team Fortr
 With Team Fortress 2 Sandbox, you can build bases, roleplay in a resturant, invent custom gamemodes, make rocket jump courses, design map layouts, produce machinimas, mess around, and more! The only limit is your own imagination!
 
 [Steam Group](http://steamcommunity.com/groups/TF2Sandbox)  
-[Discord](http://discord.gg/7t2DRAQ)
+[Discord](https://discord.gg/rdfE6Bxscc)
 ### Translating
 You may submit a Pull Request to translate Team Fortress 2 Sandbox into other languages.  
 Please do not use Google Translate or any other AI Translator.
