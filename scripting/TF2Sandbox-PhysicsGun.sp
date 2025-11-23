@@ -693,7 +693,7 @@ stock void ClientSettings(int client, int &buttons, int &impulse, float vel[3], 
 		SetEntProp(iViewModel, Prop_Send, "m_fEffects", GetEntProp(iViewModel, Prop_Send, "m_fEffects") | EF_NODRAW);
 		 
 		//Create client physics gun viewmodel
-		//g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iPhysicsGunVM[GetPhysGunWorldModelSkin(client)]));
+		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iPhysicsGunVM[GetPhysGunWorldModelSkin(client)]));
 		
 		int iTFViewModel = EntRefToEntIndex(g_iClientVMRef[client]);
 		if (IsValidEntity(iTFViewModel))
@@ -1062,24 +1062,42 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 				if (!g_bIN_ATTACK2[client])
 					{
 						g_bIN_ATTACK2[client] = true;
-						if(Phys_IsGravityEnabled(iEntity))	
+
+						char strClassnameFreezeUnfreeze[64];
+						GetEntityClassname(iEntity, strClassnameFreezeUnfreeze, sizeof(strClassnameFreezeUnfreeze));
+						if(StrEqual(strClassnameFreezeUnfreeze, "player"))
 						{
-						    if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+							PrintToChatAll("%s", GetEntProp(iEntity, Prop_Send, "m_fFlags")|FL_FROZEN);
+							if(GetEntProp(iEntity, Prop_Send, "m_fFlags")|FL_FROZEN)
 							{
-								Phys_EnableCollisions(iEntity, false);
-								Phys_EnableGravity(iEntity, false);
-								Phys_EnableDrag(iEntity, false);
-								Phys_EnableMotion(iEntity, false);
+								SetEntProp(iEntity, Prop_Send, "m_fFlags", (GetEntProp(client, Prop_Send, "m_fFlags")&~FL_FROZEN));
+							}
+							else
+							{
+								SetEntProp(iEntity, Prop_Send, "m_fFlags", GetEntProp(client, Prop_Send, "m_fFlags")|FL_FROZEN);
 							}
 						}
 						else
 						{
-						    if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
-							Phys_EnableCollisions(iEntity, true);
-							Phys_EnableGravity(iEntity, true);
-							Phys_EnableDrag(iEntity, true);
-							Phys_EnableMotion(iEntity, true);
+							if(Phys_IsGravityEnabled(iEntity))	
+							{
+								if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+								{
+									Phys_EnableCollisions(iEntity, false);
+									Phys_EnableGravity(iEntity, false);
+									Phys_EnableDrag(iEntity, false);
+									Phys_EnableMotion(iEntity, false);
+								}
+							}
+							else
+							{
+								if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
+								Phys_EnableCollisions(iEntity, true);
+								Phys_EnableGravity(iEntity, true);
+								Phys_EnableDrag(iEntity, true);
+								Phys_EnableMotion(iEntity, true);
 
+							}
 						}
 					
 						EmitSoundToClient(client, SOUND_MODE);
@@ -1243,25 +1261,51 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 				{
 					char strClassname[64];
 					GetEntityClassname(iEntity, strClassname, sizeof(strClassname));
-					
-					int r, g, b, a;
-					GetEntityRenderColor(iEntity, r, g, b, a);
-					
-					char strUserName[64];
-					strUserName = "Unknown";
-					
-					int owner = Build_ReturnEntityOwner(iEntity);
-					if (owner > 0 && owner <= MaxClients)
+					if(StrEqual(strClassname, "player"))
 					{
-						GetClientName(owner, strUserName, sizeof(strUserName));
+						char strUserNamePhys[128];
+						GetClientName(Build_ClientAimEntity(client, false, true), strUserNamePhys, sizeof(strUserNamePhys));
+
+						int r, g, b, a;
+						GetEntityRenderColor(iEntity, r, g, b, a);
+						
+						char strUserName[64];
+						strUserName = "Unknown";
+						
+						int owner = Build_ReturnEntityOwner(iEntity);
+						if (owner > 0 && owner <= MaxClients)
+						{
+							GetClientName(owner, strUserName, sizeof(strUserName));
+						}
+						
+						if (g_bShowHints[client])
+						{
+							Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
+						}
+						
+						ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nPlayer: %s%s", strMode, strUserNamePhys, strHints);
 					}
-					
-					if (g_bShowHints[client])
+					else
 					{
-						Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
+						int r, g, b, a;
+						GetEntityRenderColor(iEntity, r, g, b, a);
+						
+						char strUserName[64];
+						strUserName = "Unknown";
+						
+						int owner = Build_ReturnEntityOwner(iEntity);
+						if (owner > 0 && owner <= MaxClients)
+						{
+							GetClientName(owner, strUserName, sizeof(strUserName));
+						}
+						
+						if (g_bShowHints[client])
+						{
+							Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
+						}
+						
+						ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nObject: %s\nColor: %i %i %i %i\nName: %s\nOwner: %s%s", strMode, strClassname, r, g, b, a, GetEntityName(iEntity), strUserName, strHints);
 					}
-					
-					ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nObject: %s\nColor: %i %i %i %i\nName: %s\nOwner: %s%s", strMode, strClassname, r, g, b, a, GetEntityName(iEntity), strUserName, strHints);
 				}
 			}
 			else

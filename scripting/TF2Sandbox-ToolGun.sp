@@ -113,7 +113,8 @@ public void OnMapStart()
 	g_iHaloIndex = PrecacheModel(MODEL_HALOINDEX);
 	g_iToolGunVM = PrecacheModel(MODEL_TOOLGUNVM);
 	g_iToolGunWM = PrecacheModel(MODEL_TOOLGUNWM);
-
+	PrintToServer("%i", g_iToolGunVM);
+	PrintToServer("%i", g_iToolGunWM);
 	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.dx80.vtx");
 	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.dx90.vtx");
 	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.sw.vtx");
@@ -272,11 +273,13 @@ public Action WeaponSwitchHookPost(int client, int entity)
 	int iViewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	if(IsHoldingToolGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) == INVALID_ENT_REFERENCE)
 	{
+		PrintToServer("%i", g_iClientVMRef[client]);
+		PrintToServer("%i", EntIndexToEntRef(CreateVM(client, g_iToolGunVM)));
 		//Hide Original viewmodel
 		SetEntProp(iViewModel, Prop_Send, "m_fEffects", GetEntProp(iViewModel, Prop_Send, "m_fEffects") | EF_NODRAW);
 		 
 		//Create client tool gun viewmodel <- Currently crashing so no viewmodel for now.
-		//g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iToolGunVM));
+		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iToolGunVM));
 		
 		int iTFViewModel = EntRefToEntIndex(g_iClientVMRef[client]);
 		if (IsValidEntity(iTFViewModel))
@@ -318,7 +321,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		SetEntProp(iViewModel, Prop_Send, "m_fEffects", iEffects);
 		 
 		//Create client tool gun viewmodel <- Currently crashing so no viewmodel for now.
-		//g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iToolGunVM));
+		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iToolGunVM));
 	}
 	//Remove client toolgun viewmodel
 	else if (!IsHoldingToolGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) != INVALID_ENT_REFERENCE)
