@@ -1635,8 +1635,14 @@ void SaveData(int client, int slot) // Save Data from data file (CLIENT INDEX, S
 				flPlaybackRate = GetEntPropFloat(i, Prop_Send, "m_flPlaybackRate");
 				
 				GetEntPropString(i, Prop_Data, "m_iName", szName, sizeof(szName));
-
-				iPhysProp = Phys_IsGravityEnabled(i);
+				if(StrEqual(szClass, "prop_physics") || StrEqual(szClass, "prop_physics_override"))
+				{
+					iPhysProp = Phys_IsGravityEnabled(i);
+				}	
+				else
+				{
+					iPhysProp = 0;
+				}
 				
 				WriteFileLine(g_hFileEditting[client], "ent%i %s %s %f %f %f %f %f %f %i %f %i %i %i %i %i %i %i %f %s %i"
 				, g_iCountEntity, szClass, szModel, fOrigin[0], fOrigin[1], fOrigin[2], fAngles[0], fAngles[1], fAngles[2], iCollision, fSize, iRed, iGreen, iBlue, iAlpha, iRenderFx, iSkin, iSequence, flPlaybackRate, szName, iPhysProp);
