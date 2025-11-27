@@ -1080,28 +1080,31 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 						}
 						else
 						{
-							if(Phys_IsGravityEnabled(iEntity))	
+							if(!StrEqual(strClassnameFreezeUnfreeze, "prop_dynamic"))
 							{
-								if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+								if(Phys_IsGravityEnabled(iEntity))	
 								{
-									Build_RemoveFromPropCount(client, true);
-									Build_AddToPropCount(client, false);
-									Phys_EnableCollisions(iEntity, false);
-									Phys_EnableGravity(iEntity, false);
-									Phys_EnableDrag(iEntity, false);
-									Phys_EnableMotion(iEntity, false);
+									if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+									{
+										Build_RemoveFromPropCount(client, true);
+										Build_AddToPropCount(client, false);
+										Phys_EnableCollisions(iEntity, false);
+										Phys_EnableGravity(iEntity, false);
+										Phys_EnableDrag(iEntity, false);
+										Phys_EnableMotion(iEntity, false);
+									}
 								}
-							}
-							else
-							{
-								if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
+								else
 								{
-									Build_RemoveFromPropCount(client,false);
-									Build_AddToPropCount(client, true);
-									Phys_EnableCollisions(iEntity, true);
-									Phys_EnableGravity(iEntity, true);
-									Phys_EnableDrag(iEntity, true);
-									Phys_EnableMotion(iEntity, true);
+									if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
+									{
+										Build_RemoveFromPropCount(client,false);
+										Build_AddToPropCount(client, true);
+										Phys_EnableCollisions(iEntity, true);
+										Phys_EnableGravity(iEntity, true);
+										Phys_EnableDrag(iEntity, true);
+										Phys_EnableMotion(iEntity, true);
+									}
 								}
 							}
 						}
