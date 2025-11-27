@@ -7,8 +7,8 @@
 		{
 			"CTFPlayer::EquipWearable"
 			{
-				"windows"	"435"
-				"linux"		"436"
+				"windows"	"439"
+				"linux"		"440"
 			}
 		}
 	}

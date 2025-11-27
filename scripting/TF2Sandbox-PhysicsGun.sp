@@ -2,8 +2,8 @@
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "BattlefieldDuck"
-#define PLUGIN_VERSION "5.5"
+#define PLUGIN_AUTHOR "BattlefieldDuck, Maintained by Yuuki795"
+#define PLUGIN_VERSION "7"
 
 #include <sourcemod>
 #include <sdkhooks>
@@ -81,6 +81,7 @@ int g_iCvarClPropLimit;
 int g_iCvarClPhysLimit;
 
 
+
 bool g_bPhysGunMode[MAXPLAYERS + 1];
 bool g_bShowHints[MAXPLAYERS + 1];
 bool g_bIN_ATTACK[MAXPLAYERS + 1];
@@ -103,7 +104,7 @@ MoveType g_mtOriginal[MAXPLAYERS + 1];
 float g_fRotateCD[MAXPLAYERS + 1];
 float g_fCopyCD[MAXPLAYERS + 1];
 
-public void OnPluginStart()
+public void OnAllPluginsLoaded()
 {
 	CreateConVar("sm_tf2sb_physgun_version", PLUGIN_VERSION, "", FCVAR_SPONLY|FCVAR_NOTIFY);
 	
@@ -115,8 +116,8 @@ public void OnPluginStart()
 	g_cvbCanGrabBuild = CreateConVar("sm_tf2sb_physgun_cangrabbuild", "0", "Enable/disable grabbing buildings", 0, true, 0.0, true, 1.0);
 	g_cvbFullDuplicate = CreateConVar("sm_tf2sb_physgun_fullduplicate", "0", "Enable/disable full duplicate feature - Disable = Only prop_dynamic", 0, true, 0.0, true, 1.0);
 	
-	g_iCvarClPhysLimit = GetConVarInt(g_hCvarClPhysLimit);
-	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);	
+	g_iCvarClPropLimit = GetConVarInt(FindConVar("sbox_maxpropsperplayer"));	
+	g_iCvarClPhysLimit = GetConVarInt(FindConVar("sbox_maxphyspropsperplayer"));
 	
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	
@@ -1062,24 +1063,47 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 				if (!g_bIN_ATTACK2[client])
 					{
 						g_bIN_ATTACK2[client] = true;
-						if(Phys_IsGravityEnabled(iEntity))	
+
+						char strClassnameFreezeUnfreeze[64];
+						GetEntityClassname(iEntity, strClassnameFreezeUnfreeze, sizeof(strClassnameFreezeUnfreeze));
+						if(StrEqual(strClassnameFreezeUnfreeze, "player"))
 						{
-						    if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+							//freeze players (doesnt work yet)
+							if(GetEntProp(iEntity, Prop_Send, "m_fFlags")|FL_FROZEN)
 							{
-								Phys_EnableCollisions(iEntity, false);
-								Phys_EnableGravity(iEntity, false);
-								Phys_EnableDrag(iEntity, false);
-								Phys_EnableMotion(iEntity, false);
+								SetEntProp(iEntity, Prop_Send, "m_fFlags", (GetEntProp(client, Prop_Send, "m_fFlags")&~FL_FROZEN));
+							}
+							else
+							{
+								SetEntProp(iEntity, Prop_Send, "m_fFlags", GetEntProp(client, Prop_Send, "m_fFlags")|FL_FROZEN);
 							}
 						}
 						else
 						{
-						    if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
-							Phys_EnableCollisions(iEntity, true);
-							Phys_EnableGravity(iEntity, true);
-							Phys_EnableDrag(iEntity, true);
-							Phys_EnableMotion(iEntity, true);
-
+							if(Phys_IsGravityEnabled(iEntity))	
+							{
+								if(Build_GetCurrentProps(client) < g_iCvarClPropLimit)
+								{
+									Build_RemoveFromPropCount(client, true);
+									Build_AddToPropCount(client, false);
+									Phys_EnableCollisions(iEntity, false);
+									Phys_EnableGravity(iEntity, false);
+									Phys_EnableDrag(iEntity, false);
+									Phys_EnableMotion(iEntity, false);
+								}
+							}
+							else
+							{
+								if(Build_GetCurrentPhysProps(client) < g_iCvarClPhysLimit)
+								{
+									Build_RemoveFromPropCount(client,false);
+									Build_AddToPropCount(client, true);
+									Phys_EnableCollisions(iEntity, true);
+									Phys_EnableGravity(iEntity, true);
+									Phys_EnableDrag(iEntity, true);
+									Phys_EnableMotion(iEntity, true);
+								}
+							}
 						}
 					
 						EmitSoundToClient(client, SOUND_MODE);
@@ -1243,25 +1267,51 @@ stock void PhysGunSettings(int client, int &buttons, int &impulse, float vel[3],
 				{
 					char strClassname[64];
 					GetEntityClassname(iEntity, strClassname, sizeof(strClassname));
-					
-					int r, g, b, a;
-					GetEntityRenderColor(iEntity, r, g, b, a);
-					
-					char strUserName[64];
-					strUserName = "Unknown";
-					
-					int owner = Build_ReturnEntityOwner(iEntity);
-					if (owner > 0 && owner <= MaxClients)
+					if(StrEqual(strClassname, "player"))
 					{
-						GetClientName(owner, strUserName, sizeof(strUserName));
+						char strUserNamePhys[128];
+						GetClientName(Build_ClientAimEntity(client, false, true), strUserNamePhys, sizeof(strUserNamePhys));
+
+						int r, g, b, a;
+						GetEntityRenderColor(iEntity, r, g, b, a);
+						
+						char strUserName[64];
+						strUserName = "Unknown";
+						
+						int owner = Build_ReturnEntityOwner(iEntity);
+						if (owner > 0 && owner <= MaxClients)
+						{
+							GetClientName(owner, strUserName, sizeof(strUserName));
+						}
+						
+						if (g_bShowHints[client])
+						{
+							Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
+						}
+						
+						ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nPlayer: %s%s", strMode, strUserNamePhys, strHints);
 					}
-					
-					if (g_bShowHints[client])
+					else
 					{
-						Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
+						int r, g, b, a;
+						GetEntityRenderColor(iEntity, r, g, b, a);
+						
+						char strUserName[64];
+						strUserName = "Unknown";
+						
+						int owner = Build_ReturnEntityOwner(iEntity);
+						if (owner > 0 && owner <= MaxClients)
+						{
+							GetClientName(owner, strUserName, sizeof(strUserName));
+						}
+						
+						if (g_bShowHints[client])
+						{
+							Format(strHints, sizeof(strHints), "\n\n[MOUSE2] Freeze/Unfreeze\n[MOUSE3] Pull/Push\n[R] Rotate");
+						}
+						
+						ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nObject: %s\nColor: %i %i %i %i\nName: %s\nOwner: %s%s", strMode, strClassname, r, g, b, a, GetEntityName(iEntity), strUserName, strHints);
 					}
-					
-					ShowSyncHudText(client, g_hSyncHints, "MODE: %s\n\nObject: %s\nColor: %i %i %i %i\nName: %s\nOwner: %s%s", strMode, strClassname, r, g, b, a, GetEntityName(iEntity), strUserName, strHints);
 				}
 			}
 			else

@@ -49,7 +49,7 @@
 public Plugin myinfo = 
 {
 	name = "Team Fortress 2 Sandbox", 
-	author = "TF2SB Studio", 
+	author = "TF2SB Studio, Maintained by Yuuki", 
 	description = "The base gamemode plugin of Team Fortress 2 Sandbox. Includes all base Sandbox modules in one plugin.", 
 	version = BUILDMOD_VER, 
 	url = "https://sandbox.moddage.site/"

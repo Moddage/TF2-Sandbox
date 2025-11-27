@@ -1383,9 +1383,7 @@ public void OnAllPluginsLoaded()
 	if(GetCommandFlags("sm_tg") != INVALID_FCVAR_FLAGS)
 	{
 		AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
-		/*StrCat(buffer, sizeof(buffer), "  Toolgun:\n");
-		StrCat(buffer, sizeof(buffer), "    Pelipoika\n");*/
-	}
+	} 
 
 	RegAdminCmd("sm_g", Command_PhysGun, 0);
 
@@ -3133,7 +3131,7 @@ public Action Command_DeleteAll(int client, int args)
 	}
 	
 	Build_SetLimit(client, 0);
-	Build_SetLimit(client, 0, true);
+	Build_SetLimit(client, 0, false, true);
 	
 	g_bBuffer[client] = true;
 	CreateTimer(0.5, Timer_CoolDown, GetClientSerial(client));
@@ -3199,14 +3197,13 @@ public Action Command_Delete(int client, int args)
 				AcceptEntityInput(Obj_Dissolver, "dissolve", iEntity, Obj_Dissolver, 0);
 				AcceptEntityInput(Obj_Dissolver, "kill", -1);
 				DispatchKeyValue(iEntity, "targetname", "Del_Drop");
-				
 				int iOwner = Build_ReturnEntityOwner(iEntity);
 				if (iOwner != -1) {
 					if (StrEqual(szClass, "5"))
 						Build_SetLimit(iOwner, -1, true);
 					else if (Phys_IsGravityEnabled(iEntity))
 					{
-						Build_SetLimit(iOwner, -1, true);
+						Build_SetLimit(iOwner, -1, false, true);
 					}
 					else
 						Build_SetLimit(iOwner, -1);
@@ -3230,6 +3227,8 @@ public Action Command_Delete(int client, int args)
 			AcceptEntityInput(Obj_Dissolver, "kill", -1);
 			DispatchKeyValue(iEntity, "targetname", "Del_Drop");
 		}
+
+		
 
 		if (StrEqual(szClass, "5"))
 			Build_SetLimit(client, -1, true);
@@ -3843,10 +3842,10 @@ public int EquipMenu(Handle menu, MenuAction action, int param1, int param2)
 		{
 			FakeClientCommand(param1, "sm_physgun");
 		}
-		else if (StrEqual(item, "toolgun"))
+	/* 	else if (StrEqual(item, "toolgun"))
 		{
 			FakeClientCommand(param1, "sm_tg");
-		}
+		} */
 		else if (StrEqual(item, "portalgun"))
 		{
 			FakeClientCommand(param1, "portalgun");

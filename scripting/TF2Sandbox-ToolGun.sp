@@ -2,8 +2,8 @@
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "BattlefieldDuck"
-#define PLUGIN_VERSION "1.9"
+#define PLUGIN_AUTHOR "BattlefieldDuck, Maintained by Yuuki795"
+#define PLUGIN_VERSION "3"
 
 #include <sourcemod>
 #include <sdkhooks>
@@ -113,7 +113,8 @@ public void OnMapStart()
 	g_iHaloIndex = PrecacheModel(MODEL_HALOINDEX);
 	g_iToolGunVM = PrecacheModel(MODEL_TOOLGUNVM);
 	g_iToolGunWM = PrecacheModel(MODEL_TOOLGUNWM);
-
+	PrintToServer("%i", g_iToolGunVM);
+	PrintToServer("%i", g_iToolGunWM);
 	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.dx80.vtx");
 	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.dx90.vtx");
 	AddFileToDownloadsTable("models/tf2sandbox/weapons/c_models/c_revolver/c_revolver.sw.vtx");
@@ -199,7 +200,7 @@ public Action Command_EquipToolGun(int client, int args)
 		SetEntityModel(weapon, MODEL_TOOLGUNWM);
 		SetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex", g_iToolGunWeaponIndex);
 		SetEntProp(weapon, Prop_Send, "m_bInitialized", 1);
-		//Player crashes if quality and level aren't set with both methods, for some reason
+		// 	//Player crashes if quality and level aren't set with both methods, for some reason
 		SetEntData(weapon, GetEntSendPropOffs(weapon, "m_iEntityQuality", true), g_iToolGunQuality);
 		SetEntData(weapon, GetEntSendPropOffs(weapon, "m_iEntityLevel", true), g_iToolGunLevel);
 		SetEntProp(weapon, Prop_Send, "m_iEntityQuality", g_iToolGunQuality);
@@ -214,12 +215,11 @@ public Action Command_EquipToolGun(int client, int args)
 		SetEntProp(weapon, Prop_Send, "m_iWorldModelIndex", g_iToolGunWM);
 		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", g_iToolGunWM, _, 0);
 		SetEntProp(weapon, Prop_Send, "m_nSequence", 2);
-		
+			
 		TF2_RemoveWeaponSlot(client, WEAPON_SLOT);
 		DispatchSpawn(weapon);
 		EquipPlayerWeapon(client, weapon);		
 	}
-
 	return Plugin_Continue;
 }
 
@@ -273,10 +273,12 @@ public Action WeaponSwitchHookPost(int client, int entity)
 	int iViewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	if(IsHoldingToolGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) == INVALID_ENT_REFERENCE)
 	{
+		PrintToServer("%i", g_iClientVMRef[client]);
+		PrintToServer("%i", EntIndexToEntRef(CreateVM(client, g_iToolGunVM)));
 		//Hide Original viewmodel
 		SetEntProp(iViewModel, Prop_Send, "m_fEffects", GetEntProp(iViewModel, Prop_Send, "m_fEffects") | EF_NODRAW);
 		 
-		//Create client physics gun viewmodel
+		//Create client tool gun viewmodel <- Currently crashing so no viewmodel for now.
 		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iToolGunVM));
 		
 		int iTFViewModel = EntRefToEntIndex(g_iClientVMRef[client]);
@@ -288,7 +290,7 @@ public Action WeaponSwitchHookPost(int client, int entity)
 			CreateTimer(1.0, ResetPhysGunPlaybackRate, client, TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
-	//Remove client physics gun viewmodel
+	//Remove client tool gun viewmodel
 	else if (!IsHoldingToolGun(client) && EntRefToEntIndex(g_iClientVMRef[client]) != INVALID_ENT_REFERENCE)
 	{
 		AcceptEntityInput(EntRefToEntIndex(g_iClientVMRef[client]), "Kill");
@@ -318,7 +320,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		iEffects |= EF_NODRAW;
 		SetEntProp(iViewModel, Prop_Send, "m_fEffects", iEffects);
 		 
-		//Create client toolgun viewmodel
+		//Create client tool gun viewmodel <- Currently crashing so no viewmodel for now.
 		g_iClientVMRef[client] = EntIndexToEntRef(CreateVM(client, g_iToolGunVM));
 	}
 	//Remove client toolgun viewmodel
@@ -358,7 +360,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			g_bIN_ATTACK[client] = false;
 		}
 	}
-	
+
 	if (IsHoldingToolGun(client) && ((buttons & IN_ATTACK) || (buttons & IN_ATTACK2) || (buttons & IN_ATTACK3)) && g_fToolsCD[client] <= 0.0)
 	{
 
@@ -726,7 +728,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	else if (g_fToolsCD[client] > 0.0)
 	{
 		g_fToolsCD[client] -= 0.1;
-	}
+	} 
 	
 	if (IsHoldingToolGun(client))
 	{
@@ -787,7 +789,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	}
 	
 	return Plugin_Continue;
-}
+} 
 
 /********************
 		Stock

@@ -1,0 +1,6 @@
+/models/*
+/materials/*
+/custom/*
+/release/*
+/plugins/*
+*.zip
