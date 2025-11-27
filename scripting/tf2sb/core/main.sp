@@ -3201,9 +3201,10 @@ public Action Command_Delete(int client, int args)
 				if (iOwner != -1) {
 					if (StrEqual(szClass, "5"))
 						Build_SetLimit(iOwner, -1, true);
-					else if (Phys_IsGravityEnabled(iEntity))
+					else if (StrEqual(szClass, "prop_physics") || StrEqual(szClass, "prop_physics_override"))
 					{
-						Build_SetLimit(iOwner, -1, false, true);
+						if(Phys_IsGravityEnabled(iEntity))
+							Build_SetLimit(iOwner, -1, false, true);
 					}
 					else
 						Build_SetLimit(iOwner, -1);
