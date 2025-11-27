@@ -2685,7 +2685,6 @@ public Action Command_SpawnProp(int client, int args)
 			
 			DispatchSpawn(iEntity);
 			
-			if(!StrEqual(szPropFrozen, "1"))	
 			if(!StrEqual(szPropFrozen, "1"))
 			{
 				Phys_EnableCollisions(iEntity, false);
@@ -2701,6 +2700,7 @@ public Action Command_SpawnProp(int client, int args)
 				Phys_EnableMotion(iEntity, true);
 				Phys_EnableCollisions(iEntity, true);
 			}
+
             fAngles[0] = 0
             fAngles[1] = fAngles[1] + 180
 			TeleportEntity(iEntity, iAim, fAngles, NULL_VECTOR);
@@ -3205,6 +3205,8 @@ public Action Command_Delete(int client, int args)
 					{
 						if(Phys_IsGravityEnabled(iEntity))
 							Build_SetLimit(iOwner, -1, false, true);
+						else
+							Build_SetLimit(iOwner, -1);
 					}
 					else
 						Build_SetLimit(iOwner, -1);
