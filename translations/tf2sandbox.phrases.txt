@@ -15,7 +15,7 @@
         "en"    "[TF2SB] Team Fortress 2 Sandbox is currently version {1}. If you have any issues with it, message @Yuuki795 on Discord or create a GitHub issue."
         "chi"    "[TF2SB] 军团要塞2 沙盒插件目前处于测试阶段，版本{1}。如果您有任何问题，请在 Discord 或 Steam 群组上发送消息。"
         "zho"    "[TF2SB] 絕地要塞2 沙盒插件目前處於測試階段，版本{1}。如果您有任何問題，請在 Discord 或 Steam 群組上發送消息。"
-        "ru"    "[TF2SB] Team Fortress 2 Песочница в настоящее время в бета-версии , версия {1}. Если у вас возникнут какие-либо проблемы, сообщите об этом разработчикам в Discord или Steam группа."
+        "ru"    "[TF2SB] Team Fortress 2 Sandbox в настоящее время находится в бета-версии, версия {1}. Если у вас возникнут какие-либо проблемы, сообщите об этом разработчикам в Discord или в Steam группе."
         "fr"    "[TF2SB] Team Fortress 2 Sandbox est actuellement en version bêta, version {1}. Si vous rencontrez des problèmes, envoyez un message aux développeurs du groupe Discord ou Steam."
         "es"    "[TF2SB] Team Fortress 2 Sandbox está actualmente en versión beta, versión {1}. Si tiene algún problema, envíe un mensaje a los desarrolladores del Discord o Steam Group."
     }
@@ -24,7 +24,7 @@
         "en"    "Press TAB or say !build"
         "chi"    "按 TAB 键或打指令 !build"
         "zho"    "按 TAB 鍵或打指令 !build"
-        "ru"    "Нажмите TAB или введите !build"
+        "ru"    "Нажмите TAB или напишите !build"
         "fr"    "Appuyez sur la touche de tabulation ou dites! Build"
         "es"    "Presione TAB o diga !build"
     }
@@ -33,24 +33,26 @@
         "en"    "Static Props: "
         "chi"    "目前的物件："
         "zho"    "目前的物件："
-        "ru"    "текущие объекты: "
+        "ru"    "Статичные Пропы: "
         "fr"    "Avantages actuels:"
         "es"    "Actual Props:"
     }
     "hudmsg3"
     {
         "en"    "Physics Props: "
+	"ru"    "Физические Пропы:"
     }
     "hudmsg4"
     {
         "en"    "Total Props:"
+	"ru"    "Всего Пропов:"
     }
     "builtby"
     {
         "en"    "Built by"
         "chi"    "建造者"
         "zho"    "建造者"
-        "ru"    "творец:"
+        "ru"    "Построено игроком"
         "fr"    "Construit par"
         "es"    "Construido por"
     }
@@ -59,7 +61,7 @@
         "en"    "ON"
         "chi"    "开"
         "zho"    "開"
-        "ru"    "На"
+        "ru"    "ВКЛ."
         "fr"    "SUR"
         "es"    "EN"
     }
@@ -68,61 +70,70 @@
         "en"    "OFF"
         "chi"    "关"
         "zho"    "關"
-        "ru"    "от"
+        "ru"    "ОТКЛ."
         "fr"    "DE"
         "es"    "APAGADO"
     }
     "proplimitreached"
     {
         "en"    "You hit the Prop Limit!"
+	"ru"    "Вы достигли Лимита Пропов!"
         "fr"    "Vous atteignez la limite des prop!"
         "es"    "¡Has alcanzado el límite de apoyo!"
     }
     "ragdolllimitreached"
     {
         "en"    "You hit the Ragdoll Limit!"
+	"ru"    "Вы достигли лимита Регдоллов!"
         "fr"    "Vous atteignez la limite Ragdoll!"
         "es"    "¡Has alcanzado el límite de Ragdoll!"
     }
     "globallimitreached"
     {
         "en"    "You hit the Global Limit!"
+	"ru"    "Вы достигли Глобального Лимита!"
         "fr"    "Vous atteignez la limite mondiale!"
         "es"    "¡Llegaste al límite global!"
     }
     "invalidtarget"
     {
         "en"    "You don't have a target or target invalid."
+	"ru"    "У вас нету цели или цель недействительна."
         "fr"    "Vous n'avez pas de cible ou de cible non valide."
         "es"    "No tienes un objetivo o un objetivo no válido"
     }
     "deadtarget"
     {
         "en"    "This command can only be used on alive players."
+	"ru"    "Эта команда может быть использована только на живых игроках."
         "fr"    "Cette commande ne peut être utilisée que sur des joueurs en vie."
         "es"    "Este comando solo se puede usar en jugadores vivos"
     }
     "cantuseplayers"
     {
         "en"    "You are not allowed to do this to players!"
+	"ru"    "Вам не позволено так делать с другими игроками!"
         "fr"    "Vous n'êtes pas autorisé à faire cela aux joueurs!"
         "es"    "¡No tienes permitido hacer esto a los jugadores!"
     }
     "blacklisted"
     {
         "en"    "You're blacklisted from using Team Fortress 2 Sandbox!"
+	"ru"    "Вы находитесь в Черном Списке Team Fortress 2 Sandbox!"
         "fr"    "Vous utilisez la liste noire de Team Fortress 2 Sandbox!"
         "es"    "¡Estás en la lista negra por usar Team Fortress 2 Sandbox!"
     }
     "nolongertaunting"
     {
         "en"    "You're no longer taunting."
+	"ru"    "Вы больше не используете насмешки."
         "fr"    "Vous ne vous moquez plus."
         "es"    "Ya no te burlas"
     }
     "camera"
     {
         "en"    "Say !cam while looking at the camera to set it up!"
+	"ru"    "Чтобы включить камеру, напиши !cam когда смотришь на нее!"
         "fr"    "Dis! Cam tout en regardant la caméra pour le configurer!"
         "es"    "¡Di! Cámara mientras miras la cámara para configurarla!"
     }
@@ -185,7 +196,7 @@
         "en"    "Not every model has multiple skins."
         "chi"    "并非每个物件都有多个皮肤。"
         "zho"    "並非每個物件都有多個皮膚。"
-        "ru"    "Не каждая модель имеет несколько скинов."
+        "ru"    "Не у каждой модели есть скины."
         "fr"    "Tous les modèles n'ont pas plusieurs skins."
         "es"    "No todos los modelos tienen máscaras múltiples"
     }
@@ -194,7 +205,7 @@
         "en"    "!sdoor 1~6 = Spawn door"
         "chi"    "!sdoor 1~6 = 产生门"
         "zho"    "!sdoor 1~6 = 産生門"
-        "ru"    "!sdoor 1~6 = Поставь перед собой дверь"
+        "ru"    "!sdoor 1~6 = Заспавнить дверь"
         "fr"    "!sdoor 1 ~ 6 = Spawn door"
         "es"    "!sdoor 1 ~ 6 = Engendrar puerta"
     }
@@ -203,7 +214,7 @@
         "en"    "!sdoor a = Select door"
         "chi"    "!sdoor a = 选择门"
         "zho"    "!sdoor a = 選擇門"
-        "ru"    "!sdoor a = Выберите дверь"
+        "ru"    "!sdoor a = Выбрать дверь"
         "fr"    "!sdoor a = Sélectionnez la porte"
         "es"    "!sdoor a = Seleccionar puerta"
     }
@@ -212,7 +223,7 @@
         "en"    "!sdoor b = Select button (Shoot to open)"
         "chi"    "!sdoor b = 选择按钮（射击打开）"
         "zho"    "!sdoor b = 選擇按鈕（射擊打開）"
-        "ru"    "!sdoor b = Выберите кнопку ( Стрелять, чтобы открыть )"
+        "ru"    "!sdoor b = Выберите кнопку (Стрелять, чтобы открыть)"
         "fr"    "!sdoor b = bouton de sélection (tirer pour ouvrir)"
         "es"    "!sdoor b = botón Seleccionar (disparar para abrir)"
     }
@@ -221,7 +232,7 @@
         "en"    "!sdoor c = Select button (Press to open)"
         "chi"    "!sdoor c = 选择按钮（按下打开）"
         "zho"    "!sdoor c = 選擇按鈕（按下打開）"
-        "ru"    "!sdoor c = Выберите кнопку ( Нажмите, чтобы открыть )"
+        "ru"    "!sdoor c = Выберите кнопку (Нажмите, чтобы открыть)"
         "fr"    "!sdoor c = Select button (Appuyez pour ouvrir)"
         "es"    "!sdoor c = botón Seleccionar (Presione para abrir)"
     }
@@ -239,7 +250,7 @@
         "en"    "Prop not found: "
         "chi"    "物件不存在:"
         "zho"    "物件不存在:"
-        "ru"    "Опора не найдена : "
+        "ru"    "Проп не найден: "
         "fr"    "Prop pas trouvé: "
         "es"    "Prop no encontrado: "
     }
@@ -248,7 +259,7 @@
         "en"    "Deleted all props you owned."
         "chi"    "删除了你所拥有的物件。"
         "zho"    "刪除了你所擁有的物件。"
-        "ru"    "Убраны все объекты, которые вам не принадлежат"
+        "ru"    "Все ваши пропы были удалены."
         "fr"    "Supprimé tous les accessoires que vous possédiez."
         "es"    "Eliminó todos los accesorios que poseía: "
     }
@@ -257,7 +268,7 @@
         "en"    "You have no props!"
         "chi"    "你没有物件！"
         "zho"    "你沒有物件！"
-        "ru"    "У вас нет объектов!"
+        "ru"    "У вас нет пропов!"
         "fr"    "Vous n'avez pas d'accessoires!"
         "es"    "¡No tienes accesorios!"
     }
@@ -275,7 +286,7 @@
         "en"    "You've been resupplied."
         "chi"    "你已经被补给了。"
         "zho"    "你已經被補給了。"
-        "ru"    "Мы дали вам запасы"
+        "ru"    "Вам дали запасы"
         "fr"    "Vous avez été réapprovisionné."
         "es"    "Has sido reabastecido"
     }
@@ -284,7 +295,7 @@
         "en"    "If you want to delete everything you own, say !delall"
         "chi"    "如果你想删除你所拥有物件，打指令 !delall"
         "zho"    "如果你想刪除你所擁有物件，打指令 !delall"
-        "ru"    "Если вы хотите удалить все, что у вас есть, скажите !delall"
+        "ru"    "Если вы хотите удалить все, что у вас есть, напишите !delall"
         "fr"    "Si vous voulez supprimer tout ce que vous possédez, dites! Delall"
         "es"    "Si desea eliminar todo lo que posee, diga !delall"
     }
@@ -293,7 +304,7 @@
         "en"    "Say !del to delete the prop you are looking at."
         "chi"    "打指令 !del 删除你正在看的物件。"
         "zho"    "打指令 !del 刪除你正在看的物件。"
-        "ru"    "Скажи !del, чтобы удалить объект, который вы смотрите."
+        "ru"    "Напиши !del, чтобы удалить проп, на который вы смотрите."
         "fr"    "Dis! Del pour supprimer l'accessoire que tu regardes."
         "es"    "¡Di !del para eliminar el accesorio que estás viendo"
     }
@@ -302,7 +313,7 @@
         "en"    "Press TAB to open Spawnlist!"
         "chi"    "按 TAB 键打开列表！"
         "zho"    "按 TAB 鍵打開列表！"
-        "ru"    "Нажмите TAB, чтобы открыть список объектов!"
+        "ru"    "Нажмите TAB, чтобы открыть список пропов!"
         "fr"    "Appuyez sur TAB pour ouvrir Spawnlist!"
         "es"    "¡Presiona TAB para abrir Spawnlist!"
     }
@@ -311,7 +322,7 @@
         "en"    "Say !god to turn off godmode"
         "chi"    "打指令 !god 关掉无敌模式"
         "zho"    "打指令 !god 關掉無敵模式"
-        "ru"    "Скажи !god, чтобы выключить режим бога"
+        "ru"    "Напиши !god, чтобы выключить бессмертие"
         "fr"    "Dites! Dieu pour désactiver le mode divin"
         "es"    "¡Di Dios para apagar el modo divino"
     }
@@ -320,7 +331,7 @@
         "en"    "If you want to rocket jump while in godmode, say !buddha"
         "chi"    "如果你想在无敌模式中跳火箭，那就打指令 !buddha"
         "zho"    "如果你想在無敵模式中跳火箭，那就打指令 !buddha"
-        "ru"    "Если вы хотите прыгать с ракетами в то время как в режим бога, скажем !buddha"
+        "ru"    "Если вы хотите порокетджампить, когда находитесь в бессмертии, напишите !buddha"
         "fr"    "Si vous voulez sauter en fusée en mode divin, dites! Bouddha"
         "es"    "Si quieres saltar cohetes mientras estás en modo divino, ¡di !buddha"
     }
