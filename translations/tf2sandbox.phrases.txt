@@ -40,12 +40,12 @@
     "hudmsg3"
     {
         "en"    "Physics Props: "
-	"ru"    "Физические Пропы:"
+		"ru"    "Физические Пропы:"
     }
     "hudmsg4"
     {
         "en"    "Total Props:"
-	"ru"    "Всего Пропов:"
+		"ru"    "Всего Пропов:"
     }
     "builtby"
     {
@@ -77,63 +77,63 @@
     "proplimitreached"
     {
         "en"    "You hit the Prop Limit!"
-	"ru"    "Вы достигли Лимита Пропов!"
+		"ru"    "Вы достигли Лимита Пропов!"
         "fr"    "Vous atteignez la limite des prop!"
         "es"    "¡Has alcanzado el límite de apoyo!"
     }
     "ragdolllimitreached"
     {
         "en"    "You hit the Ragdoll Limit!"
-	"ru"    "Вы достигли лимита Регдоллов!"
+		"ru"    "Вы достигли лимита Регдоллов!"
         "fr"    "Vous atteignez la limite Ragdoll!"
         "es"    "¡Has alcanzado el límite de Ragdoll!"
     }
     "globallimitreached"
     {
         "en"    "You hit the Global Limit!"
-	"ru"    "Вы достигли Глобального Лимита!"
+		"ru"    "Вы достигли Глобального Лимита!"
         "fr"    "Vous atteignez la limite mondiale!"
         "es"    "¡Llegaste al límite global!"
     }
     "invalidtarget"
     {
         "en"    "You don't have a target or target invalid."
-	"ru"    "У вас нету цели или цель недействительна."
+		"ru"    "У вас нету цели или цель недействительна."
         "fr"    "Vous n'avez pas de cible ou de cible non valide."
         "es"    "No tienes un objetivo o un objetivo no válido"
     }
     "deadtarget"
     {
         "en"    "This command can only be used on alive players."
-	"ru"    "Эта команда может быть использована только на живых игроках."
+		"ru"    "Эта команда может быть использована только на живых игроках."
         "fr"    "Cette commande ne peut être utilisée que sur des joueurs en vie."
         "es"    "Este comando solo se puede usar en jugadores vivos"
     }
     "cantuseplayers"
     {
         "en"    "You are not allowed to do this to players!"
-	"ru"    "Вам не позволено так делать с другими игроками!"
+		"ru"    "Вам не позволено так делать с другими игроками!"
         "fr"    "Vous n'êtes pas autorisé à faire cela aux joueurs!"
         "es"    "¡No tienes permitido hacer esto a los jugadores!"
     }
     "blacklisted"
     {
         "en"    "You're blacklisted from using Team Fortress 2 Sandbox!"
-	"ru"    "Вы находитесь в Черном Списке Team Fortress 2 Sandbox!"
+		"ru"    "Вы находитесь в Черном Списке Team Fortress 2 Sandbox!"
         "fr"    "Vous utilisez la liste noire de Team Fortress 2 Sandbox!"
         "es"    "¡Estás en la lista negra por usar Team Fortress 2 Sandbox!"
     }
     "nolongertaunting"
     {
         "en"    "You're no longer taunting."
-	"ru"    "Вы больше не используете насмешки."
+		"ru"    "Вы больше не используете насмешки."
         "fr"    "Vous ne vous moquez plus."
         "es"    "Ya no te burlas"
     }
     "camera"
     {
         "en"    "Say !cam while looking at the camera to set it up!"
-	"ru"    "Чтобы включить камеру, напиши !cam когда смотришь на нее!"
+		"ru"    "Чтобы включить камеру, напиши !cam когда смотришь на нее!"
         "fr"    "Dis! Cam tout en regardant la caméra pour le configurer!"
         "es"    "¡Di! Cámara mientras miras la cámara para configurarla!"
     }
