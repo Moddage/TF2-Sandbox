@@ -99,61 +99,61 @@ public void OnPluginStart_Main()
 	SetConVarInt(FindConVar("tf_allow_player_use"), 1);
 
 	// blacklist
-	RegAdminCmd("sm_bl", Command_AddBL, ADMFLAG_CONVARS, "Add clients to the blacklist");
-	RegAdminCmd("sm_unbl", Command_RemoveBL, ADMFLAG_CONVARS, "Remove clients from the blacklist");
+	RegAdminCmd("sm_bl", Command_AddBL, ADMFLAG_ROOT, "Add clients to the blacklist");
+	RegAdminCmd("sm_unbl", Command_RemoveBL, ADMFLAG_ROOT, "Remove clients from the blacklist");
 
 	// disable exploits
-	SetCommandFlags("explode", GetCommandFlags("setpos"));
+	//SetCommandFlags("explode", GetCommandFlags("setpos"));
 	
 	// disable cheat flags
-	SetCommandFlags("noclip", GetCommandFlags("kill")); // TODO: Don't use kill for this
-	SetCommandFlags("god", GetCommandFlags("kill"));
-	SetCommandFlags("buddha", GetCommandFlags("kill"));
+	//SetCommandFlags("noclip", GetCommandFlags("kill")); // TODO: Don't use kill for this
+	//SetCommandFlags("god", GetCommandFlags("kill"));
+	//SetCommandFlags("buddha", GetCommandFlags("kill"));
 
 	// command hooks
-	RegConsoleCmd("kill", Command_kill, "");
-	RegConsoleCmd("noclip", Command_Fly, "");
-	RegConsoleCmd("god", Command_ChangeGodMode, "");
+	//RegConsoleCmd("kill", Command_kill, "");
+	//RegConsoleCmd("noclip", Command_Fly, "");
+	//RegConsoleCmd("god", Command_ChangeGodMode, "");
 	
 	// spawn props
-	RegAdminCmd("sm_spawnprop", Command_SpawnProp, 0, "Spawn a prop in command list!");
-	RegAdminCmd("sm_prop", Command_SpawnProp, 0, "Spawn props in command list, too!");
+	RegAdminCmd("sm_spawnprop", Command_SpawnProp, ADMFLAG_ROOT, "Spawn a prop in command list!");
+	RegAdminCmd("sm_prop", Command_SpawnProp, ADMFLAG_ROOT, "Spawn props in command list, too!");
 	
 	// coloring, skins, scale
-	RegAdminCmd("sm_color", Command_Color, 0, "Color a prop.");
-	RegAdminCmd("sm_colour", Command_Color, 0, "Colour a prop.");
-	RegAdminCmd("sm_render", Command_Render, 0, "Render an entity.");
-	RegAdminCmd("sm_skin", Command_Skin, 0, "Color a prop.");
-	RegAdminCmd("sm_propscale", Command_PropScale, 0, "Prop Scale");
+	RegAdminCmd("sm_color", Command_Color, ADMFLAG_ROOT, "Color a prop.");
+	RegAdminCmd("sm_colour", Command_Color, ADMFLAG_ROOT, "Colour a prop.");
+	RegAdminCmd("sm_render", Command_Render, ADMFLAG_ROOT, "Render an entity.");
+	RegAdminCmd("sm_skin", Command_Skin, ADMFLAG_ROOT, "Color a prop.");
+	RegAdminCmd("sm_propscale", Command_PropScale, ADMFLAG_ROOT, "Prop Scale");
 	
 	// building
-	RegAdminCmd("sm_build", Command_BuildMenu, 0);
-	RegAdminCmd("sm_sandbox", Command_BuildMenu, 0);
-	RegAdminCmd("sm_propfinder", Command_PropFinder, 0);
-	RegAdminCmd("sm_delall", Command_DeleteAll, 0, "Delete all of your spawned props");
-	RegAdminCmd("sm_del", Command_Delete, 0, "Delete a entity");
-	RegAdminCmd("sm_setname", Command_SetName, 0, "Set the name of a prop");
-	RegAdminCmd("sm_sdoor", Command_SpawnDoor, 0, "Scripted Door");
-	RegAdminCmd("sm_ld", Command_LightDynamic, 0, "Dynamic Light");
-	RegAdminCmd("sm_simplelight", Command_LightDynamic, 0, "Dynamic Light");
-	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, 0, "Half-Life 2 Door");
-	RegAdminCmd("sm_rotate", Command_Rotate, 0, "Rotate an entity");
-	RegAdminCmd("sm_r", Command_Rotate, 0, "Rotate an entity");
-	RegAdminCmd("sm_accuraterotate", Command_AccurateRotate, 0, "Accurate rotate a prop");
-	RegAdminCmd("sm_ar", Command_AccurateRotate, 0, "Accurate rotate a prop.");
-	RegAdminCmd("sm_move", Command_Move, 0, "Move a prop to a position.");
-	RegAdminCmd("+copy", Command_Copy, 0, "Copy a prop");
-	RegAdminCmd("-copy", Command_Paste, 0, "Stop Copying a Prop");
+	RegAdminCmd("sm_build", Command_BuildMenu, ADMFLAG_ROOT);
+	RegAdminCmd("sm_sandbox", Command_BuildMenu, ADMFLAG_ROOT);
+	RegAdminCmd("sm_propfinder", Command_PropFinder, ADMFLAG_ROOT);
+	RegAdminCmd("sm_delall", Command_DeleteAll, ADMFLAG_ROOT, "Delete all of your spawned props");
+	RegAdminCmd("sm_del", Command_Delete, ADMFLAG_ROOT, "Delete a entity");
+	RegAdminCmd("sm_setname", Command_SetName, ADMFLAG_ROOT, "Set the name of a prop");
+	RegAdminCmd("sm_sdoor", Command_SpawnDoor, ADMFLAG_ROOT, "Scripted Door");
+	RegAdminCmd("sm_ld", Command_LightDynamic, ADMFLAG_ROOT, "Dynamic Light");
+	RegAdminCmd("sm_simplelight", Command_LightDynamic, ADMFLAG_ROOT, "Dynamic Light");
+	RegAdminCmd("sm_propdoor", Command_OpenableDoorProp, ADMFLAG_ROOT, "Half-Life 2 Door");
+	RegAdminCmd("sm_rotate", Command_Rotate, ADMFLAG_ROOT, "Rotate an entity");
+	RegAdminCmd("sm_r", Command_Rotate, ADMFLAG_ROOT, "Rotate an entity");
+	RegAdminCmd("sm_accuraterotate", Command_AccurateRotate, ADMFLAG_ROOT, "Accurate rotate a prop");
+	RegAdminCmd("sm_ar", Command_AccurateRotate, ADMFLAG_ROOT, "Accurate rotate a prop.");
+	RegAdminCmd("sm_move", Command_Move, ADMFLAG_ROOT, "Move a prop to a position.");
+	RegAdminCmd("+copy", Command_Copy, ADMFLAG_ROOT, "Copy a prop");
+	RegAdminCmd("-copy", Command_Paste, ADMFLAG_ROOT, "Stop Copying a Prop");
 	
 	// player commands
-	RegAdminCmd("sm_god", Command_ChangeGodMode, 0, "Turn Godmode On/Off");
-	RegAdminCmd("sm_buddha", Command_ChangeBuddha, 0, "Turn Buddha On/Off");
-	RegAdminCmd("sm_addhealth", Command_Health, 0, "Add onto your max health");
-	RegAdminCmd("sm_resupply", Command_Resupply, 0);
-	RegAdminCmd("sm_fly", Command_Fly, 0, "Noclip");
+	//RegAdminCmd("sm_god", Command_ChangeGodMode, 0, "Turn Godmode On/Off");
+	//RegAdminCmd("sm_buddha", Command_ChangeBuddha, 0, "Turn Buddha On/Off");
+	RegAdminCmd("sm_addhealth", Command_Health, ADMFLAG_ROOT, "Add onto your max health");
+	RegAdminCmd("sm_resupply", Command_Resupply, ADMFLAG_ROOT);
+	//RegAdminCmd("sm_fly", Command_Fly, 0, "Noclip");
 
 	// admin commands
-	RegAdminCmd("sm_fda", ClientRemoveAll, ADMFLAG_SLAY);
+	RegAdminCmd("sm_fda", ClientRemoveAll, ADMFLAG_ROOT);
 
 	// Half-life 2 default props
 	g_hPropMenuHL2 = CreateMenu(PropMenuHL2);
@@ -191,8 +191,6 @@ public void OnPluginStart_Main()
 	// translations
 	LoadTranslations("common.phrases");
 	LoadTranslations("tf2sandbox.phrases");
-
-	CreateTimer(0.1, Display_Msgs, 0, TIMER_REPEAT);
 
 	// disallow breaking props
 	HookEntityOutput("prop_physics_respawnable", "OnBreak", OnPropBreak);
@@ -299,7 +297,6 @@ public void OnPluginStart_Main()
 	AddMenuItem(g_hDSPMenu, "20", "Echo");
 	AddMenuItem(g_hDSPMenu, "23", "Blur");
 	AddMenuItem(g_hDSPMenu, "30", "Quiet");
-	AddMenuItem(g_hDSPMenu, "134", "Fly");
 	AddMenuItem(g_hDSPMenu, "135", "Demon");
 	AddMenuItem(g_hDSPMenu, "116", "Micspam");
 	SetMenuExitBackButton(g_hDSPMenu, true);
@@ -1278,7 +1275,11 @@ public void OnAllPluginsLoaded()
 	SetMenuExitButton(g_hMenuCredits, false);
 	
 	Format(buffer, sizeof(buffer), "Credits\n\n\n");
-	StrCat(buffer, sizeof(buffer), " Coders:\n");
+
+	StrCat(buffer, sizeof(buffer), " Maintainer:\n");
+	StrCat(buffer, sizeof(buffer), "   Yuuki\n");
+
+	StrCat(buffer, sizeof(buffer), " Creators:\n");
 	StrCat(buffer, sizeof(buffer), "   Lead\n");
 	StrCat(buffer, sizeof(buffer), "   ✔TatLead\n");
 	StrCat(buffer, sizeof(buffer), "   _diamondburned_\n");
@@ -1322,19 +1323,9 @@ public void OnAllPluginsLoaded()
 
 	AddMenuItem(g_hEquipMenu, "toolgun", "--SANDBOX WEAPONS--", ITEMDRAW_DISABLED);
 
-	if(GetCommandFlags("sm_sbpg") != INVALID_FCVAR_FLAGS)
-	{
-		AddMenuItem(g_hEquipMenu, "physgun2", "Physics Gun V2");
-	}
-
-	if(GetCommandFlags("sm_pg") != INVALID_FCVAR_FLAGS)
-	{
-		AddMenuItem(g_hEquipMenu, "physgunv2", "Physics Gun V3");
-	}
-
 	if(GetCommandFlags("sm_physgun") != INVALID_FCVAR_FLAGS)
 	{
-    	AddMenuItem(g_hEquipMenu, "physgunnew", "Physics Gun V5");
+    	AddMenuItem(g_hEquipMenu, "physgunnew", "Physics Gun");
 	}  
 
 	if(GetCommandFlags("portalgun") != INVALID_FCVAR_FLAGS) // https://forums.alliedmods.net/showthread.php?t=237940
@@ -1385,15 +1376,12 @@ public void OnAllPluginsLoaded()
 		AddMenuItem(g_hEquipMenu, "toolgun", "Tool Gun");
 	} 
 
-	RegAdminCmd("sm_g", Command_PhysGun, 0);
-
 	StrCat(buffer, sizeof(buffer), "Thank you so much for playing TF2SB!\n");
 
 	SetMenuTitle(g_hMenuCredits, buffer);
 	AddMenuItem(g_hMenuCredits, "back", "Back");
 	
-	RegAdminCmd("sm_tf2sb", Command_TF2SBCred, 0);
-	RegAdminCmd("sm_credits", Command_TF2SBCred, 0);
+	RegAdminCmd("sm_credits", Command_TF2SBCred, ADMFLAG_ROOT);
 
 	AddMenuItem(g_hMainMenu, "credits", "Credits");
 }
@@ -1469,11 +1457,6 @@ public void OnClientDisconnect(int client)
 	}
 
 	g_bBuffer[client] = false;
-}
-
-public void OnClientConnected(int client)
-{
-	g_bGodmode[client] = true;
 }
 
 public Action Timer_Disconnect(Handle timer, Handle hPack)
@@ -2131,24 +2114,6 @@ public Action Command_Rotate(int client, int args)
 		Format(szArgs, sizeof(szArgs), "%s %s", szArgs, szTemp);
 	}
 	Build_Logging(client, "sm_rotate", szArgs);
-	return Plugin_Handled;
-}
-
-public Action Command_Fly(int client, int args)
-{
-	if (!Build_AllowToUse(client) || Build_IsBlacklisted(client) || !Build_IsClientValid(client, client, true) || !Build_AllowFly(client))
-		return Plugin_Handled;
-	
-	if (GetEntityMoveType(client) != MOVETYPE_NOCLIP)
-	{
-		Build_PrintToChat(client, "Noclip %t", "on");
-		SetEntityMoveType(client, MOVETYPE_NOCLIP);
-	}
-	else
-	{
-		Build_PrintToChat(client, "Noclip %t", "off");
-		SetEntityMoveType(client, MOVETYPE_WALK);
-	}
 	return Plugin_Handled;
 }
 
@@ -2934,56 +2899,6 @@ public Action Event_Spawn(Handle event, const char[] name, bool dontBroadcast)
 	nextactivetime[client] = GetGameTime();
 }
 
-public Action Command_ChangeGodMode(int client, int args)
-{
-	if (!Build_IsClientValid(client, client, true))
-		return Plugin_Handled;
-	
-	g_bGodmode[client] = !g_bGodmode[client];
-	
-	if (g_bGodmode[client])
-	{
-		Build_PrintToChat(client, "God Mode %t", "on");
-		SetEntProp(client, Prop_Data, "m_takedamage", 0, 1);
-		
-		g_bBuddha[client] = false;
-	}
-	else
-	{
-		Build_PrintToChat(client, "God Mode %t", "off");
-		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
-		
-		g_bBuddha[client] = false;
-	}
-	
-	return Plugin_Handled;
-}
-
-public Action Command_ChangeBuddha(int client, int args)
-{
-	if (!Build_IsClientValid(client, client, true))
-		return Plugin_Handled;
-	
-	g_bBuddha[client] = !g_bBuddha[client];
-	
-	if (g_bBuddha[client])
-	{
-		Build_PrintToChat(client, "Buddha %t", "on");
-		SetEntProp(client, Prop_Data, "m_takedamage", 1, 1);
-		g_bBuddha[client] = true;
-		g_bGodmode[client] = false;
-	}
-	else
-	{
-		Build_PrintToChat(client, "Buddha %t", "off");
-		SetEntProp(client, Prop_Data, "m_takedamage", 2, 1);
-		
-		g_bGodmode[client] = false;
-	}
-	
-	return Plugin_Handled;
-}
-
 public Action Command_Health(int client, int args)
 {
 	if (!Build_IsClientValid(client, client, true))
@@ -3002,19 +2917,6 @@ public Action Command_Health(int client, int args)
 	TF2_RegeneratePlayer(client);
 
 	return Plugin_Handled;
-}
-
-// Messages
-public Action Display_Msgs(Handle timer)
-{
-	for (int client = 1; client <= MaxClients; client++) {
-		if (Build_IsClientValid(client, client, true) && !IsFakeClient(client)) {
-			int iAimTarget = Build_ClientAimEntity(client, false, true);
-			if (iAimTarget != -1 && IsValidEdict(iAimTarget))
-				EntityInfo(client, iAimTarget);
-		}
-	}
-	return;
 }
 
 public void EntityInfo(int client, int iTarget)
@@ -3299,38 +3201,6 @@ public Action Command_BuildMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_PhysGun(int client, int args)
-{
-	if(GetCommandFlags("sm_physgun") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_pg") == INVALID_FCVAR_FLAGS && GetCommandFlags("sm_sbpg") == INVALID_FCVAR_FLAGS)
-	{
-		/* Build_PrintToChat(client, "You have been given Physics Gun V1!");
-		// Build_PrintToChat(client, "GAWH, WHY ARE YOU USING PHYSGUN 1.0??");
-		// Build_PrintToChat(client, "USE 2.0 ALREADY! (/g)");
-		Build_PrintToChat(client, "This version is full of bugs, please use the latest from:");
-		Build_PrintToChat(client, "https://github.com/tf2-sandbox-studio/Module-PhysicsGun");
-		TF2Items_GiveWeapon(client, 99999);
-		int weapon = GetPlayerWeaponSlot(client, 1);
-		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon); */
-		// bruh moment
-		// Build_PrintToChat(client, "You can use the latest physgun from:");
-		Build_PrintToChat(client, "https://github.com/tf2-sandbox-studio/Module-PhysicsGun");
-	}
-	else
-	{
-		// Build_PrintToChat(client, "Physgun V1 is full of bugs, use V2/V3/V4!");
-		if(GetCommandFlags("sm_physgun") != INVALID_FCVAR_FLAGS)
-		{
-			FakeClientCommand(client, "sm_physgun");
-		} else if(GetCommandFlags("sm_pg") != INVALID_FCVAR_FLAGS)
-		{
-			FakeClientCommand(client, "sm_pg");
-		} else if(GetCommandFlags("sm_sbpg") != INVALID_FCVAR_FLAGS)
-		{
-			FakeClientCommand(client, "sm_sbpg");
-		}	
-	}
-}
-
 public Action Command_PropFinder(int client, int args)
 {
 	if (g_bBuffer[client])
@@ -3596,43 +3466,6 @@ public int CondMenu(Handle menu, MenuAction action, int param1, int param2)
 		else if (StrEqual(item, "resupply"))
 		{
 			FakeClientCommand(param1, "sm_resupply");
-		}
-		
-		else if (StrEqual(item, "noclip"))
-		{
-			FakeClientCommand(param1, "sm_fly");
-		}
-		
-		else if (StrEqual(item, "godmode"))
-		{
-			FakeClientCommand(param1, "sm_god");
-		}
-		
-		else if (StrEqual(item, "buddha"))
-		{
-			FakeClientCommand(param1, "sm_buddha");
-		}
-		
-		/*if (StrEqual(item, "buddha"))
-		{
-			FakeClientCommand(param1, "sm_buddha");				
-		}*/
-		
-		else if (StrEqual(item, "fly"))
-		{
-			if (!Build_AllowToUse(param1) || Build_IsBlacklisted(param1) || !Build_IsClientValid(param1, param1, true) || !Build_AllowFly(param1))
-				return 0;
-			
-			if (GetEntityMoveType(param1) != MOVETYPE_FLY)
-			{
-				Build_PrintToChat(param1, "Fly %t", "on");
-				SetEntityMoveType(param1, MOVETYPE_FLY);
-			}
-			else
-			{
-				Build_PrintToChat(param1, "Fly %t", "off");
-				SetEntityMoveType(param1, MOVETYPE_WALK);
-			}
 		}
 		
 		else if (StrEqual(item, "minicrits"))

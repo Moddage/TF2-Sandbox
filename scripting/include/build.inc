@@ -1,5 +1,5 @@
 #define BUILDMODAPI_VER 3
-#define BUILDMOD_VER "1.0"
+#define BUILDMOD_VER "1.1-ff2"
 #define MAX_HOOK_ENTITIES 4096
 
 /**
@@ -51,13 +51,6 @@ native Build_SetLimit(client_index, amount, bool:Doll = false, bool:Phys = false
  */
 native bool:Build_AllowToUse(client_index);
 
-/**
- * Check client can use Fly.
- * 
- * @param client_index		Client index.
- * @return					True on success. False on failure.
- */
-native bool:Build_AllowFly(client_index);
 
 /**
  * Get client admin.

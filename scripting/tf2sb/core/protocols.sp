@@ -8,14 +8,10 @@ bool steamworks = false;
 bool g_bIN_SCORE[MAXPLAYERS + 1];
 
 //Handle
-Handle g_hCvarServerTag = INVALID_HANDLE;
-Handle g_hCvarGameDesc = INVALID_HANDLE;
 Handle g_hBlackListArray;
 Handle g_hCvarSwitch = INVALID_HANDLE;
 Handle g_hCvarNonOwner = INVALID_HANDLE;
-Handle g_hCvarFly = INVALID_HANDLE;
 Handle g_hCvarPhysSwitch = INVALID_HANDLE;
-Handle g_hCvarTips = INVALID_HANDLE;
 Handle g_hCvarClPhysLimit	 = INVALID_HANDLE;
 Handle g_hCvarClDonatorLimit = INVALID_HANDLE;
 Handle g_hCvarClPropLimit = INVALID_HANDLE;
@@ -25,9 +21,7 @@ Handle g_hCvarServerLimit = INVALID_HANDLE;
 //int
 int g_iCvarEnabled;
 int g_iCvarNonOwner;
-int g_iCvarFly;
 int g_iCvarPhysEnabled;
-int g_iCvarTips;
 int g_iCvarClPropLimit;
 int g_iCvarClDonatorLimit;
 int g_iCvarClPhysLimit;
@@ -38,16 +32,6 @@ int g_iPhysCurrent[MAXPLAYERS];
 int g_iDollCurrent[MAXPLAYERS];
 int g_iServerCurrent;
 int g_iEntOwner[MAX_HOOK_ENTITIES] =  { -1, ... };
-
-//char
-static const char tips[5][] =  
-{
-	"tip1",
-	"tip2",
-	"tip3",
-	"tip4",
-	"tip5"
-};
 
 //float
 float g_fCoolDown[MAXPLAYERS + 1];
@@ -60,7 +44,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("Build_ReturnEntityOwner", Native_ReturnOwner);
 	CreateNative("Build_SetLimit", Native_SetLimit);
 	CreateNative("Build_AllowToUse", Native_AllowToUse);
-	CreateNative("Build_AllowFly", Native_AllowFly);
 	CreateNative("Build_IsAdmin", Native_IsAdmin);
 	CreateNative("Build_ClientAimEntity", Native_ClientAimEntity);
 	CreateNative("Build_IsEntityOwner", Native_IsOwner);
@@ -102,24 +85,6 @@ public void OnLibraryAdded_Protocols(const char[] name)
 	#endif
 }
 
-public void OnConfigsExecuted() 
-{
-	if (GetConVarBool(g_hCvarServerTag))
-		TagsCheck("tf2sb");
-	
-	if (GetConVarBool(g_hCvarGameDesc))
-	{
-		char sBuffer[64];
-		Format(sBuffer, sizeof(sBuffer), "TF2: Sandbox %s", BUILDMOD_VER);
-		#if defined _SteamWorks_Included
-		if (steamworks)
-		{
-			SteamWorks_SetGameDescription(sBuffer);
-		}
-		#endif
-	}
-}
-
 public void OnPluginStart_Protocols() 
 {
 	// Check for update status:
@@ -132,23 +97,17 @@ public void OnPluginStart_Protocols()
 
 	g_hCvarSwitch = CreateConVar("sbox_enable", "2", "Turn on, off TF2SB, or admins only.\n0 = Off\n1 = Admins Only\n2 = Enabled for everyone", 0, true, 0.0, true, 2.0);
 	g_hCvarNonOwner = CreateConVar("sbox_nonowner", "0", "Disable anti-grief", 0, true, 0.0, true, 1.0);
-	g_hCvarFly = CreateConVar("sbox_noclip", "1", "Can players can use !fly or noclip to noclip or not?", 0, true, 0.0, true, 1.0);
-	g_hCvarTips = CreateConVar("sbox_tips", "1", "Will TF2Sandbox Tips be displayed?", 0, true, 0.0, true, 1.0);
 	g_hCvarPhysSwitch = CreateConVar("sbox_enablephysprops", "0", "Allow props with physics", 0, true, 0.0, true, 1.0);
 	g_hCvarClPropLimit = CreateConVar("sbox_maxpropsperplayer", "120", "Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClDonatorLimit = CreateConVar("sbox_maxpropsperdonator", "300", "Donator Player prop spawn limit.", 0, true, 0.0);
 	g_hCvarClPhysLimit = CreateConVar("sbox_maxphyspropsperplayer", "50", "Player phys prop limit", 0, true, 0.0);
 	g_hCvarClDollLimit = CreateConVar("sbox_maxragdolls", "10", "Player doll spawn limit.", 0, true, 0.0);
 	g_hCvarServerLimit = CreateConVar("sbox_maxprops", "2000", "Server-side props limit", 0, true, 0.0);
-	g_hCvarServerTag = CreateConVar("sbox_tag", "1", "Enable 'tf2sb' tag", 0, true, 1.0);
-	g_hCvarGameDesc = CreateConVar("sbox_gamedesc", "1", "Change game name to 'TF2 Sandbox Version'?", 0, true, 1.0);
 	RegAdminCmd("sm_version", Command_Version, 0, "Show TF2SB Core version");
 	RegAdminCmd("sm_my", Command_SpawnCount, 0, "Show how many entities are you spawned.");
 	
 	g_iCvarEnabled = GetConVarInt(g_hCvarSwitch);
-	g_iCvarTips = GetConVarBool(g_hCvarTips);
 	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
-	g_iCvarFly = GetConVarBool(g_hCvarFly);
 	g_iCvarPhysEnabled = GetConVarBool(g_hCvarPhysSwitch);
 	g_iCvarClPhysLimit = GetConVarInt(g_hCvarClPhysLimit);
 	g_iCvarClPropLimit = GetConVarInt(g_hCvarClPropLimit);
@@ -158,9 +117,7 @@ public void OnPluginStart_Protocols()
 	
 	HookConVarChange(g_hCvarSwitch, Hook_CvarEnabled);
 	HookConVarChange(g_hCvarNonOwner, Hook_CvarNonOwner);
-	HookConVarChange(g_hCvarFly, Hook_CvarFly);
 	HookConVarChange(g_hCvarPhysSwitch, Hook_CvarPhysEnabled);
-	HookConVarChange(g_hCvarTips, Hook_CvarTips);
 	HookConVarChange(g_hCvarClPhysLimit, Hook_CvarClPhysLimit);
 	HookConVarChange(g_hCvarClPropLimit, Hook_CvarClPropLimit);
 	HookConVarChange(g_hCvarClDonatorLimit, Hook_CvarClDonatorLimit);
@@ -173,7 +130,6 @@ public void OnPluginStart_Protocols()
 
 	g_hBlackListArray = CreateArray(33, 128); // 33 arrays, every array size is 128
 	ReadBlackList();
-	CreateTimer(15.0, HandleTips, 0, 1);
 
 	AutoExecConfig();
 	LoadTranslations("tf2sandbox.phrases");
@@ -283,11 +239,6 @@ public Action DisplayHud(Handle timer)
 	CreateTimer(0.1, DisplayHud);
 }
 
-public Action HandleTips(Handle timer)
-{
-	if (!g_iCvarTips == false)
-		Build_PrintToAll(" %t", tips[GetRandomInt(0, sizeof(tips) - 1)]);
-}
 
 public void OnMapEnd() 
 {
@@ -317,19 +268,9 @@ public void Hook_CvarNonOwner(Handle convar, const char[] oldValue, const char[]
 	g_iCvarNonOwner = GetConVarBool(g_hCvarNonOwner);
 }
 
-public void Hook_CvarFly(Handle convar, const char[] oldValue, const char[] newValue) 
-{
-	g_iCvarFly = GetConVarBool(g_hCvarFly);
-}
-
 public void Hook_CvarPhysEnabled(Handle convar, const char[] oldValue, const char[] newValue)
 {
 	g_iCvarPhysEnabled = GetConVarBool(g_hCvarPhysSwitch);
-}
-
-public void Hook_CvarTips(Handle convar, const char[] oldValue, const char[] newValue) 
-{
-	g_iCvarTips = GetConVarBool(g_hCvarTips);
 }
 
 public void Hook_CvarClPropLimit(Handle convar, const char[] oldValue, const char[] newValue) 
@@ -567,24 +508,6 @@ public int Native_AllowToUse(Handle hPlugin, int iNumParams)
 			}
 			default:return true;
 		}
-	}
-	
-	ThrowNativeError(SP_ERROR_NATIVE, "client id %i is not connected.", client);
-	return false;
-}
-
-public int Native_AllowFly(Handle hPlugin, int iNumParams) 
-{
-	int client = GetNativeCell(1);
-	if (IsClientConnected(client)) 
-	{
-		//int AdminId:Aid = GetUserAdmin(client);
-		if (!g_iCvarFly == true) {
-			Build_PrintToChat(client, "Noclip is not available or disabled.");
-			ClientCommand(client, "playgamesound \"%s\"", "replay/replaydialog_warn.wav");
-			return false;
-		} else
-			return true;
 	}
 	
 	ThrowNativeError(SP_ERROR_NATIVE, "client id %i is not connected.", client);

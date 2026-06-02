@@ -108,10 +108,10 @@ public void OnAllPluginsLoaded()
 {
 	CreateConVar("sm_tf2sb_physgun_version", PLUGIN_VERSION, "", FCVAR_SPONLY|FCVAR_NOTIFY);
 	
-	RegAdminCmd("sm_physgun", Command_EquipPhysicsGun, 0, "Equip a Physics Gun");
-	RegAdminCmd("sm_physicsgun", Command_EquipPhysicsGun, 0, "Equip a Physics Gun");
+	RegAdminCmd("sm_physgun", Command_EquipPhysicsGun, ADMFLAG_ROOT, "Equip a Physics Gun");
+	RegAdminCmd("sm_physicsgun", Command_EquipPhysicsGun, ADMFLAG_ROOT, "Equip a Physics Gun");
 	
-	RegAdminCmd("sm_physguncredits", Command_PhysicsGunCredits, 0, "Open physgun credits menu");
+	RegAdminCmd("sm_physguncredits", Command_PhysicsGunCredits, ADMFLAG_ROOT, "Open physgun credits menu");
 	
 	g_cvbCanGrabBuild = CreateConVar("sm_tf2sb_physgun_cangrabbuild", "0", "Enable/disable grabbing buildings", 0, true, 0.0, true, 1.0);
 	g_cvbFullDuplicate = CreateConVar("sm_tf2sb_physgun_fullduplicate", "0", "Enable/disable full duplicate feature - Disable = Only prop_dynamic", 0, true, 0.0, true, 1.0);
@@ -273,8 +273,6 @@ public Action Command_EquipPhysicsGun(int client, int args)
 		
 		//Set physics gun as Active Weapon
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
-		
-		Build_PrintToChat(client, "You have equipped a Physics Gun (Sandbox version)!");
 	}
 
 	return Plugin_Continue;
