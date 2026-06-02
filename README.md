@@ -6,6 +6,12 @@ With Team Fortress 2 Sandbox, you can build bases, roleplay in a resturant, inve
 
 [Steam Group](http://steamcommunity.com/groups/TF2Sandbox)  
 [Discord](https://discord.gg/rdfE6Bxscc)
+
+## Branches
+Main: This is the current release of the Normal TF2Sandbox plugin as its own gamemode.
+Dev: This is the current In-Dev version of the TF2Sandbox plugin. Expect there to be bugs and for things to not work as expected.
+FF2-Dev: This is the current In-Dev version of the plugin built to be used with [FF2Rewrite](https://github.com/Batfoxkid/Freak-Fortress-2-Rewrite). This will allow bosses to use prop spawn/weapons from TF2Sandbox as abilities. This is a lite version of the plugin with a bunch of features removed.
+
 ### Translating
 You may submit a Pull Request to translate Team Fortress 2 Sandbox into other languages.  
 Please do not use Google Translate or any other AI Translator.
